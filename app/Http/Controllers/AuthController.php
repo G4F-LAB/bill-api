@@ -60,14 +60,17 @@ class AuthController extends Controller
                     $message = 'Usuário ou senha inválidos!';
                     $httpCode = 401;
                 }
+
+                dd($ldap);
+dd($error);
             });
 
             $credentials = [
                 'samaccountname' => $request->username,
                 'password' => $request->password
             ];
-dd($ldap);
-dd($error);
+dd($dispatcher);
+
             //autenticação
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
