@@ -61,7 +61,7 @@ class AuthController extends Controller
                     $httpCode = 401;
                 }
 
-                dd($ldap);
+                print_r($ldap);
 dd($error);
             });
 
@@ -69,7 +69,7 @@ dd($error);
                 'samaccountname' => $request->username,
                 'password' => $request->password
             ];
-dd($dispatcher);
+// dd($dispatcher);
 
             //autenticação
             if (Auth::attempt($credentials)) {
