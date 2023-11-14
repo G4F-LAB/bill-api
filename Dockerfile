@@ -11,7 +11,7 @@ RUN composer2 install -d /app
 
 
 # Expose port 80 for the web server
-EXPOSE 80
+# EXPOSE 80
 WORKDIR /app
 # Set the entrypoint command to run the Laravel application
 CMD php artisan serve --host=0.0.0.0 --port=80
