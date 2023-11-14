@@ -4,8 +4,8 @@ FROM  webdevops/php-nginx-dev:8.2
 COPY ./ /app
 RUN mkdir -m 777 -p /app/tmp
 
-RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
-RUN docker-php-ext-install ldap
+# RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
+# RUN docker-php-ext-install ldap
 
 RUN composer2 install -d /app
 
