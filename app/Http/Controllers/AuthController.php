@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\Collaborator;
+use App\Models\Permission;
 use LdapRecord\Container;
 use LdapRecord\Auth\Events\Failed;
 
@@ -81,7 +82,7 @@ class AuthController extends Controller
                 return response()->json(['error' => $message], $httpCode);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível conectar ao servidor, tente novamente mais tarde.'], 500);
         }
     }
 
@@ -111,7 +112,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         $permissionResult = $this->checkPermission($user);
-        $permission = ($permissionResult === null) ? 7 : $permissionResult;
+        $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
 
         $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
         if ($colaborador == NULL) {
@@ -132,14 +133,14 @@ class AuthController extends Controller
     {
         $group = $user['memberof'];
         $arr_permission = [
-            "trainee_w"             => 1,
-            "gerencia_executiva1_w" => 2,
-            "gerencia_executiva2_w" => 2,
-            "Gerentes_Operacoes"    => 3,
-            "rh_checklist_w"        => 5,
-            "rh_book_w"             => 5,
-            "financeiro_book_w"     => 5,
-            "g_TI"                  => 6,
+            "trainee_w"             => $this->permissionID('Admin'),
+            "gerencia_executiva1_w" => $this->permissionID('Executivo'),
+            "gerencia_executiva2_w" => $this->permissionID('Executivo'),
+            "Gerentes_Operacoes"    => $this->permissionID('Operacao'),
+            "rh_checklist_w"        => $this->permissionID('Rh'),
+            "rh_book_w"             => $this->permissionID('Rh'),
+            "financeiro_book_w"     => $this->permissionID('Fin'),
+            "g_TI"                  => $this->permissionID('TI'),
         ];
 
         if (!$group)
@@ -151,5 +152,10 @@ class AuthController extends Controller
             if (array_key_exists($value_filtered, $arr_permission))
                 return $arr_permission[$value_filtered];
         }
+    }
+
+    private function permissionID($permission){
+        $id = Permission::where('name', $permission)->first();
+        return $id->id_permissao;
     }
 }

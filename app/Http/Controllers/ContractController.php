@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Http;
 class ContractController extends Controller
 {
 
-    public function getAllContracts()
+    //Obter todos os contratos
+    public function getAllContracts(Request $request)
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
@@ -21,6 +22,7 @@ class ContractController extends Controller
         return response()->json($contracts, 200);
     }
 
+    //Vincular um colaborador a um contrato
     public function collaborator(Request $request)
     {
         try {
@@ -32,10 +34,11 @@ class ContractController extends Controller
             $contrato->collaborator()->attach($request->id_colaborador);
             return response()->json([$request], 201);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            return response()->json(['error' => 'Falha ao vincular o colaborador ao contrato.'], 500);
         }
     }
 
+    //Atualizar os dados de um contrato
     public function update(Request $request)
     {
                 // return response()->json([$request->id_contrato], 200);
@@ -59,10 +62,11 @@ class ContractController extends Controller
             
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 
+    //Atualizar a lista de contratos
     public function updateContracts(){
         try {
             $response = Http::withHeaders([

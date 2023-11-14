@@ -43,6 +43,7 @@ class ChecklistController extends Controller
         // $request->validate($this->checklist->rules(), $this->checklist->feedback());
         try{
             
+            $this->checklist->id_contrato = $request->id_contrato;
             $this->checklist->data_checklist  = $request->data_checklist;
             $this->checklist->objeto_contrato = $request-> objeto_contrato;
             $this->checklist->forma_envio = $request->forma_envio;
