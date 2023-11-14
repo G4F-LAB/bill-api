@@ -1,5 +1,5 @@
 
-FROM  webdevops/php-nginx-dev:8.2
+FROM  webdevops/php-nginx-dev:8.2-alpine
 
 COPY ./ /app
 RUN mkdir -m 777 -p /app/tmp
@@ -13,3 +13,6 @@ WORKDIR /app
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Set the entrypoint command to run the Laravel application
 CMD php artisan serve --host=0.0.0.0 --port=80
+
+# Ensure all of our files are owned by the same user and group.
+RUN chown -R application:application .
