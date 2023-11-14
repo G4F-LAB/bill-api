@@ -12,8 +12,4 @@ WORKDIR /app
 
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Set the entrypoint command to run the Laravel application
-# CMD php artisan serve --host=0.0.0.0 --port=80
-
-
-RUN php artisan optimize
-RUN php artisan horizon:publish
+CMD php artisan serve --host=0.0.0.0 --port=80
