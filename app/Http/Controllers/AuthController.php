@@ -66,7 +66,8 @@ class AuthController extends Controller
                 'samaccountname' => $request->username,
                 'password' => $request->password
             ];
-dd($message);
+dd($ldap);
+dd($error);
             //autenticação
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
