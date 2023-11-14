@@ -1,32 +1,42 @@
-	# Use the official PHP 8.2 image as the base image
-FROM php:8.2
- 
-# Install required dependencies
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+FROM php:8.2-fpm
 
-# Install PHP LDAP extension
-RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
-RUN docker-php-ext-install ldap
+# set your user name, ex: user=carlos
+ARG user=yourusername
+ARG uid=1000
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
- 
-# Set the working directory
-WORKDIR /var/www/html
- 
-# Copy the Laravel application files to the container
-COPY . .
 
-RUN chown -R www-data:www-data \
-    /var/www/html/storage \
-    /var/www/html/bootstrap/cache
+# Create system user to run Composer and Artisan Commands
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
 
+# Install redis
+RUN pecl install -o -f redis \
+    &&  rm -rf /tmp/pear \
+    &&  docker-php-ext-enable redis
 
+# Set working directory
+WORKDIR /var/www
 
-# Expose port 80 for the web server
-EXPOSE 80
- 
-# Set the entrypoint command to run the Laravel application
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+# Copy custom configurations PHP
+COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+USER $user
