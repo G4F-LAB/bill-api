@@ -57,7 +57,7 @@ class AuthController extends Controller
                     $message = 'Limite de tentativas de acesso atingidas. Tente novamente mais tarde.';
                     $httpCode = 401;
                 } else {
-                    $message = 'Usuário ou senha inválidos';
+                    $message = $error;
                     $httpCode = 401;
                 }
             });
