@@ -16,4 +16,24 @@ class Nomenclature extends Model
         'nome_arquivo',
         'nomeclatura_padrao_arquivo',
     ];
+
+    public function rules()
+    {
+        return [
+            'id_nomenclatura' => 'required|string',
+            'nome_arquivo' => 'required|string',
+            'nomeclatura_padrao_arquivo' => 'required|numeric'
+        ];
+    }
+
+    public function feedback()
+    {
+        return [
+            'id_nomenclatura.required' => 'O ID é obrigatório.',
+            'nome_arquivo.required' => 'O campo Nome do arquivo é de preenchimento obrigatório.',
+            'nomeclatura_padrao_arquivo.required' => 'O campo Nomenclatura é de preenchimento obrigatório.'
+        ];
+
+    }
+
 }

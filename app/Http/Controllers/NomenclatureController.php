@@ -44,14 +44,44 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           
+           if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
+           
+           $nomenclatura->nome_arquivo = $request->nome_arquivo;
+           $nomenclatura->nomeclatura_padrao_arquivo = $request->nomeclatura_padrao_arquivo;
+           $nomenclatura->save();   
 
-            if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
+           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
 
+            return response()->json($nomenclatura, 200);
 
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
             // return response()->json(['error'=> $exception->getMessage()], 500);
         }
     }
+
+    public function delete(Request $request)
+    {
+        try {
+
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+
+           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           
+           if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
+          
+           $nomenclatura->delete();   
+
+           return response()->json('Nomenclatura excluída.', 200);
+
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+            // return response()->json(['error'=> $exception->getMessage()], 500);
+        }
+    }
+
+
 }
