@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\NomenclatureController;
 use App\Http\Controllers\TesteController;
 
 /*
@@ -46,6 +47,19 @@ Route::middleware(['sys.auth', 'sec.check', 'handle.cors'])->group(function () {
     Route::middleware('check.permission: Admin, Executivo, Operacao')->put('/contratos', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contratos/novos', [ContractController::class, 'updateContracts']);
     
+    //CheckList//
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/checklist/{id}', [ChecklistController::class, 'getbyID']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist',[ChecklistController::class, 'store']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->put('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
+
+
+    //Nomenclaturas padrão dos arquivos
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/nomenclatura', [NomenclatureController::class, 'getAll']);
+    Route::middleware('check.permission: Admin')->post('/nomenclatura', [NomenclatureController::class, 'create']);
+    Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'update']);
+    // Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'delete']);
 
 });
 
@@ -53,10 +67,9 @@ Route::middleware(['sys.auth', 'sec.check', 'handle.cors'])->group(function () {
 Route::post('/teste', [TesteController::class, 'teste']);
 
 
-//CheckList//
-Route::get('/checklist', [ChecklistController::class , 'getAll']);
-Route::get('/checklist/{id}', [ChecklistController::class, 'getbyID']);
-Route::post('/checklist',[ChecklistController::class, 'store']);
+
+
+
 
 Route::get('/documentation', function () {
     return view('documentation');
