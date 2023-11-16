@@ -7,6 +7,7 @@ use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\NomenclatureController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\TesteController;
 
 /*
@@ -60,6 +61,10 @@ Route::middleware(['sys.auth', 'sec.check', 'handle.cors'])->group(function () {
     Route::middleware('check.permission: Admin')->post('/nomenclatura', [NomenclatureController::class, 'create']);
     Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'update']);
     // Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'delete']);
+
+    //Arquivos
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/arquivos', [FileController::class, 'upload']);
+
 
 });
 
