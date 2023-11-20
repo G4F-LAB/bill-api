@@ -3,20 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
-use App\Models\Nomenclature;
+use App\Models\FileNaming;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class NomenclatureController extends Controller
+class FileNamingController extends Controller
 {
     public function getAll()
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-        $nomenclatures = Nomenclature::all();
+        $file_naming = FileNaming::all();
 
-        return response()->json($nomenclatures, 200);
+        return response()->json($file_naming, 200);
     }
 
     public function create(Request $request)
@@ -25,15 +25,15 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $nomenclature = new Nomenclature();
-            $nomenclature->nome_arquivo = $request->nome_arquivo;
-            $nomenclature->nomeclatura_padrao_arquivo = $request->nomenclatura_padrao_arquivo;
+            $file_naming = new FileNaming();
+            $file_naming->file_name = $request->file_name;
+            $file_naming->standard_file_naming = $request->standard_file_naming;
+            $file_naming->save();
 
-            $nomenclature->save();
-            return response()->json($nomenclature, 200);
+            return response()->json($file_naming, 200);
+
         } catch (\Exception $exception) {
-            return response()->json(['error' => 'Não foi possível criar, tente novamente mais tarde.'], 500);
-            // return response()->json(['error'=> $exception->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
         }
     }
 
@@ -44,17 +44,18 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
-           
-           if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
-           
-           $nomenclatura->nome_arquivo = $request->nome_arquivo;
-           $nomenclatura->nomeclatura_padrao_arquivo = $request->nomeclatura_padrao_arquivo;
-           $nomenclatura->save();   
+            $file_naming = FileNaming::find($request->id_file_naming);
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+            if (!$file_naming)
+                return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
 
-            return response()->json($nomenclatura, 200);
+            $file_naming->file_name = $request->file_name;
+            $file_naming->standard_file_naming = $request->standard_file_naming;
+            $file_naming->save();
+
+            $file_naming = FileNaming::find($request->id_file_naming);
+
+            return response()->json($file_naming, 200);
 
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
@@ -69,13 +70,14 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
-           
-           if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
-          
-           $nomenclatura->delete();   
+            $file_naming = FileNaming::find($request->id_file_naming);
 
-           return response()->json('Nomenclatura excluída.', 200);
+            if (!$file_naming)
+                return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
+
+            $file_naming->delete();
+
+            return response()->json('Nomenclatura excluída.', 200);
 
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);

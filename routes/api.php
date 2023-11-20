@@ -7,7 +7,7 @@ use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\NomenclatureController;
+use App\Http\Controllers\FileNamingController;
 use App\Http\Controllers\TesteController;
 
 /*
@@ -26,9 +26,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['handle.cors'])->post('/login', [AuthController::class, 'login']);
+// Route::get('/nomenclatura', [FileNamingController::class, 'getAll']);
 
 //Rotas protegidas pelo middleware sys.auth
-Route::middleware(['sec.check', 'handle.cors'])->group(function () {
+Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Auth
     Route::get('/refresh', [AuthController::class, 'refresh']);
@@ -57,10 +58,10 @@ Route::middleware(['sec.check', 'handle.cors'])->group(function () {
 
 
     //Nomenclaturas padrão dos arquivos
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/nomenclatura', [NomenclatureController::class, 'getAll']);
-    Route::middleware('check.permission: Admin')->post('/nomenclatura', [NomenclatureController::class, 'create']);
-    Route::middleware('check.permission: Admin')->put('/nomenclatura', [NomenclatureController::class, 'update']);
-    Route::middleware('check.permission: Admin')->delete('/nomenclatura', [NomenclatureController::class, 'delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
+    Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
+    Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
+    Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
 
     //Itens
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'show']);
