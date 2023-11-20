@@ -59,8 +59,8 @@ Route::middleware(['sec.check', 'handle.cors'])->group(function () {
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/nomenclatura', [NomenclatureController::class, 'getAll']);
     Route::middleware('check.permission: Admin')->post('/nomenclatura', [NomenclatureController::class, 'create']);
-    Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'update']);
-    // Route::middleware('check.permission: Admin')->patch('/nomenclatura', [NomenclatureController::class, 'delete']);
+    Route::middleware('check.permission: Admin')->put('/nomenclatura', [NomenclatureController::class, 'update']);
+    Route::middleware('check.permission: Admin')->delete('/nomenclatura', [NomenclatureController::class, 'delete']);
 
     //Itens
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'getAll']);
