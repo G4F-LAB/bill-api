@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     use HasFactory;
-    protected $table = 'item';
-    protected $primaryKey = 'id_itens';
+    protected $table = 'itens';
+    protected $primaryKey = 'id_item';
     protected $fillable = [
-        'competencia',
+        'competence',
         'status',
     ];
     public function checklist() {
@@ -19,7 +19,7 @@ class Item extends Model
     }
 
     public function arquivos() {
-        return $this->hasMany(Item::class,'arquivos', 'id_arquivo', 'id_arquivo')->withTimestamps();
+        return $this->hasMany(Item::class,'files', 'id_file')->withTimestamps();
     }
 
     

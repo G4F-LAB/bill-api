@@ -10,16 +10,16 @@ class Contract extends Model
     use HasFactory;
 
     protected $fillable = [
-        'contrato',
+        'contract',
         'name',
-        'situacao_contratual',
-        'id_gerente',
+        'contractual_situation',
+        'id_manager',
     ];
     
-    protected $primaryKey = 'id_contrato';
+    protected $primaryKey = 'id_contract';
 
     public function collaborator() {
-        return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'id_contrato', 'id_colaborador')->withTimestamps();
+        return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'id_contract', 'id_collaborator')->withTimestamps();
     }
 
     public function checklist(){

@@ -121,7 +121,7 @@ class AuthController extends Controller
             $colaborador = new Collaborator();
             $colaborador->name = $user['displayname'][0];
             $colaborador->objectguid = $user->getConvertedGuid();
-            $colaborador->id_permissao = $permission;
+            $colaborador->id_permission = $permission;
             $colaborador->save();
 
             $firstLogin = true;
@@ -158,6 +158,6 @@ class AuthController extends Controller
     private function permissionID($permission)
     {
         $id = Permission::where('name', $permission)->first();
-        return $id->id_permissao;
+        return $id->id_permission;
     }
 }

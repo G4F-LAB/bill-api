@@ -17,7 +17,7 @@ class FileTypeFactory extends Factory
     public function definition()
     {
         return [
-            'categoria_arquivo' => fake()->name(),
+            'files_category' => fake()->name(),
         ];
     }
 }
