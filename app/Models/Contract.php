@@ -13,16 +13,15 @@ class Contract extends Model
         'contract',
         'name',
         'contractual_situation',
-        'id_manager',
+        'manager_id',
     ];
     
-    protected $primaryKey = 'id_contract';
 
     public function collaborator() {
-        return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'id_contract', 'id_collaborator')->withTimestamps();
+        return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
     }
 
     public function checklist(){
-        return $this->hasMany(Checklist::class,'Checklist','id_checklist');
+        return $this->hasMany(Checklist::class,'Checklist','id');
     }
 }
