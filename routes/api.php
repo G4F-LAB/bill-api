@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['handle.cors'])->post('/login', [AuthController::class, 'login']);
+// Route::get('/nomenclatura', [FileNamingController::class, 'getAll']);
 
 //Rotas protegidas pelo middleware sys.auth
 Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
@@ -57,10 +58,10 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Nomenclaturas padrão dos arquivos
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/nomenclatura', [FileNamingController::class, 'getAll']);
-    Route::middleware('check.permission: Admin')->post('/nomenclatura', [FileNamingController::class, 'create']);
-    Route::middleware('check.permission: Admin')->put('/nomenclatura', [FileNamingController::class, 'update']);
-    Route::middleware('check.permission: Admin')->delete('/nomenclatura', [FileNamingController::class, 'delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
+    Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
+    Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
+    Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
 
     //Itens
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'show']);
