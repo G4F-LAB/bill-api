@@ -13,23 +13,23 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('nomeclatura_arquivo', function (Blueprint $table) {
-            $table->id('id_nomeclatura_arquivo');
-            $table->string('nome_arquivo');
-            $table->string('nomeclatura_padrao_arquivo');
+        Schema::create('file_naming', function (Blueprint $table) {
+            $table->id('id_file_naming');
+            $table->string('file_name');
+            $table->string('standard_file_naming');
             $table->timestamps();
         });
 
         
     }
 
-    /**->constrained('nomeclatura_arquivo') ->constrained('contracts')
+    /**->constrained('file_naming') ->constrained('contracts')
      * Reverse the migrations.
      *
      * @return void
      */
     public function down()
     {
-        Schema::dropIfExists('nomeclatura_arquivo');
+        Schema::dropIfExists('file_naming');
     }
 };

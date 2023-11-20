@@ -14,8 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('permissions', function (Blueprint $table) {
-            $table->id('id_permissao');
+            $table->id('id_permission');
             $table->string('name');
+        });
+
+        Schema::table('collaborators', function (Blueprint $table) {
+            $table->foreign('id_permission')->references('id_permission')->on('permissions');
         });
     }
 
@@ -26,6 +30,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('collaborators', function (Blueprint $table) {
+            $table->dropForeign('collaborators_id_permissao_foreign');
+        });
         Schema::dropIfExists('permissions');
     }
 };

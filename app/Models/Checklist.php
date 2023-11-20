@@ -44,4 +44,8 @@ class Checklist extends Model
         ];
 
     }
+
+    public function contratos (){
+        return $this->hasMany(Contract::class,'id_contrato');
+    }
 }

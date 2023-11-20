@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Contract;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class ContractSeeder extends Seeder
+class ItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,6 +14,6 @@ class ContractSeeder extends Seeder
      */
     public function run()
     {
-        
+        //
     }
 }

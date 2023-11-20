@@ -39,6 +39,10 @@ class TesteController extends Controller
         return $content;
     }
 
+    public function novoteste(Request $request) {
+        echo 'chegou aqui';
+    }
+
     private function guid_to_str($binary_guid){
         $unpacked = unpack('Va/v2b/n2c/Nd', $binary_guid);
         $uuid = sprintf('%08X-%04X-%04X-%04X-%04X%08X', $unpacked['a'], $unpacked['b1'], $unpacked['b2'], $unpacked['c1'], $unpacked['c2'], $unpacked['d']);
