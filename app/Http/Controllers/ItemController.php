@@ -16,6 +16,7 @@ class ItemController extends Controller
     
     public function show()
     {
+        dd('auqi');
         if (!$itens = $this->service->getAll()) {
             return response()->json([
                 'error' => 'Not Found'
