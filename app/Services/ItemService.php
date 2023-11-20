@@ -52,7 +52,7 @@ class ItemService
     {
         $item = Item::findOne($id);   
         $item->id_item = $id;
-        $item->status  = false;
+        $item->delete_at  = false;
         $item->save();
 
         return response()->json(['message'=>'Item deletado com sucesso'],200);

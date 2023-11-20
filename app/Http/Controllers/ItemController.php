@@ -16,7 +16,7 @@ class ItemController extends Controller
     
     public function show()
     {
-        dd('auqi');
+        //dd('auqi');
         if (!$itens = $this->service->getAll()) {
             return response()->json([
                 'error' => 'Not Found'
@@ -38,11 +38,22 @@ class ItemController extends Controller
         return $itens;
     }
 
+    public function new(Request $request)
+    {
+        try{ 
+            $item = $this->service->new($request);
+            return response()->json([], Response::HTTP_NO_CONTENT);
+            
+        }catch(\Exception $e){
+            return response()->json(['erro'=> $e->getMessage()],500);
+        }
+       
+    }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id = null)
     {
         try{ 
             dd("teste");
@@ -57,9 +68,9 @@ class ItemController extends Controller
             $item = $this->service->update($request, $item);
             return response()->json([], Response::HTTP_NO_CONTENT);
 
-           }catch(\Exception $e){
+        }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
-           }
+        }
        
     }
 

@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
-use App\Models\Nomenclature;
+use App\Models\FileNaming;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class NomenclatureController extends Controller
+class FileNamingController extends Controller
 {
     public function getAll()
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-        $nomenclatures = Nomenclature::all();
+        $nomenclatures = FileNaming::all();
 
         return response()->json($nomenclatures, 200);
     }
@@ -25,9 +25,9 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $nomenclature = new Nomenclature();
-            $nomenclature->nome_arquivo = $request->nome_arquivo;
-            $nomenclature->nomeclatura_padrao_arquivo = $request->nomenclatura_padrao_arquivo;
+            $nomenclature = new FileNaming();
+            $nomenclature->file_name = $request->file_name;
+            $nomenclature->standard_file_naming = $request->standard_file_naming;
 
             $nomenclature->save();
             return response()->json($nomenclature, 200);
@@ -44,15 +44,15 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           $nomenclatura = FileNaming::find($request->id_file_naming);
            
            if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
            
-           $nomenclatura->nome_arquivo = $request->nome_arquivo;
-           $nomenclatura->nomeclatura_padrao_arquivo = $request->nomeclatura_padrao_arquivo;
+           $nomenclatura->file_name = $request->file_name;
+           $nomenclatura->standard_file_naming = $request->standard_file_naming;
            $nomenclatura->save();   
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           $nomenclatura = FileNaming::find($request->id_file_naming);
 
             return response()->json($nomenclatura, 200);
 
@@ -69,7 +69,7 @@ class NomenclatureController extends Controller
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-           $nomenclatura = Nomenclature::find($request->id_nomenclatura);
+           $nomenclatura = FileNaming::find($request->id_nomenclatura);
            
            if (!$nomenclatura) return response()->json(['error'=> 'Nomenclatura não encontrada'], 404);
           

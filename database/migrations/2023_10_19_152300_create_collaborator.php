@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::create('collaborators', function (Blueprint $table) {
-            $table->id('id_collaborator');
+            $table->id();
             $table->string('name',150);
             $table->string('objectguid');
-            $table->unsignedSmallInteger('id_permission');
+            $table->unsignedSmallInteger('permission_id');
             $table->timestamps();
         });
     }

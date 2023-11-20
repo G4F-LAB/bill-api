@@ -14,12 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('permissions', function (Blueprint $table) {
-            $table->id('id_permission');
+            $table->id();
             $table->string('name');
         });
 
         Schema::table('collaborators', function (Blueprint $table) {
-            $table->foreign('id_permission')->references('id_permission')->on('permissions');
+            $table->foreign('permission_id')->references('id')->on('permissions');
         });
     }
 

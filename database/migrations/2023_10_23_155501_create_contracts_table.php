@@ -14,16 +14,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('contracts', function (Blueprint $table) {
-            $table->id('id_contract');
-            $table->string('contract',50)->unique();
+            $table->unsignedInteger('id')->unique();
+            $table->string('client_id',50)->unique();
             $table->string('name',150);
             $table->boolean('contractual_situation');
-            $table->unsignedBigInteger('id_manager')->nullable();
+            $table->unsignedBigInteger('manager_id')->nullable();
             $table->timestamps();
         });
 
         Schema::table('contracts', function (Blueprint $table) {
-            $table->foreign('id_manager')->references('id_collaborator')->on('collaborators');
+            $table->primary(['id','client_id']);
+            $table->foreign('manager_id')->references('id')->on('collaborators');
         });
     }
 
