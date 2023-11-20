@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Contract>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Item>
  */
-class ContractFactory extends Factory
+class ItemFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,9 +17,7 @@ class ContractFactory extends Factory
     public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'situacao_contratual' => fake()->boolean(),
-            'id_gerente' => fake()->numberBetween(),
+            //
         ];
     }
 }

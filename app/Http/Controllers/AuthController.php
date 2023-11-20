@@ -16,6 +16,7 @@ class AuthController extends Controller
     //Endpoint para autenticação
     public function login(Request $request)
     {
+        // return response()->json(['error' => $request->all()], 200);
 
         //regras de validação
         $rules = [
@@ -154,7 +155,8 @@ class AuthController extends Controller
         }
     }
 
-    private function permissionID($permission){
+    private function permissionID($permission)
+    {
         $id = Permission::where('name', $permission)->first();
         return $id->id_permissao;
     }

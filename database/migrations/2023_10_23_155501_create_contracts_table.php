@@ -14,14 +14,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('contracts', function (Blueprint $table) {
-            $table->id();
-            $table->string('id_contrato')->unique();
-            $table->string('name');
-            $table->boolean('situacao_contratual');
-            $table->tinyInteger('id_gerente')->nullable();
+            $table->id('id_contract');
+            $table->string('contract',50)->unique();
+            $table->string('name',150);
+            $table->boolean('contractual_situation');
+            $table->unsignedBigInteger('id_manager')->nullable();
             $table->timestamps();
         });
 
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->foreign('id_manager')->references('id_collaborator')->on('collaborators');
+        });
     }
 
     /**
@@ -31,6 +34,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->dropForeign('contracts_id_manager_foreign');
+        });
         Schema::dropIfExists('contracts');
     }
 };

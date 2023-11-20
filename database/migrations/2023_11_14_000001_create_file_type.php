@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('file_types', function (Blueprint $table) {
-            $table->id('id_tipo_arquivo');
-            $table->string('categoria_arquivo',50);
+            $table->id('id_file_type');
+            $table->string('files_category');        
+            $table->timestamps();
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('file_type');
+        Schema::dropIfExists('file_types');
     }
 };

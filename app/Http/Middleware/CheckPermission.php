@@ -33,8 +33,7 @@ class CheckPermission
         }
         
         $colaborador = Collaborator::where('objectguid',Auth::user()->getConvertedGuid())->first();
-        // print_r($colaborador);
-        // exit;
+
         if($colaborador->hasPermission($validPermissions)) return $next($request);
 
         return response()->json(['error' => 'Acesso não permitido'],403);
