@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\File_type;
+use App\Models\FileType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,18 +17,18 @@ class FileTypeSeeder extends Seeder
     {
         $dados = [
             [
-                "categoria_arquivo" => "Recursos Humanos"
+                "files_category" => "Recursos Humanos"
             ],
             [
-                "categoria_arquivo" => "Financeiro"
+                "files_category" => "Financeiro"
             ],
             [
-                "categoria_arquivo" => "Operação"
+                "files_category" => "Operação"
             ],
         ];
 
         foreach ($dados as $dado) {
-            File_type::create($dado);
+            FileType::create($dado);
         }
     }
 }

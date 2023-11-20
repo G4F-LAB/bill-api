@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class File_type extends Model
+class FileType extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "id_tipo_arquivo";
+    protected $primaryKey = "id_file_type";
     protected $fillable = [
-        "categoria_arquivo",
+        "files_category",
     ];
     public $timestamps = false;
 }

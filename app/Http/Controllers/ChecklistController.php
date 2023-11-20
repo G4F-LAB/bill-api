@@ -44,7 +44,7 @@ class ChecklistController extends Controller
         // return response()->json([$request->all()],200);
         
         try{
-                $this->checklist->id_contrato = $request->id_contrato;
+                $this->checklist->id_contract = $request->id_contract;
                 $this->checklist->data_checklist  = $request->data_checklist;
                 $this->checklist->objeto_contrato = $request-> objeto_contrato;
                 $this->checklist->forma_envio = $request->forma_envio;
@@ -84,7 +84,7 @@ class ChecklistController extends Controller
                 $request->validate($checklist->rules(), $checklist->feedback());
             }
 
-            if ($request->has('id_contrato'))$checklist->id_contrato = $request->id_contrato;
+            if ($request->has('id_contract'))$checklist->id_contract = $request->id_contract;
             if ($request->has('data_checklist'))$checklist->data_checklist  = $request->data_checklist;
             if ($request->has('objeto_contrato'))$checklist->objeto_contrato = $request-> objeto_contrato;
             if ($request->has('forma_envio'))$checklist->forma_envio = $request->forma_envio;

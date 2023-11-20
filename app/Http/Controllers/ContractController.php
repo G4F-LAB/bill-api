@@ -36,7 +36,7 @@ class ContractController extends Controller
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $contrato = Contract::find($request->contrato);
-            $contrato->collaborator()->attach($request->id_colaborador);
+            $contrato->collaborator()->attach($request->id_collaborator);
             return response()->json([$request], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao vincular o colaborador ao contrato.'], 500);

@@ -10,12 +10,12 @@ class Collaborator extends Model
     use HasFactory;
 
     protected $table = 'collaborators';
-    protected $primaryKey = 'id_colaborador';
+    protected $primaryKey = 'id_collaborator';
 
 
     public function permissao() {
         //belongsTo: (Nome da classe de modelo, foreign_key, 'owner_key')
-        return $this->belongsTo(Permission::class, 'id_permissao', 'id_permissao');
+        return $this->belongsTo(Permission::class, 'id_permission', 'id_permission');
     }
 
     public function hasPermission($validPermissions) {
@@ -26,7 +26,7 @@ class Collaborator extends Model
             $permissao = Permission::where('name',$validPermission)->first();
             if($permissao == NULL) return response()->json(['error' => 'Permissão inválida: '.$validPermission],404);
 
-            if($this->id_permissao == $permissao->id_permissao) {
+            if($this->id_permission == $permissao->id_permission) {
                 $flag = true;
                 break;
             }
@@ -36,10 +36,10 @@ class Collaborator extends Model
     }
 
     public function permission(){
-        return $this->hasMany(Permission::class, 'id_permissao', 'id_permissao');
+        return $this->hasMany(Permission::class, 'id_permission', 'id_permission');
     }
 
     public function contract() {
-        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id_colaborador', 'id_contrato')->withTimestamps();
+        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id_collaborator', 'id_contract')->withTimestamps();
     }
 }

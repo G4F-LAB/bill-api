@@ -31,7 +31,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('collaborators', function (Blueprint $table) {
-            $table->dropForeign('collaborators_id_permissao_foreign');
+            $table->dropForeign('collaborators_id_permission_foreign');
         });
         Schema::dropIfExists('permissions');
     }

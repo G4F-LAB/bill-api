@@ -13,10 +13,10 @@ class Permission extends Model
         'name',
     ];
     public $timestamps = false;
-    protected $primaryKey = 'id_permissao';
+    protected $primaryKey = 'id_permission';
 
     public function colaborador() {
         //hasMany: (Nome da classe de modelo, foreign_key, 'local_key')
-        return $this->hasMany(Collaborator::class, 'id_permissao', 'id_permissao');
+        return $this->hasMany(Collaborator::class, 'id_permission', 'id_permission');
     }
 }

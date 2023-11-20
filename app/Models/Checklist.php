@@ -10,42 +10,42 @@ class Checklist extends Model
 {
     protected $primaryKey = 'id_checklist';
     protected $fillable = [ 
-        'id_contrato',
-        'data_checklist',
-        'objeto_contrato',
-        'forma_envio',
+        'contract',
+        'date_checklist',
+        'object_contract',
+        'shipping_method',
         'obs',
-        'aceite',
-        'setor',
-        'assinado_por'
+        'accept',
+        'sector',
+        'signed_by'
     ];
 
     public function rules(){
         return [
-        'id_contrato' => 'required|string',
-        'data_checklist' => 'required|date',
-        'objeto_contrato' => 'required|string',
-        'forma_envio' => 'required|string',
+        'contract' => 'required|string',
+        'date_checklist' => 'required|date',
+        'object_contract' => 'required|string',
+        'shipping_method' => 'required|string',
         'obs' => 'string',
-        'aceite' => 'boolean',
-        'setor' => 'required|string',
-        'assinado_por' => 'string'
+        'accept' => 'boolean',
+        'sector' => 'required|string',
+        'signed_by' => 'string'
         
         ];
     }
     
     public function feedback() {
         return[
-            'id_contrato.required' => 'O campo do contrato é de preenchimento obrigatório.',
-            'data_checklist.required' => 'O campo do data é de preenchimento obrigatório.',
-            'forma_envio.required' => 'O campo do forma de envio é de preenchimento obrigatório.',
-            'setor.required' => 'O campo do setor é de preenchimento obrigatório.'
+            'contract.required' => 'O campo do contrato é de preenchimento obrigatório.',
+            'date_checklist.required' => 'O campo do data é de preenchimento obrigatório.',
+            'shipping_method.required' => 'O campo do forma de envio é de preenchimento obrigatório.',
+            'sector.required' => 'O campo do setor é de preenchimento obrigatório.'
 
         ];
 
     }
 
     public function contratos (){
-        return $this->hasMany(Contract::class,'id_contrato');
+        return $this->hasMany(Contract::class,'contract');
     }
 }

@@ -18,8 +18,8 @@ class ContractFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'situacao_contratual' => fake()->boolean(),
-            'id_gerente' => fake()->numberBetween(),
+            'contractual_situation' => fake()->boolean(),
+            'id_manager' => fake()->numberBetween(),
         ];
     }
 }

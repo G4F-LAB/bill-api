@@ -26,7 +26,7 @@ class SystemAuth
                 $colaborador = Collaborator::where('objectguid',Auth::user()->getConvertedGuid())->first();
                 $log = new Log();
                 dd($request);
-                $log->id_colaborador = $colaborador->id_colaborador;
+                $log->id_collaborator = $colaborador->id_collaborator;
                 $log->origin_ip = $request->ip();
                 $log->action = $request->method();
 

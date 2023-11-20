@@ -45,7 +45,7 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         try{ 
-
+            dd("teste");
             $item = Item::find($id);
             if(!$item){
                 return response()->json([
