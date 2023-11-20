@@ -14,24 +14,25 @@ return new class extends Migration
     public function up()
     {
         Schema::create('itens', function (Blueprint $table) {
-            $table->id('id_item');
-            $table->unsignedBigInteger('id_checklist');
-            $table->unsignedBigInteger('id_file_naming');
-            $table->unsignedBigInteger('id_file_type');
-            $table->boolean('status');
+            $table->id();
+            $table->unsignedBigInteger('checklist_id');
+            $table->unsignedBigInteger('file_naming_id');
+            $table->unsignedBigInteger('file_type_id');
+            $table->boolean('status')->default(0);
             $table->unsignedSmallInteger('competence');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('itens', function(Blueprint $table){
             //$table->foreign('id_arquivo')->references('id_arquivo')->on('files');
-            $table->foreign('id_file_naming')->references('id_file_naming')->on('file_naming');
-            $table->foreign('id_checklist')->references('id_checklist')->on('checklists');
-            $table->foreign('id_file_type')->references('id_file_type')->on('file_types');
+            $table->foreign('file_naming_id')->references('id')->on('file_naming');
+            $table->foreign('checklist_id')->references('id')->on('checklists');
+            $table->foreign('file_type_id')->references('id')->on('file_types');
         });
 
         Schema::table('files', function(Blueprint $table) {
-            $table->foreign('id_item')->references('id_item')->on('itens');
+            $table->foreign('item_id')->references('id')->on('itens');
         });
     }
 

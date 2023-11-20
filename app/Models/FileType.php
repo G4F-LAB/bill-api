@@ -9,7 +9,6 @@ class FileType extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "id_file_type";
     protected $fillable = [
         "files_category",
     ];

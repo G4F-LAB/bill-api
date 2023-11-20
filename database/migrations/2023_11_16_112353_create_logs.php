@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('logs', function (Blueprint $table) {
-            $table->id('id_log');
-            $table->unsignedInteger('id_collaborator');
+            $table->id('id');
+            $table->unsignedInteger('collaborator_id');
             $table->ipAddress('origin_ip');
             $table->string('action',10);
             $table->string('route',100);
@@ -23,7 +23,7 @@ return new class extends Migration
         });
 
         Schema::table('logs', function(Blueprint $table){
-            $table->foreign('id_collaborator')->references('id_collaborator')->on('collaborators');
+            $table->foreign('collaborator_id')->references('id')->on('collaborators');
         });
     }
 
@@ -35,7 +35,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('logs', function (Blueprint $table) {
-            $table->dropForeign('logs_id_colaborador_foreign');
+            $table->dropForeign('logs_collaborator_id_foreign');
         });
         
         Schema::dropIfExists('logs');

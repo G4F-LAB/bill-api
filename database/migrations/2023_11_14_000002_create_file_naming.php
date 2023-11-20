@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('file_naming', function (Blueprint $table) {
-            $table->id('id_file_naming');
+            $table->id();
             $table->string('file_name');
             $table->string('standard_file_naming');
             $table->timestamps();

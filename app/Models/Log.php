@@ -10,5 +10,4 @@ class Log extends Model
     use HasFactory;
 
     protected $table = 'logs';
-    protected $primaryKey = 'id_log';
 }

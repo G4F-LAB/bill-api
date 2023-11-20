@@ -66,15 +66,16 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Itens
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'show']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/item/{id}', [ItemController::class, 'findOne']);
-    Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'update']);
-    Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'update']);
-    Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'delete']);
+    Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'new']);
+    Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
+    Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'delete']);
     
   
 });
 
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste']);
+Route::post('/teste', [TesteController::class, 'teste']);
 
 
 

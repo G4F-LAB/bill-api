@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('checklists', function (Blueprint $table) {
-            $table->id('id_checklist');
-            $table->string('contract');
+            $table->id();
+            $table->unsignedInteger('contract_id');
             $table->date('date_checklist');
             $table->string('object_contract');
             $table->string('shipping_method');
@@ -27,8 +27,8 @@ return new class extends Migration
         });
 
         Schema::table('checklists', function (Blueprint $table) {
-            $table->foreign('signed_by')->references('id_collaborator')->on('collaborators');
-            $table->foreign('contract')->references('contract')->on('contracts');
+            $table->foreign('signed_by')->references('id')->on('collaborators');
+            $table->foreign('contract_id')->references('id')->on('contracts');
         });
     }
 

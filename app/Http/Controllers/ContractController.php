@@ -23,7 +23,7 @@ class ContractController extends Controller
             return response()->json($contracts, 200);
         }
 
-        $contracts = Contract::where('situacao_contratual', true)->get();
+        $contracts = Contract::where('contractual_situation', true)->get();
         return response()->json($contracts, 200);
     }
 
@@ -35,7 +35,7 @@ class ContractController extends Controller
 
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->contrato);
+            $contrato = Contract::find($request->contract);
             $contrato->collaborator()->attach($request->id_collaborator);
             return response()->json([$request], 201);
         } catch (\Exception $e) {
@@ -52,14 +52,14 @@ class ContractController extends Controller
 
             if (!$colaborador->hasPermission(['Admin', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->contrato);
+            $contrato = Contract::find($request->contract);
 
-            if ($request->has('situacao_contratual')) {
-                $contrato->situacao_contratual = $request->situacao_contratual;
+            if ($request->has('contractual_situation')) {
+                $contrato->contractual_situation = $request->contractual_situation;
             }
 
             if ($request->has('id_gerente')) {
-                $contrato->id_gerente = $request->id_gerente;
+                $contrato->id_manager = $request->id_manager;
             }
 
             $contrato->save();
@@ -92,15 +92,16 @@ class ContractController extends Controller
 
             foreach ($jsonData['data']['list'] as $contract) {
                 $contract_find = Contract::find($contract['codccu']);
-                echo $contract_find;
-            
-                // if (empty($contract_find)) {
-                //     $new_contract = new Contract();
-                //     $new_contract->contrato = $contract['codccu'];
-                //     $new_contract->name = $contract['nomccu'];
-                //     $new_contract->situacao_contratual = true;
-                //     $new_contract->save();
-                // }
+                echo(empty($contract_find));
+                
+                
+                if (empty($contract_find)) {
+                    $new_contract = new Contract();
+                    $new_contract->contract = $contract['codccu'];
+                    $new_contract->name = $contract['nomccu'];
+                    $new_contract->contractual_situation = true;
+                    $new_contract->save();
+                } 
             }
             return response()->json(['message' => 'Contratos atualizados com sucesso!'], 200);
         } catch (\Exception $e) {
