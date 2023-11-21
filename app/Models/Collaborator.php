@@ -13,7 +13,6 @@ class Collaborator extends Model
 
 
     public function permissao() {
-        //belongsTo: (Nome da classe de modelo, foreign_key, 'owner_key')
         return $this->belongsTo(Permission::class, 'permission_id', 'id');
     }
 
@@ -40,5 +39,9 @@ class Collaborator extends Model
 
     public function contract() {
         return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id', 'contract_id')->withTimestamps();
+    }
+
+    public function manager() {
+        return $this->hasMany(Contract::class, 'id', 'manager_id');
     }
 }

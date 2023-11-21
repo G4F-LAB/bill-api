@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Collaborator;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use App\Services\ItemService;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+
 class ItemController extends Controller
 {
     public function __construct(
@@ -16,34 +19,36 @@ class ItemController extends Controller
     
     public function show()
     {
-        //dd('auqi');
-        if (!$itens = $this->service->getAll()) {
-            return response()->json([
-                'error' => 'Not Found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return $itens;
+        try{
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            $itens = Item::all();
+            return response()->json($itens, 200);
+    
+        }catch(\Exception $e){
+            return response()->json(['error'=>'Não foi possivel acessar os Itens'],500);
+        }  
     }
 
 
-    public function findOne(string $id)
+    public function getbyID(string $id)
     {
-        if (!$itens = $this->service->findOne($id)) {
-            return response()->json([
-                'error' => 'Not Found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return $itens;
+        try{
+            $itens = Item::find($id);  
+            return response()->json($itens, 200);
+    
+        }catch(\Exception $e){
+            return response()->json(['error'=>'Não foi possivel acessar os Itens'],500);
+        }  
+     
     }
 
-    public function new(Request $request)
+    public function create(Request $request)
     {
         try{ 
-            $item = $this->service->new($request);
+            $item = $this->new($request);
             return response()->json([], Response::HTTP_NO_CONTENT);
-            
+
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
@@ -53,20 +58,20 @@ class ItemController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id = null)
+    public function update(Request $request, string $id)
     {
         try{ 
-            dd("teste");
+           
             $item = Item::find($id);
+           
             if(!$item){
                 return response()->json([
                     'error' => 'Item não encontrado'
                 ], Response::HTTP_NOT_FOUND);
             }            
-            
-            // if ($request->method() == 'PATCH' || $request->method() == 'PUT') {                
-            $item = $this->service->update($request, $item);
-            return response()->json([], Response::HTTP_NO_CONTENT);
+                                  
+            $item = $this->updateItem($request, $item);
+            return response()->json(['message'=>'Item atualizado com sucesso'],200);
 
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
@@ -79,14 +84,49 @@ class ItemController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!$this->service->findOne($id)) {
-            return response()->json([
-                'error' => 'Not Found'
-            ], Response::HTTP_NOT_FOUND);
+        try{
+            $item = Item::find($id);  
+            //dd($item); 
+            if (!$item) {
+                return response()->json([
+                    'error' => 'Not Found'
+                ], Response::HTTP_NOT_FOUND);
+            }
+        
+            $item->id = $id;
+            $item->deleted_at = date('Y/m/d H:i');
+            $item->save();
+    
+            return response()->json(['message'=>'Item deletado com sucesso'],200);
+        }catch(\Exception $e){
+            return response()->json(['erro'=> $e->getMessage()],500);
         }
+        
+    }
 
-        $this->service->delete($id);
 
-        return response()->json([], Response::HTTP_NO_CONTENT);
+    public function updateItem(Request $request, Item $item)
+    {
+        if ($request->has('id'))$item->id = $request->id;
+        if ($request->has('status'))$item->status = $request->status;
+        if ($request->has('competence'))$item->competence = $request->competence;
+        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
+        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
+        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+        $item->save();
+        return response()->json(['message'=>'Item atualizado com sucesso'],200);
+    }
+
+    public function new(Request $request)
+    {
+        $item = new Item();
+        if ($request->has('status'))$item->status = $request->status;
+        if ($request->has('competence'))$item->competence = $request->competence;
+        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
+        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
+        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+        $item->save();
+
+        return response()->json(['message'=>'Item criado com sucesso'],200);
     }
 }

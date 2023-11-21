@@ -11,7 +11,7 @@ class Item extends Model
     use HasFactory;
     use SoftDeletes;
     protected $table = 'itens';
-    protected $primaryKey = 'id_item';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'competence',
         'status',

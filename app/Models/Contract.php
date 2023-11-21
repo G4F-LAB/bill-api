@@ -10,7 +10,7 @@ class Contract extends Model
     use HasFactory;
 
     protected $fillable = [
-        'contract',
+        'client_id',
         'name',
         'contractual_situation',
         'manager_id',
@@ -19,6 +19,9 @@ class Contract extends Model
 
     public function collaborator() {
         return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
+    }
+    public function manager() {
+        return $this->belongsTo(Collaborator::class,'manager_id', 'id');
     }
 
     public function checklist(){

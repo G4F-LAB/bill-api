@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Checklist extends Model
 
 {
-    protected $primaryKey = 'id_checklist';
+    protected $primaryKey = 'id';
     protected $fillable = [ 
-        'contract',
+        'contract_id',
         'date_checklist',
         'object_contract',
         'shipping_method',
@@ -22,7 +22,7 @@ class Checklist extends Model
 
     public function rules(){
         return [
-        'contract' => 'required|string',
+        'contract_id' => 'required|string',
         'date_checklist' => 'required|date',
         'object_contract' => 'required|string',
         'shipping_method' => 'required|string',
@@ -45,7 +45,7 @@ class Checklist extends Model
 
     }
 
-    public function contratos (){
-        return $this->hasMany(Contract::class,'contract');
-    }
+    // public function contratos (){
+    //     return $this->hasMany(Contract::class,'contract');
+    // }
 }

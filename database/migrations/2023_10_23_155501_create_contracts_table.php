@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('contracts', function (Blueprint $table) {
-            $table->unsignedInteger('id')->unique();
+            $table->id();
             $table->string('client_id',50)->unique();
             $table->string('name',150);
             $table->boolean('contractual_situation');
@@ -23,7 +23,6 @@ return new class extends Migration
         });
 
         Schema::table('contracts', function (Blueprint $table) {
-            $table->primary(['id','client_id']);
             $table->foreign('manager_id')->references('id')->on('collaborators');
         });
     }

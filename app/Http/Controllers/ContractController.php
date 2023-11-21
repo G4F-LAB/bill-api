@@ -19,11 +19,11 @@ class ContractController extends Controller
 
         //Puxar todos os contratos, incluindo os encerrados
         if ($request->has('encerrados')) {
-            $contracts = Contract::all();
+            $contracts = Contract::with('manager')->get();
             return response()->json($contracts, 200);
         }
 
-        $contracts = Contract::where('contractual_situation', true)->get();
+        $contracts = Contract::with('manager')->where('contractual_situation', true)->get();
         return response()->json($contracts, 200);
     }
 
@@ -52,22 +52,22 @@ class ContractController extends Controller
 
             if (!$colaborador->hasPermission(['Admin', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->contract);
+            $contrato = Contract::where('client_id',$request->id_contrato)->first();
 
             if ($request->has('contractual_situation')) {
                 $contrato->contractual_situation = $request->contractual_situation;
             }
 
             if ($request->has('id_gerente')) {
-                $contrato->id_manager = $request->id_manager;
+                $contrato->manager_id = $request->id_gerente;
             }
 
             $contrato->save();
 
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-            // return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 
@@ -91,13 +91,11 @@ class ContractController extends Controller
 
 
             foreach ($jsonData['data']['list'] as $contract) {
-                $contract_find = Contract::find($contract['codccu']);
-                echo(empty($contract_find));
-                
-                
+                $contract_find = Contract::where('client_id',$contract['codccu'])->first();
+
                 if (empty($contract_find)) {
                     $new_contract = new Contract();
-                    $new_contract->contract = $contract['codccu'];
+                    $new_contract->client_id = $contract['codccu'];
                     $new_contract->name = $contract['nomccu'];
                     $new_contract->contractual_situation = true;
                     $new_contract->save();

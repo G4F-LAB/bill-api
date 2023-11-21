@@ -18,8 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('checklist_id');
             $table->unsignedBigInteger('file_naming_id');
             $table->unsignedBigInteger('file_type_id');
-            $table->boolean('status')->default(0);
-            $table->unsignedSmallInteger('competence');
+            $table->boolean('status')->default(0);   
             $table->timestamps();
             $table->softDeletes();
         });

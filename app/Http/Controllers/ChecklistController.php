@@ -44,10 +44,10 @@ class ChecklistController extends Controller
         // return response()->json([$request->all()],200);
         
         try{
-                $this->checklist->contract = $request->contract;
+                $this->checklist->contract_id = $request->contract_id;
                 $this->checklist->date_checklist  = $request->date_checklist;
                 $this->checklist->object_contract = $request-> object_contract;
-                $this->checklist->shipping_method = $request->forma_envio;
+                $this->checklist->shipping_method = $request->shipping_method;
                 $this->checklist->obs = $request->obs;
                 $this->checklist->accept = $request->accept;
                 $this->checklist->sector = $request->sector;
@@ -84,9 +84,9 @@ class ChecklistController extends Controller
                 $request->validate($checklist->rules(), $checklist->feedback());
             }
 
-            if ($request->has('contract'))$checklist->contract = $request->contract;
+            if ($request->has('contract'))$checklist->contract_id = $request->contract_id;
             if ($request->has('date_checklist'))$checklist->date_checklist  = $request->date_checklist;
-            if ($request->has('object_contract'))$checklist->object_contract = $request-> object_contract;
+            if ($request->has('object_contract'))$checklist->object_contract = $request->object_contract;
             if ($request->has('shipping_method'))$checklist->shipping_method = $request->shipping_method;
             if ($request->has('obs'))$checklist->obs = $request->obs;
             if ($request->has('accept'))$checklist->accept = $request->accept;
