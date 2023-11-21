@@ -13,7 +13,9 @@ class File extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'complementary_name'
+        'item_id',
+        'complementary_name',
+        'path'
     ];
 
     public function item()

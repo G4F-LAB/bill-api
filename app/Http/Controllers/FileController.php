@@ -24,16 +24,16 @@ class FileController extends Controller
             $file = $request->file('file');
 
             $items = $this->getChecklistItems($checklist_id);
-
+            $result = array();
             if(is_array($file))
             {
                 foreach($file as $archive) {
-                    $result = self::saveChecklistFiles($checklist_id, $items, $archive);
+                    array_push($result, self::saveChecklistFiles($checklist_id, $items, $archive));
                 }
             }
             else 
             {
-                $result = self::saveChecklistFiles($checklist_id, $items, $file);
+                array_push($result, self::saveChecklistFiles($checklist_id, $items, $archive));
             }
 
 
@@ -52,88 +52,55 @@ class FileController extends Controller
 
     
     function getChecklistItems($checklist_id) {
-        $items = array(
-            (object) [
-              'id' => '1',
-              'file_naming_id' => 1
-            ],
-            (object) [
-                'id' => '2',
-                'file_naming_id' => 2
-             ],
-             (object) [
-                'id' => '3',
-                'file_naming_id' => 3
-             ]
-          );
-
-
+        $items = Item::where('checklist_id',  $checklist_id )->pluck('file_naming_id', 'id');
         return $items;
     }
 
     function getChecklistFilesName($ids) {
-        $names = FileNaming::pluck('standard_file_naming', 'id')->all();
-
-
+        $names = FileNaming::whereIn('id', $ids)->pluck('standard_file_naming', 'id')->all();
         return $names;
     }
 
 
-    function saveChecklistFiles($checklist_id, $item, $file){
+    function saveChecklistFiles($checklist_id, $items, $file){
         
         $filetype = $file->getClientOriginalExtension();
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
         
-        
-        $fileNames = self::getChecklistFilesName([]);
-
-        $success = array();
-        $erros = array();
+        $fileNames = self::getChecklistFilesName($items);
 
         foreach ($fileNames as $name) {
 
             if (strpos($filename, $name) !== FALSE) {
                 $filenameplus = str_replace($name, '', $filename);
-                // echo '<pre>';
-                // echo $filename;
-                // echo '<pre>';
-                // echo $filenameplus;
-                // echo '<pre>';
-                // echo $key = array_search ($name, $fileNames);
-                
-                $item_id = 7;
- 
+
+                $file_naming_id = array_search($name, $fileNames);
+                $item_id = array_search($file_naming_id , $items->toArray());
+
                 $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
 
-
-                if($upload = Storage::disk('s3')->put($path, file_get_contents($file))){
-
-                    array_push($success, ['file_id'=> NULL, 'item_id' => $item_id, 'name' => $filename]);
+                if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
                     try {
                         $saveFile = File::updateOrCreate(
-                            ['complementary_name' =>  $filenameplus],
-                            ['path' => $path],
-                            ['item_id' => $item_id]
+                            ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
                         );
+                        $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
                     } catch (\Throwable $th) {
                         //throw $th;
-                        array_push($erros, ['message' => 'Erro ao salvar no banco de dados', 'name' => $name]);
+                        $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $namefilename];
                     }
                     
                 } else{
-                    array_push($erros, ['message' => 'Error ao subir arquivo', 'name' => $name]);
+                    $data = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $name];
                 } 
-    
 
             }else{
-                // array_push($erros, ['name' => $name]);
-            }
-        }
+                $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido','name' => $filename];
 
-        return [
-                'success' => $success,
-                'erros' => $erros
-          ];
+            }
+
+        }
+        return $data;
       
     }
  
