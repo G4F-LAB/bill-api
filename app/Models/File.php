@@ -9,10 +9,15 @@ class File extends Model
 {
     use HasFactory;
 
-    protected $table = 'arquivos';
-    protected $primaryKey = 'id_arquivo';
+    protected $table = 'files';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
-        'nome_complementar'
+        'complementary_name'
     ];
+
+    public function item()
+    {
+        return $this->hasOne('Item');
+    }
 }
