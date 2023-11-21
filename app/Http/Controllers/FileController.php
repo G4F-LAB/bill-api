@@ -68,7 +68,9 @@ class FileController extends Controller
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
         
         $fileNames = self::getChecklistFilesName($items);
-
+        
+        $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
+        
         foreach ($fileNames as $name) {
 
             if (strpos($filename, $name) !== FALSE) {
