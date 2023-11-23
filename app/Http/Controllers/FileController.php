@@ -86,6 +86,7 @@ class FileController extends Controller
                         $saveFile = File::updateOrCreate(
                             ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
                         );
+                        Item::where('id', $item_id)->update(['status' => true]);
                         $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
                     } catch (\Throwable $th) {
                         //throw $th;
