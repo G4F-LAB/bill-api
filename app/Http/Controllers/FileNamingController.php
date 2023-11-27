@@ -26,8 +26,8 @@ class FileNamingController extends Controller
             if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = new FileNaming();
-            $file_naming->file_name = $request->file_name;
-            $file_naming->standard_file_naming = $request->standard_file_naming;
+            $file_naming->file_name = trim($request->file_name);
+            $file_naming->standard_file_naming = trim($request->standard_file_naming);
             $file_naming->save();
 
             return response()->json($file_naming, 200);
@@ -49,8 +49,8 @@ class FileNamingController extends Controller
             if (!$file_naming)
                 return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
 
-            $file_naming->file_name = $request->file_name;
-            $file_naming->standard_file_naming = $request->standard_file_naming;
+            $file_naming->file_name = trim($request->file_name);
+            $file_naming->standard_file_naming = trim($request->standard_file_naming);
             $file_naming->save();
 
             $file_naming = FileNaming::find($request->id_file_naming);

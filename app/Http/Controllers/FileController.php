@@ -33,7 +33,7 @@ class FileController extends Controller
             }
             else 
             {
-                array_push($result, self::saveChecklistFiles($checklist_id, $items, $archive));
+                array_push($result, self::saveChecklistFiles($checklist_id, $items, $file));
             }
 
 
@@ -70,7 +70,7 @@ class FileController extends Controller
         $fileNames = self::getChecklistFilesName($items);
         
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
-        
+
         foreach ($fileNames as $name) {
 
             if (strpos($filename, $name) !== FALSE) {
@@ -86,10 +86,11 @@ class FileController extends Controller
                         $saveFile = File::updateOrCreate(
                             ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
                         );
+                        Item::where('id', $item_id)->update(['status' => true]);
                         $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
                     } catch (\Throwable $th) {
                         //throw $th;
-                        $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $namefilename];
+                        $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $filename];
                     }
                     
                 } else{
