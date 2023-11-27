@@ -10,6 +10,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileNamingController;
 use App\Http\Controllers\TesteController;
+use App\Http\Controllers\LogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,10 +69,15 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Itens
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'show']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/item/{id}', [ItemController::class, 'getbyID']);
-    Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'create']);
+    Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'store']);
     Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
     Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'destroy']);
     
+
+    //LOG
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/log', [LogController::class, 'show']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log', [LogController::class, 'getLogName']);
+
   
 });
 

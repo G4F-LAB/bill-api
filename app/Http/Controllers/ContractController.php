@@ -30,14 +30,16 @@ class ContractController extends Controller
     //Vincular um colaborador a um contrato
     public function collaborator(Request $request)
     {
+            
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-
+            
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->contract);
-            $contrato->collaborator()->attach($request->id_collaborator);
-            return response()->json([$request], 201);
+            $contrato = Contract::find($request->contract_id);
+            
+            $contrato->collaborator()->attach($request->collaborator_id);
+            return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao vincular o colaborador ao contrato.'], 500);
         }

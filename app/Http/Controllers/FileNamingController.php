@@ -19,7 +19,7 @@ class FileNamingController extends Controller
         return response()->json($file_naming, 200);
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();

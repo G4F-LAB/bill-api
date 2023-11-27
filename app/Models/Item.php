@@ -5,18 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Item extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use LogsActivity;
+    
     protected $table = 'itens';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'competence',
+        'file_type_id',
         'status',
+        'file_naming_id',
+        'checklist_id'
     ];
 
+ 
+    public function getActivitylogOptions(): LogOptions
+    {        
+        return LogOptions::defaults()->useLogName('item')->logOnly(['file_type_id',
+        'status',
+        'file_naming_id',
+        'checklist_id']);
+
+       
+    }
+  
     public function rules()
     {
         return [            

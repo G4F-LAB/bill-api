@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Checklist extends Model
 
 {
+    use LogsActivity;
     protected $primaryKey = 'id';
     protected $fillable = [ 
         'contract_id',
@@ -22,7 +25,7 @@ class Checklist extends Model
 
     public function rules(){
         return [
-        'contract_id' => 'required|string',
+        'contract_id' => 'required|int',
         'date_checklist' => 'required|date',
         'object_contract' => 'required|string',
         'shipping_method' => 'required|string',
@@ -32,6 +35,20 @@ class Checklist extends Model
         'signed_by' => 'string'
         
         ];
+    }
+
+
+    public function getActivitylogOptions(): LogOptions
+    {        
+        return LogOptions::defaults()->useLogName('Checklist')->logOnly([
+        'contract_id',
+        'date_checklist',
+        'object_contract',
+        'shipping_method',
+        'obs',
+        'accept',
+        'sector',
+        'signed_by']);
     }
     
     public function feedback() {
@@ -45,7 +62,4 @@ class Checklist extends Model
 
     }
 
-    // public function contratos (){
-    //     return $this->hasMany(Contract::class,'contract');
-    // }
 }

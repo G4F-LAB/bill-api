@@ -34,7 +34,7 @@ class Collaborator extends Model
     }
 
     public function permission(){
-        return $this->hasMany(Permission::class, 'permission_id', 'id');
+        return $this->hasMany(Permission::class, 'id', 'permission_id');
     }
 
     public function contract() {

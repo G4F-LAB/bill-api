@@ -8,13 +8,12 @@ use Illuminate\Http\Request;
 use App\Services\ItemService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-
 class ItemController extends Controller
 {
-    public function __construct(
-        protected ItemService $service,
-    ) {
-    }
+    // public function __construct(
+    //     protected ItemService $service,
+    // ) {
+    // }
 
     
     public function show()
@@ -34,6 +33,8 @@ class ItemController extends Controller
     public function getbyID(string $id)
     {
         try{
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
             $itens = Item::find($id);  
             return response()->json($itens, 200);
     
@@ -43,11 +44,11 @@ class ItemController extends Controller
      
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         try{ 
             $item = $this->new($request);
-            return response()->json([], Response::HTTP_NO_CONTENT);
+            return response()->json(['message'=>'Item criado com sucesso'],200);
 
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
@@ -61,9 +62,9 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         try{ 
-           
+            
             $item = Item::find($id);
-           
+            
             if(!$item){
                 return response()->json([
                     'error' => 'Item não encontrado'
@@ -109,24 +110,23 @@ class ItemController extends Controller
     {
         if ($request->has('id'))$item->id = $request->id;
         if ($request->has('status'))$item->status = $request->status;
-        if ($request->has('competence'))$item->competence = $request->competence;
         if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
         if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
         if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
         $item->save();
-        return response()->json(['message'=>'Item atualizado com sucesso'],200);
+        // return response()->json(['message'=>'Item atualizado com sucesso'],200);
     }
 
     public function new(Request $request)
     {
         $item = new Item();
         if ($request->has('status'))$item->status = $request->status;
-        if ($request->has('competence'))$item->competence = $request->competence;
         if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
         if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
         if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+        //dd($item);
         $item->save();
 
-        return response()->json(['message'=>'Item criado com sucesso'],200);
+        
     }
 }

@@ -73,8 +73,8 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
-                if ($this->checkDatabaseUser()) return response()->json(['token' => $token, 'first_access' => true], $httpCode);
-                return response()->json(['token' => $token], $httpCode);
+                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
+                return response()->json(['token' => $token, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
             } else {
                 if (empty($message)) {
                     $message = 'Usuário ou senha inválidos!';
@@ -127,7 +127,18 @@ class AuthController extends Controller
             $firstLogin = true;
         }
 
-        return $firstLogin;
+        return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+    }
+
+    public function me()
+    {
+        try {
+            $colaborador = Collaborator::with('permission')->where('objectguid', Auth::user()->getConvertedGuid())->first();
+
+            return response()->json($colaborador);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
+        }
     }
 
     private function checkPermission($user)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use App\Models\Collaborator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,6 @@ class ChecklistController extends Controller
 
     public function getAll(){
         try{
-
         $checklist = Checklist::all();
         return response()->json($checklist,200);
         
@@ -26,11 +26,22 @@ class ChecklistController extends Controller
         }
     }
 
-    public function getbyId($id){
+
+    
+    public function getById($id){
         try {
             $checklist = Checklist::find($id);
+    
             if($checklist) {
-                return response()->json($checklist, 200);
+
+                $DataAtual = Carbon::now();
+                $checklistAnteriores = Checklist::orderBy('date_checklist', 'DESC')
+                    ->where('date_checklist', '<=', $DataAtual)
+                    ->where('id', '!=', $id)
+                    ->limit(3) 
+                    ->get();
+    
+                return response()->json($checklistAnteriores, 200);
             } else {
                 return response()->json(['error' => 'Checklist não encontrado'], 404);
             }
@@ -38,6 +49,7 @@ class ChecklistController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
 
     public function store(Request $request)
     {
@@ -84,7 +96,6 @@ class ChecklistController extends Controller
                 $request->validate($checklist->rules(), $checklist->feedback());
             }
 
-            if ($request->has('contract'))$checklist->contract_id = $request->contract_id;
             if ($request->has('date_checklist'))$checklist->date_checklist  = $request->date_checklist;
             if ($request->has('object_contract'))$checklist->object_contract = $request->object_contract;
             if ($request->has('shipping_method'))$checklist->shipping_method = $request->shipping_method;

@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class FileNaming extends Model
 {
     use HasFactory;
-
+    use LogsActivity;
     protected $table = 'file_naming';
 
     protected $fillable = [
@@ -23,6 +25,14 @@ class FileNaming extends Model
             'file_name' => 'required|string',
             'standard_file_naming' => 'required|numeric'
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {        
+        return LogOptions::defaults()->useLogName('FileNaming')->logOnly([
+            'file_name',
+            'standard_file_naming'
+        ]);
     }
 
     public function feedback()
