@@ -12,7 +12,7 @@ class CollaboratorController extends Controller
     public function getAllDb()
     {
         try {
-            $colaboradores = Collaborator::with('permissao')->orderBy('id_collaborator')->get();
+            $colaboradores = Collaborator::with('permissao')->orderBy('id')->get();
 
             foreach ($colaboradores as $index => $colaborador) {
                 $encodedGuid = $this->str_to_guid($colaborador->objectguid);
@@ -99,5 +99,23 @@ class CollaboratorController extends Controller
         $unpacked = unpack('Va/v2b/n2c/Nd', $binary_guid);
         $uuid = sprintf('%08X-%04X-%04X-%04X-%04X%08X', $unpacked['a'], $unpacked['b1'], $unpacked['b2'], $unpacked['c1'], $unpacked['c2'], $unpacked['d']);
         return mb_strtolower($uuid);
+    }
+
+
+    public function collaboratorsByPermission(){
+        $permissions = Permission::get();
+        $data = array();
+        foreach ($permissions as $key => $permission) {
+           $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
+
+           $item = array(
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'total' => $collaborator->count(),
+                'collaborators' => $collaborator,
+           );
+           array_push($data, $item);
+        }
+        return $data;
     }
 }
