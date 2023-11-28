@@ -26,6 +26,7 @@ class SetupController extends Controller
         foreach ($menu as $index => $item) {
 
             $form_data = [
+                "id" => $item->id,
                 "name" => $item->name,
                 "slug" => $item->slug,
                 "path" => $item->path,
