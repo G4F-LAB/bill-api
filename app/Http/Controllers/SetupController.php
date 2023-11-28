@@ -21,7 +21,7 @@ class SetupController extends Controller
         $user = Auth::user();
         $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->get();
         $data = array();
         foreach ($menu as $index => $item) {
 
@@ -33,8 +33,8 @@ class SetupController extends Controller
                 "sort" => $item->sort
             ];
 
-            if(isset($item->parent_id)){
-                $childrens = SetupNavigation::where('id', $item->parent_id)->get();
+            $childrens = SetupNavigation::where('parent_id', $item->id)->get();
+            if(isset($childrens)){
                 $c_data = array("children" => $childrens);
                 $form_data = array_merge($form_data, $c_data);
             }
