@@ -115,7 +115,7 @@ class AuthController extends Controller
         $permissionResult = $this->checkPermission($user);
         $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
 
-        $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
+        $colaborador = Collaborator::with('permission')->where('objectguid', $user->getConvertedGuid())->first();
         if ($colaborador == NULL) {
 
             $colaborador = new Collaborator();
