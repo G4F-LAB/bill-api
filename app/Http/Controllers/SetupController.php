@@ -27,7 +27,7 @@ class SetupController extends Controller
 
             $form_data = [
                 "id" => $item->id,
-                "name" => $item->name,
+                "title" => $item->name,
                 "slug" => $item->slug,
                 "path" => $item->path,
                 "icon" => $item->icon,

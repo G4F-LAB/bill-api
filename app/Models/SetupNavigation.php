@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 class SetupNavigation extends Model
 {
     use HasFactory;
@@ -13,6 +15,7 @@ class SetupNavigation extends Model
 
     protected $table = 'setup_navigations';
     protected $primaryKey = 'id';
+    protected $appends = ['title'];
 
     protected $fillable = [
         'parent_id',
@@ -37,4 +40,11 @@ class SetupNavigation extends Model
         ]);
     }
 
+    protected function title(): Attribute
+    {
+
+        return new Attribute(
+            get: fn () => $this->name,
+        );
+    }
 }
