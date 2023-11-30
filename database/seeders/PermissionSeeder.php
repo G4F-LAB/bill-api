@@ -13,7 +13,8 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'Executivo']);
         Permission::create(['name' => 'Operacao']);
         Permission::create(['name' => 'Analista']);
-        Permission::create(['name' => 'RhFin']);
+        Permission::create(['name' => 'Rh']);
+        Permission::create(['name' => 'Fin']);
         Permission::create(['name' => 'TI']);
         Permission::create(['name' => 'Geral']);
     }

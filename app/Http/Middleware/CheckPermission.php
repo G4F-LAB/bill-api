@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Collaborator;
 use App\Models\Permission;
+use Spatie\Activitylog\Facades\CauserResolver;
 
 class CheckPermission
 {
@@ -33,8 +34,8 @@ class CheckPermission
         }
         
         $colaborador = Collaborator::where('objectguid',Auth::user()->getConvertedGuid())->first();
-        // print_r($colaborador);
-        // exit;
+        CauserResolver::setCauser($colaborador);
+        
         if($colaborador->hasPermission($validPermissions)) return $next($request);
 
         return response()->json(['error' => 'Acesso não permitido'],403);

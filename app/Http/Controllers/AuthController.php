@@ -16,6 +16,7 @@ class AuthController extends Controller
     //Endpoint para autenticação
     public function login(Request $request)
     {
+        // return response()->json(['error' => $request->all()], 200);
 
         //regras de validação
         $rules = [
@@ -71,8 +72,8 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
-                if ($this->checkDatabaseUser()) return response()->json(['token' => $token, 'first_access' => true], $httpCode);
-                return response()->json(['token' => $token], $httpCode);
+                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
+                return response()->json(['token' => $token, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
             } else {
                 if (empty($message)) {
                     $message = 'Usuário ou senha inválidos!';
@@ -113,19 +114,30 @@ class AuthController extends Controller
         $permissionResult = $this->checkPermission($user);
         $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
 
-        $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
+        $colaborador = Collaborator::with('permission')->where('objectguid', $user->getConvertedGuid())->first();
         if ($colaborador == NULL) {
 
             $colaborador = new Collaborator();
             $colaborador->name = $user['displayname'][0];
             $colaborador->objectguid = $user->getConvertedGuid();
-            $colaborador->id_permissao = $permission;
+            $colaborador->permission_id = $permission;
             $colaborador->save();
 
             $firstLogin = true;
         }
 
-        return $firstLogin;
+        return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+    }
+
+    public function me()
+    {
+        try {
+            $colaborador = Collaborator::with('permission')->where('objectguid', Auth::user()->getConvertedGuid())->first();
+
+            return response()->json($colaborador);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
+        }
     }
 
     private function checkPermission($user)
@@ -153,8 +165,9 @@ class AuthController extends Controller
         }
     }
 
-    private function permissionID($permission){
+    private function permissionID($permission)
+    {
         $id = Permission::where('name', $permission)->first();
-        return $id->id_permissao;
+        return $id->id;
     }
 }

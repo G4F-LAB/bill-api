@@ -11,59 +11,71 @@ use Illuminate\Support\Facades\Http;
 class ContractController extends Controller
 {
 
-    public function getAllContracts()
+    //Obter todos os contratos
+    public function getAllContracts(Request $request)
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
+        //Puxar todos os contratos, incluindo os encerrados
+        if ($request->has('encerrados')) {
+            $contracts = Contract::with('manager')->get();
+            return response()->json($contracts, 200);
+        }
 
-        $contracts = Contract::all();
+        $contracts = Contract::with('manager')->where('contractual_situation', true)->get();
         return response()->json($contracts, 200);
     }
 
+    //Vincular um colaborador a um contrato
     public function collaborator(Request $request)
     {
+            
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-
+            
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->id_contrato);
-            $contrato->collaborator()->attach($request->id_colaborador);
-            return response()->json([$request], 201);
+            $contrato = Contract::find($request->contract_id);
+            
+            $contrato->collaborator()->attach($request->collaborator_id);
+            return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            return response()->json(['error' => 'Falha ao vincular o colaborador ao contrato.'], 500);
         }
     }
 
+    //Atualizar os dados de um contrato
     public function update(Request $request)
     {
-                // return response()->json([$request->id_contrato], 200);
+        // return response()->json([$request->contrato], 200);
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
 
             if (!$colaborador->hasPermission(['Admin', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::find($request->id_contrato);
-            
+            $contrato = Contract::where('client_id',$request->id_contrato)->first();
+
             if ($request->has('contractual_situation')) {
                 $contrato->contractual_situation = $request->contractual_situation;
             }
 
             if ($request->has('id_gerente')) {
-                $contrato->id_gerente = $request->id_gerente;
-            }else {
-                return response()->json([$contrato], 200);
+                $contrato->manager_id = $request->id_gerente;
             }
+
             $contrato->save();
-            
+
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 
-    public function updateContracts(){
+    //Atualizar a lista de contratos
+    public function updateContracts()
+    {
         try {
             $response = Http::withHeaders([
                 'Content-type' => 'application/json',
@@ -71,22 +83,29 @@ class ContractController extends Controller
                 'x-api-key' => 'rO4km1L2j5SFYU071iSLY8I6O1lOK8uxC78TquVscM'
             ])
                 ->withBody(json_encode([
-                    'table_name' => 'R018CCU'
+                    'table_name' => 'R018CCU',
+                    'nav' => [
+                        'page_items' => 500
+                    ],
                 ]), 'application/json')
                 ->get('https://senior.g4fcorporate.com/table/list');
             $jsonData = $response->json();
 
 
             foreach ($jsonData['data']['list'] as $contract) {
-                Contract::firstOrCreate([
-                    'id_contrato' => $contract['codccu'],
-                    'name' => $contract['nomccu'],
-                    'situacao_contratual' => true
-                ]);
+                $contract_find = Contract::where('client_id',$contract['codccu'])->first();
+
+                if (empty($contract_find)) {
+                    $new_contract = new Contract();
+                    $new_contract->client_id = $contract['codccu'];
+                    $new_contract->name = $contract['nomccu'];
+                    $new_contract->contractual_situation = true;
+                    $new_contract->save();
+                } 
             }
-            return response()->json(['message'=>'Contratos atualizados com sucesso!'], 200);
+            return response()->json(['message' => 'Contratos atualizados com sucesso!'], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Falha ao atualizar.'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

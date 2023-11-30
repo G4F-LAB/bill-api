@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
+use App\Models\Collaborator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class ChecklistController extends Controller
 {
@@ -24,11 +26,22 @@ class ChecklistController extends Controller
         }
     }
 
-    public function getbyId($id){
+
+    
+    public function getById($id){
         try {
             $checklist = Checklist::find($id);
+    
             if($checklist) {
-                return response()->json($checklist, 200);
+
+                $DataAtual = Carbon::now();
+                $checklistAnteriores = Checklist::orderBy('date_checklist', 'DESC')
+                    ->where('date_checklist', '<=', $DataAtual)
+                    ->where('id', '!=', $id)
+                    ->limit(3) 
+                    ->get();
+    
+                return response()->json($checklistAnteriores, 200);
             } else {
                 return response()->json(['error' => 'Checklist não encontrado'], 404);
             }
@@ -36,35 +49,71 @@ class ChecklistController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
 
     public function store(Request $request)
     {
+        // return response()->json([$request->all()],200);
         
-        // $request->validate($this->checklist->rules(), $this->checklist->feedback());
         try{
+                $this->checklist->contract_id = $request->contract_id;
+                $this->checklist->date_checklist  = $request->date_checklist;
+                $this->checklist->object_contract = $request-> object_contract;
+                $this->checklist->shipping_method = $request->shipping_method;
+                $this->checklist->obs = $request->obs;
+                $this->checklist->accept = $request->accept;
+                $this->checklist->sector = $request->sector;
+                $this->checklist->signed_by = $request->signed_by;
+                $this->checklist->save();
+                return response()->json(['message'=>'Checklista criado com sucesso'],200);
             
-            $this->checklist->data_checklist  = $request->data_checklist;
-            $this->checklist->objeto_contrato = $request-> objeto_contrato;
-            $this->checklist->forma_envio = $request->forma_envio;
-            $this->checklist->obs = $request->obs;
-            $this->checklist->aceite = $request->aceite;
-            $this->checklist->setor = $request->setor;
-            $this->checklist->assinado_por = $request->assinado_por;
-            $this->checklist->created_at = NULL;
-            $this->checklist->updated_at = NULL;
-
-            $this->checklist->save();
-            
-            
+                
 
         }catch(\Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
         
+        public function update(Request $request , $id){
+           try{ 
+
+            $checklist = Checklist::find($id);
+            if(!$checklist){
+                return response()->json(['message'=>'Checklist não existe'],404);
+            }
+            
+            if ($request->method() == 'PATCH') {
+                $dinamicRules = array();
+                
+                //aplica regras dinâmicas para os campos que foram enviados
+                foreach ($checklist->rules() as $input => $rule) {
+                    if (array_key_exists($input, $request->all())) {
+                        $dinamicRules[$input] = $rule;
+                    }
+                }
+                $request->validate($dinamicRules, $checklist->feedback());
+            } else {
+                $request->validate($checklist->rules(), $checklist->feedback());
+            }
+
+            if ($request->has('date_checklist'))$checklist->date_checklist  = $request->date_checklist;
+            if ($request->has('object_contract'))$checklist->object_contract = $request->object_contract;
+            if ($request->has('shipping_method'))$checklist->shipping_method = $request->shipping_method;
+            if ($request->has('obs'))$checklist->obs = $request->obs;
+            if ($request->has('accept'))$checklist->accept = $request->accept;
+            if ($request->has('sector'))$checklist->sector = $request->sector;
+            if ($request->has('signed_by'))$checklist->signed_by = $request->signed_by;
+            $checklist->save();
+            return response()->json(['message'=>'Checklist atualizado com sucesso'],200);
+
+           }catch(\Exception $e){
+            return response()->json(['erro'=> $e->getMessage()],500);
+           }
+        }
         
         
     }
     
 
 
-}
+

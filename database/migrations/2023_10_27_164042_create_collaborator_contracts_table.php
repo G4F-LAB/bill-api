@@ -14,15 +14,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('collaborator_contracts', function (Blueprint $table) {
-            $table->smallInteger('id_colaborador');
-            $table->string('id_contrato')->unique();
-            $table->primary(['id_colaborador', 'id_contrato']);
+            $table->unsignedInteger('collaborator_id')->unique();
+            $table->unsignedInteger('contract_id',50)->unique();
             $table->timestamps();
         });
 
         Schema::table('collaborator_contracts', function(Blueprint $table){
-            $table->foreign('id_colaborador')->references('id_colaborador')->on('collaborators');
-            $table->foreign('id_contrato')->references('id_contrato')->on('contracts');
+            $table->foreign('collaborator_id')->references('id')->on('collaborators');
+            $table->foreign('contract_id')->references('id')->on('contracts');
         });
     }
 
@@ -33,6 +32,10 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('collaborator_contracts', function (Blueprint $table) {
+            $table->dropForeign('collaborator_contracts_contract_foreign');
+            $table->dropForeign('collaborator_contracts_id_collaborator_foreign');
+        });
         Schema::dropIfExists('collaborator_contracts');
     }
 };

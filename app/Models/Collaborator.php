@@ -4,29 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 
 class Collaborator extends Model
 {
     use HasFactory;
 
     protected $table = 'collaborators';
-    protected $primaryKey = 'id_colaborador';
-
+    protected $appends = ['name_initials'];
 
     public function permissao() {
-        //belongsTo: (Nome da classe de modelo, foreign_key, 'owner_key')
-        return $this->belongsTo(Permission::class, 'id_permissao', 'id_permissao');
+        return $this->belongsTo(Permission::class, 'permission_id', 'id');
     }
 
     public function hasPermission($validPermissions) {
         $flag = false;
 
         foreach($validPermissions as $index => $validPermission) {
-            
+
             $permissao = Permission::where('name',$validPermission)->first();
             if($permissao == NULL) return response()->json(['error' => 'Permissão inválida: '.$validPermission],404);
 
-            if($this->id_permissao == $permissao->id_permissao) {
+            if($this->permission_id == $permissao->id) {
                 $flag = true;
                 break;
             }
@@ -36,10 +36,26 @@ class Collaborator extends Model
     }
 
     public function permission(){
-        return $this->hasMany(Permission::class, 'id_permissao', 'id_permissao');
+        return $this->hasMany(Permission::class, 'id', 'permission_id');
     }
 
     public function contract() {
-        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id_colaborador', 'id_contrato')->withTimestamps();
+        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id', 'contract_id')->withTimestamps();
     }
+
+    public function manager() {
+        return $this->hasMany(Contract::class, 'id', 'manager_id');
+    }
+
+
+    protected function nameInitials(): Attribute
+    {
+        preg_match('/(?:\w+\. )?(\w+).*?(\w+)(?: \w+\.)?$/', $this->name, $result);
+        $initials =  strtoupper($result[1][0].$result[2][0]);
+
+        return new Attribute(
+            get: fn () => $initials,
+        );
+    }
+
 }

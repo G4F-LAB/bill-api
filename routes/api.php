@@ -6,7 +6,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\FileController;
+use App\Http\Controllers\FileNamingController;
 use App\Http\Controllers\TesteController;
+use App\Http\Controllers\LogController;
+use App\Http\Controllers\SetupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,20 +28,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware(['sec.check', 'handle.cors'])->post('/login', [AuthController::class, 'login']);
+Route::middleware(['handle.cors'])->post('/login', [AuthController::class, 'login']);
+// Route::get('/nomenclatura', [FileNamingController::class, 'getAll']);
 
 //Rotas protegidas pelo middleware sys.auth
-Route::middleware(['sys.auth', 'sec.check', 'handle.cors'])->group(function () {
+Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Auth
     Route::get('/refresh', [AuthController::class, 'refresh']);
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
+    //Setup
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->post('/setup/navigation', [SetupController::class, 'navigation_upsert']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->delete('/setup/navigation/{id}', [SetupController::class, 'navigation_delete']);
+
 
     //Colaboradores e Permissões
     Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
     Route::middleware('check.permission:Admin, Executivo, Operacao')->put('/colaborador', [CollaboratorController::class , 'update']);
+    Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
 
     //Vincular um colaborador a um contrato
     Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/colaborador/contrato', [ContractController::class , 'collaborator']);
@@ -45,18 +57,45 @@ Route::middleware(['sys.auth', 'sec.check', 'handle.cors'])->group(function () {
     Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contratos', [ContractController::class, 'getAllContracts']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->put('/contratos', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contratos/novos', [ContractController::class, 'updateContracts']);
-    
+
+    //CheckList//
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/checklist/{id}', [ChecklistController::class, 'getbyID']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist',[ChecklistController::class, 'store']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->put('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
+
+
+    //Nomenclaturas padrão dos arquivos
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
+    Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
+    Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
+    Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
+
+    //Itens
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/item', [ItemController::class, 'show']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/item/{id}', [ItemController::class, 'getbyID']);
+    Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'store']);
+    Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
+    Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'destroy']);
+
+
+    //LOG
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/log', [LogController::class, 'show']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log', [LogController::class, 'getLogName']);
+
 
 });
 
 
+Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste']);
 Route::post('/teste', [TesteController::class, 'teste']);
 
 
-//CheckList//
-Route::get('/checklist', [ChecklistController::class , 'getAll']);
-Route::get('/checklist/{id}', [ChecklistController::class, 'getbyID']);
-Route::post('/checklist',[ChecklistController::class, 'store']);
+
+
+
 
 Route::get('/documentation', function () {
     return view('documentation');

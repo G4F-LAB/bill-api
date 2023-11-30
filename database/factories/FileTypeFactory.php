@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Contract>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Tipo_arquivo>
  */
-class ContractFactory extends Factory
+class FileTypeFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,9 +17,7 @@ class ContractFactory extends Factory
     public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'contractual_situation' => fake()->boolean(),
-            'id_manager' => fake()->numberBetween(),
+            'files_category' => fake()->name(),
         ];
     }
 }

@@ -13,13 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('collaborators', function (Blueprint $table) {
+        Schema::create('files', function (Blueprint $table) {
             $table->id();
-            $table->string('name',150);
-            $table->string('objectguid');
-            $table->unsignedSmallInteger('permission_id');
+            $table->string('complementary_name',100);
+            $table->string('path');
+            $table->unsignedBigInteger('item_id');
             $table->timestamps();
         });
+
     }
 
     /**->constrained('collaborators') ->constrained('contracts')
@@ -29,6 +30,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('collaborators');
+
+        Schema::dropIfExists('files');
     }
 };

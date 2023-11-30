@@ -15,33 +15,33 @@ class ChecklistSeeder extends Seeder
     public function run()
     
     {
-        $data_checklist = "2023-10-20";
+        $data_checklist = "2023-08-20";
+        $data_checklist1 = "2023-07-10";
         \DB::table('checklists')->insert([
             [
-                'id_contrato' => 'cto-4',
-                'data_checklist' => $data_checklist,
-                'objeto_contrato' => 'hsajfh',
-                'forma_envio' => 'email',
+                'contract_id' => '8',
+                'date_checklist' => $data_checklist,
+                'object_contract' => 'hsajfh',
+                'shipping_method' => 'email',
                 'obs' => 'teste',
-                'aceite' => false,
-                'setor' => 'Gerencia',
-                'assinado_por' => 'Eduardo',
+                'accept' => false,
+                'sector' => 'Gerencia',
+                'signed_by' => '1',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_contrato' => 'cto-5',
-                'data_checklist' => $data_checklist,
-                'objeto_contrato' => 'teste',
-                'forma_envio' => 'teste',
+                'contract_id' => '11',
+                'date_checklist' => $data_checklist1,
+                'object_contract' => 'teste',
+                'shipping_method' => 'teste',
                 'obs' => 'teste',
-                'aceite' => true,
-                'setor' => 'RH',
-                'assinado_por' => 'Eduardo.Borges',
+                'accept' => true,
+                'sector' => 'RH',
+                'signed_by' => '1',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
-            // Adicione mais registros conforme necessário
         ]);
     }
 }

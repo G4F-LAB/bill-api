@@ -12,7 +12,7 @@ class CollaboratorController extends Controller
     public function getAllDb()
     {
         try {
-            $colaboradores = Collaborator::with('permissao')->orderBy('id_colaborador')->get();
+            $colaboradores = Collaborator::with('permissao')->orderBy('id')->get();
 
             foreach ($colaboradores as $index => $colaborador) {
                 $encodedGuid = $this->str_to_guid($colaborador->objectguid);
@@ -51,24 +51,24 @@ class CollaboratorController extends Controller
     public function update(Request $request)
     {
         $rules = [
-            'id_colaborador' => 'required|numeric|exists:collaborators,id_colaborador',
-            'id_permissao' => 'required|numeric|exists:permissions,id_permissao',
+            'id_collaborator' => 'required|numeric|exists:collaborators,id_collaborator',
+            'id_permission' => 'required|numeric|exists:permissions,id_permission',
         ];
 
         $feedback = [
-            'id_colaborador.required' => 'O campo de id do colaborador vazio',
-            'id_permissao.required' => 'O campo de id da permissão vazio',
-            'id_colaborador.numeric' => 'O campo de id do colaborador deve ser numérico',
-            'id_permissao.numeric' => 'O campo de id da permissão deve ser numérico',
-            'id_colaborador.exists' => 'Colaborador não encontrado',
-            'id_permissao.exists' => 'Permissão inválida!',
+            'id_collaborator.required' => 'O campo de id do colaborador vazio',
+            'id_permission.required' => 'O campo de id da permissão vazio',
+            'id_collaborator.numeric' => 'O campo de id do colaborador deve ser numérico',
+            'id_permission.numeric' => 'O campo de id da permissão deve ser numérico',
+            'id_collaborator.exists' => 'Colaborador não encontrado',
+            'id_permission.exists' => 'Permissão inválida!',
         ];
 
         $request->validate($rules, $feedback);
 
         try {
-            $colaborador = Collaborator::find($request->id_colaborador);
-            $colaborador->id_permissao = $request->id_permissao;
+            $colaborador = Collaborator::find($request->id_collaborator);
+            $colaborador->id_permission = $request->id_permission;
 
             $colaborador->save();
             return response()->json(['message' => 'Permissão alterada com sucesso!'], 200);
@@ -99,5 +99,23 @@ class CollaboratorController extends Controller
         $unpacked = unpack('Va/v2b/n2c/Nd', $binary_guid);
         $uuid = sprintf('%08X-%04X-%04X-%04X-%04X%08X', $unpacked['a'], $unpacked['b1'], $unpacked['b2'], $unpacked['c1'], $unpacked['c2'], $unpacked['d']);
         return mb_strtolower($uuid);
+    }
+
+
+    public function collaboratorsByPermission(){
+        $permissions = Permission::get();
+        $data = array();
+        foreach ($permissions as $key => $permission) {
+           $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
+
+           $item = array(
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'total' => $collaborator->count(),
+                'collaborators' => $collaborator,
+           );
+           array_push($data, $item);
+        }
+        return $data;
     }
 }

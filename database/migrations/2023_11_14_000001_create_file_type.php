@@ -13,22 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('collaborators', function (Blueprint $table) {
+        Schema::create('file_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name',150);
-            $table->string('objectguid');
-            $table->unsignedSmallInteger('permission_id');
-            $table->timestamps();
+            $table->string('files_category');        
         });
     }
 
-    /**->constrained('collaborators') ->constrained('contracts')
+    /**
      * Reverse the migrations.
      *
      * @return void
      */
     public function down()
     {
-        Schema::dropIfExists('collaborators');
+        Schema::dropIfExists('file_types');
     }
 };
