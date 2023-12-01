@@ -43,6 +43,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->post('/setup/navigation', [SetupController::class, 'navigation_upsert']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->delete('/setup/navigation/{id}', [SetupController::class, 'navigation_delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/permissions', [SetupController::class, 'permissions']);
 
 
     //Colaboradores e Permissões

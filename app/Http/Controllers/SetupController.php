@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SetupNavigation;
 use App\Models\Collaborator;
+use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -31,7 +32,8 @@ class SetupController extends Controller
                 "slug" => $item->slug,
                 "path" => $item->path,
                 "icon" => $item->icon,
-                "sort" => $item->sort
+                "sort" => $item->sort,
+                "permission_ids" => $item->permission_ids
             ];
 
             $childrens = SetupNavigation::where('parent_id', $item->id)->get();
@@ -94,6 +96,24 @@ class SetupController extends Controller
             $menu->delete();
 
             return response()->json(['message' => 'Menu excluído!']);
+
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+        }
+    }
+
+    public function permissions()
+    {
+        try {
+
+            $permissions = Permission::all();
+
+            if (!$permissions)
+                return response()->json(['error' => 'Menu não encontrado'], 404);
+
+
+
+            return response()->json($permissions);
 
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
