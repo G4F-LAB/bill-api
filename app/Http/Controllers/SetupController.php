@@ -54,11 +54,15 @@ class SetupController extends Controller
         $path = $request->path;
         $icon = $request->icon;
         $sort = $request->sort;
+
         $permission_ids = array();
+        if(is_array($request->permission_ids)){
             foreach ($request->permission_ids as $item) {
             if (is_numeric($item)) { array_push($permission_ids, (int)$item); }
             }
-
+        }else{
+            $permission_ids = $request->permission_ids;
+        }
 
         try {
             $menu = SetupNavigation::updateOrCreate(
