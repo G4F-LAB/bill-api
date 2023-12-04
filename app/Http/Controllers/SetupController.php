@@ -49,12 +49,15 @@ class SetupController extends Controller
     function navigation_upsert(Request $request) {
 
         $slug = $request->slug;
-        $name = $request->name;
+        $name = $request->title;
         $parent_id = $request->parent_id ? (int) $request->parent_id : NULL;
         $path = $request->path;
         $icon = $request->icon;
         $sort = $request->sort;
-        $permission_ids = json_encode($request->permission_ids);
+        $permission_ids = array();
+            foreach ($request->permission_ids as $item) {
+            if (is_numeric($item)) { array_push($permission_ids, (int)$item); }
+            }
 
 
         try {
