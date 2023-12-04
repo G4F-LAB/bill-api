@@ -36,7 +36,7 @@ class SetupController extends Controller
                 "permission_ids" => $item->permission_ids
             ];
 
-            $childrens = SetupNavigation::where('parent_id', $item->id)->orderBy('sort', 'asc')->get();
+            $childrens = SetupNavigation::where('parent_id', $item->id)->whereJsonContains('permission_ids', [$colaborador->permission_id])->orderBy('sort', 'asc')->get();
             if(isset($childrens) && count($childrens) > 0  ){
                 $c_data = array("children" => $childrens);
                 $form_data = array_merge($form_data, $c_data);
