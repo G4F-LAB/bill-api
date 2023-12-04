@@ -22,7 +22,7 @@ class SetupController extends Controller
         $user = Auth::user();
         $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
         $data = array();
         foreach ($menu as $index => $item) {
 
