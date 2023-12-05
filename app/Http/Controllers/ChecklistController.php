@@ -36,15 +36,11 @@ class ChecklistController extends Controller
             $checklist = Checklist::find($id);
 
             if($checklist) {
+                $contractId = $checklist->contract_id;
 
-                $DataAtual = Carbon::now();
-                $checklistAnteriores = Checklist::orderBy('date_checklist', 'DESC')
-                    ->where('date_checklist', '<=', $DataAtual)
-                    ->where('id', '!=', $id)
-                    ->limit(3)
-                    ->get();
-
-                return response()->json($checklistAnteriores, 200);
+                $buscarChecklist = Checklist::where('contract_id', $contractId)->orWhere("id",$id)->orderBy('date_checklist','DESC')->limit(3)->get();
+                return response()->json($buscarChecklist, 200);
+            
             } else {
                 return response()->json(['error' => 'Checklist não encontrado'], 404);
             }

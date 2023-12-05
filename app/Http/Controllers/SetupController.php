@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SetupNavigation;
 use App\Models\Collaborator;
+use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -21,7 +22,7 @@ class SetupController extends Controller
         $user = Auth::user();
         $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
         $data = array();
         foreach ($menu as $index => $item) {
 
@@ -31,11 +32,12 @@ class SetupController extends Controller
                 "slug" => $item->slug,
                 "path" => $item->path,
                 "icon" => $item->icon,
-                "sort" => $item->sort
+                "sort" => $item->sort,
+                "permission_ids" => $item->permission_ids
             ];
 
-            $childrens = SetupNavigation::where('parent_id', $item->id)->get();
-            if(isset($childrens)){
+            $childrens = SetupNavigation::where('parent_id', $item->id)->whereJsonContains('permission_ids', [$colaborador->permission_id])->orderBy('sort', 'asc')->get();
+            if(isset($childrens) && count($childrens) > 0  ){
                 $c_data = array("children" => $childrens);
                 $form_data = array_merge($form_data, $c_data);
             }
@@ -47,13 +49,20 @@ class SetupController extends Controller
     function navigation_upsert(Request $request) {
 
         $slug = $request->slug;
-        $name = $request->name;
+        $name = $request->title;
         $parent_id = $request->parent_id ? (int) $request->parent_id : NULL;
         $path = $request->path;
         $icon = $request->icon;
         $sort = $request->sort;
-        $permission_ids = json_encode($request->permission_ids);
 
+        $permission_ids = array();
+        if(is_array($request->permission_ids)){
+            foreach ($request->permission_ids as $item) {
+            if (is_numeric($item)) { array_push($permission_ids, (int)$item); }
+            }
+        }else{
+            $permission_ids = $request->permission_ids;
+        }
 
         try {
             $menu = SetupNavigation::updateOrCreate(
@@ -94,6 +103,24 @@ class SetupController extends Controller
             $menu->delete();
 
             return response()->json(['message' => 'Menu excluído!']);
+
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+        }
+    }
+
+    public function permissions()
+    {
+        try {
+
+            $permissions = Permission::all();
+
+            if (!$permissions)
+                return response()->json(['error' => 'Menu não encontrado'], 404);
+
+
+
+            return response()->json($permissions);
 
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
