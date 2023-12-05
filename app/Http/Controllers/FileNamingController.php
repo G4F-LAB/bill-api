@@ -19,6 +19,16 @@ class FileNamingController extends Controller
         return response()->json($file_naming, 200);
     }
 
+    public function getByID(Request $request)
+    {
+        $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+
+        $file_naming = FileNaming::find($request->id);
+
+        return response()->json($file_naming, 200);
+    }
+
     public function store(Request $request)
     {
         try {

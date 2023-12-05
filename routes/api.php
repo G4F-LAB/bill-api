@@ -70,6 +70,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
     Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
     Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
     Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
