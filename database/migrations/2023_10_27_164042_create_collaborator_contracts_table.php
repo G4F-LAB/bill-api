@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('collaborator_contracts', function (Blueprint $table) {
-            $table->unsignedInteger('collaborator_id')->unique();
-            $table->unsignedInteger('contract_id',50)->unique();
+            $table->id('id');
+            $table->unsignedInteger('collaborator_id');
+            $table->unsignedInteger('contract_id');
             $table->timestamps();
         });
 

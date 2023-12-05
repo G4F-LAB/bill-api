@@ -62,4 +62,9 @@ class Checklist extends Model
 
     }
 
+    public function contract()
+    {
+        return $this->belongsTo(Contract::class);
+    }
+
 }

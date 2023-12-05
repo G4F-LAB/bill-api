@@ -11,8 +11,10 @@ class Collaborator extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'id';
     protected $table = 'collaborators';
     protected $appends = ['name_initials'];
+    protected $hidden = ['pivot'];
 
     public function permissao() {
         return $this->belongsTo(Permission::class, 'permission_id', 'id');
@@ -39,8 +41,8 @@ class Collaborator extends Model
         return $this->hasMany(Permission::class, 'id', 'permission_id');
     }
 
-    public function contract() {
-        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'id', 'contract_id')->withTimestamps();
+    public function contracts() {
+        return $this->belongsToMany(Contract::class,'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
     }
 
     public function manager() {

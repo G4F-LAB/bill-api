@@ -12,6 +12,7 @@ use App\Http\Controllers\FileNamingController;
 use App\Http\Controllers\TesteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +66,9 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->put('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
+
+    //Analytics
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
 
 
     //Nomenclaturas padrão dos arquivos
