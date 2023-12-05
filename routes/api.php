@@ -12,6 +12,7 @@ use App\Http\Controllers\FileNamingController;
 use App\Http\Controllers\TesteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->post('/setup/navigation', [SetupController::class, 'navigation_upsert']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->delete('/setup/navigation/{id}', [SetupController::class, 'navigation_delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/permissions', [SetupController::class, 'permissions']);
 
 
     //Colaboradores e Permissões
@@ -65,10 +67,15 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->put('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);
+
+    //Analytics
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
 
 
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
     Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
     Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
     Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);

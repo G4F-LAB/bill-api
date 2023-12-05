@@ -41,7 +41,7 @@ class ContractController extends Controller
             $contrato->collaborator()->attach($request->collaborator_id);
             return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Falha ao vincular o colaborador ao contrato.'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

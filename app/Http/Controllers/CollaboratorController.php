@@ -9,10 +9,31 @@ use App\Models\Permission;
 
 class CollaboratorController extends Controller
 {
-    public function getAllDb()
+    public function getAllDb(Request $request)
     {
+
+        $search = $request->q;
+
+
         try {
-            $colaboradores = Collaborator::with('permissao')->orderBy('id')->get();
+
+
+            $colaboradores = Collaborator::with('permission')->where([
+                ['name', '!=', Null],
+                [function ($query) use ($request) {
+                    if (($s = $request->q)) {
+                        $query->orWhere('name', 'LIKE', '%' . $s . '%')
+                            // ->orWhere('email', 'LIKE', '%' . $s . '%')
+                            ->get();
+                    }else if (($id = $request->permission)) {
+                        $query->orWhere('permission_id', (int)$id)
+                            ->get();
+                    }
+                }]
+            ])->paginate(10);
+
+
+
 
             foreach ($colaboradores as $index => $colaborador) {
                 $encodedGuid = $this->str_to_guid($colaborador->objectguid);
@@ -21,7 +42,7 @@ class CollaboratorController extends Controller
 
                 $grupo_primario = [];
                 $grupo_secundario = [];
-                
+
                 if (array_key_exists('memberof', $adUser)) {
                     foreach ($adUser['memberof'] as $key => $value) {
                         if ($key !== 'count') {
@@ -33,11 +54,10 @@ class CollaboratorController extends Controller
                 }
 
                 $not_defined = 'Não definido';
-                $colaborador->nome = array_key_exists('cn', $adUser) ? $adUser['cn'][0] : $not_defined;
-                $colaborador->cargo = array_key_exists('physicaldeliveryofficename', $adUser) ? $adUser['physicaldeliveryofficename'][0] : $not_defined;
+                $colaborador->role = array_key_exists('physicaldeliveryofficename', $adUser) ? $adUser['physicaldeliveryofficename'][0] : $not_defined;
                 $colaborador->email =  array_key_exists('mail', $adUser) ? $adUser['mail'][0] : $not_defined;
-                $colaborador->grupo_primario = $grupo_primario;
-                $colaborador->grupo_secundario = $grupo_secundario;
+                $colaborador->primary_group = $grupo_primario;
+                $colaborador->secondary_group = $grupo_secundario;
             }
 
             return response()->json($colaboradores, 200);

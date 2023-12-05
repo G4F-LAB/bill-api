@@ -11,6 +11,8 @@ class Contract extends Model
     use HasFactory;
     use LogsActivity;
 
+    protected $primaryKey = 'id';
+    protected $hidden = ['pivot'];
     protected $fillable = [
         'client_id',
         'name',
@@ -28,7 +30,7 @@ class Contract extends Model
             'manager_id'
         ]);
     }
-    public function collaborator() {
+    public function collaborators() {
         return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
     }
     public function manager() {
@@ -36,6 +38,8 @@ class Contract extends Model
     }
 
     public function checklist(){
-        return $this->hasMany(Checklist::class,'Checklist','id');
+        return $this->hasMany(Checklist::class);
     }
+
+    
 }
