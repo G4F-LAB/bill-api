@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('icon',70)->nullable();
             $table->string('path',130)->nullable();
             $table->integer('sort')->default(0);
-            $table->jsonb('permission_ids');
+            $table->jsonb('permission_ids')->nullable();
 
             $table->timestamps();
         });

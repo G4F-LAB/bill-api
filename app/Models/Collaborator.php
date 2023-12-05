@@ -16,7 +16,7 @@ class Collaborator extends Model
     protected $appends = ['name_initials'];
     protected $hidden = ['pivot'];
 
-    public function permissao() {
+    public function permission() {
         return $this->belongsTo(Permission::class, 'permission_id', 'id');
     }
 
@@ -33,13 +33,10 @@ class Collaborator extends Model
                 break;
             }
         }
-        
+
         return $flag;
     }
 
-    public function permission(){
-        return $this->hasMany(Permission::class, 'id', 'permission_id');
-    }
 
     public function contracts() {
         return $this->belongsToMany(Contract::class,'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
