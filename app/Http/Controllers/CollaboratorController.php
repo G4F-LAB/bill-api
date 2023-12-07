@@ -9,6 +9,35 @@ use App\Models\Permission;
 
 class CollaboratorController extends Controller
 {
+
+    public function create(Request $request)
+    {
+        
+        $username = $request->nome;
+        $permission = $request->permission;
+
+    
+        try {
+            $user = Container::getConnection('default')->query()->where('samaccountname', $username)->first();
+           
+            if ($user) {
+                $collaborator = new Collaborator();
+                $collaborator->name = $user['displayname'][0];
+                $collaborator->objectguid = $this->guid_to_str($user['objectguid'][0]);
+                $collaborator->permission_id = $permission;
+                $collaborator->save();
+
+                return response()->json($collaborator, 200);
+            } else {
+                return response()->json(['error' => 'Usuário não encontrado']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
+
+
+
     public function getAllDb(Request $request)
     {
 
@@ -25,7 +54,7 @@ class CollaboratorController extends Controller
                         $query->orWhere('name', 'LIKE', '%' . $s . '%')
                             // ->orWhere('email', 'LIKE', '%' . $s . '%')
                             ->get();
-                    }else if (($id = $request->permission)) {
+                    } else if (($id = $request->permission)) {
                         $query->orWhere('permission_id', (int)$id)
                             ->get();
                     }
@@ -48,7 +77,7 @@ class CollaboratorController extends Controller
                         if ($key !== 'count') {
                             $explode = explode(',', $value);
                             array_push($grupo_primario, str_replace("CN=", '', $explode[0]));
-                            array_push($grupo_secundario, str_replace("OU=", '', str_replace("CN=",'',$explode[1])));
+                            array_push($grupo_secundario, str_replace("OU=", '', str_replace("CN=", '', $explode[1])));
                         }
                     }
                 }
@@ -122,19 +151,20 @@ class CollaboratorController extends Controller
     }
 
 
-    public function collaboratorsByPermission(){
+    public function collaboratorsByPermission()
+    {
         $permissions = Permission::get();
         $data = array();
         foreach ($permissions as $key => $permission) {
-           $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
+            $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
 
-           $item = array(
+            $item = array(
                 'id' => $permission->id,
                 'name' => $permission->name,
                 'total' => $collaborator->count(),
                 'collaborators' => $collaborator,
-           );
-           array_push($data, $item);
+            );
+            array_push($data, $item);
         }
         return $data;
     }

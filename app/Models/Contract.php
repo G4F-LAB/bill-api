@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+
 class Contract extends Model
 {
     use HasFactory;
@@ -30,9 +31,11 @@ class Contract extends Model
             'manager_id'
         ]);
     }
-    public function collaborators() {
+
+    public function collaborator() {
         return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
     }
+
     public function manager() {
         return $this->belongsTo(Collaborator::class,'manager_id', 'id');
     }
@@ -41,5 +44,7 @@ class Contract extends Model
         return $this->hasMany(Checklist::class);
     }
 
-    
+    public function operation() {
+        return $this->hasMany(Operation::class);
+    }
 }

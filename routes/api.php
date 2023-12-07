@@ -13,6 +13,8 @@ use App\Http\Controllers\TesteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\FileCompetenceController;
+use App\Http\Controllers\OperationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +53,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
     Route::middleware('check.permission:Admin, Executivo, Operacao')->put('/colaborador', [CollaboratorController::class , 'update']);
     Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
+    Route::middleware('check.permission:Admin, Executivo')->post('/collaborators/create', [CollaboratorController::class , 'create']);
 
     //Vincular um colaborador a um contrato
     Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/colaborador/contrato', [ContractController::class , 'collaborator']);
@@ -76,7 +79,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
     Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
-    Route::middleware('check.permission: Admin')->put('/filenaming', [FileNamingController::class, 'update']);
+    Route::middleware('check.permission: Admin')->put('/filenaming/{id}', [FileNamingController::class, 'update']);
     Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
 
     //Itens
@@ -85,6 +88,15 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'store']);
     Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
     Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'destroy']);
+
+    //Operações
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operacoes', [OperationController::class, 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operacoes/{id}', [OperationController::class, 'delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes', [OperationController::class, 'create']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes/{id}', [OperationController::class, 'update']);
+
+    //Competencia
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/competencias', [FileCompetenceController::class, 'getAll']);
 
 
     //LOG
