@@ -9,6 +9,35 @@ use App\Models\Permission;
 
 class CollaboratorController extends Controller
 {
+
+    public function create(Request $request)
+    {
+        
+        $username = $request->nome;
+        $permission = $request->permission;
+
+    
+        try {
+            $user = Container::getConnection('default')->query()->where('samaccountname', $username)->first();
+           
+            if ($user) {
+                $collaborator = new Collaborator();
+                $collaborator->name = $user['displayname'][0];
+                $collaborator->objectguid = $this->guid_to_str($user['objectguid'][0]);
+                $collaborator->permission_id = $permission;
+                $collaborator->save();
+
+                return response()->json($collaborator, 200);
+            } else {
+                return response()->json(['error' => 'Usuário não encontrado']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
+
+
+
     public function getAllDb(Request $request)
     {
 
@@ -25,12 +54,12 @@ class CollaboratorController extends Controller
                         $query->orWhere('name', 'LIKE', '%' . $s . '%')
                             // ->orWhere('email', 'LIKE', '%' . $s . '%')
                             ->get();
-                    }else if (($id = $request->permission)) {
+                    } else if (($id = $request->permission)) {
                         $query->orWhere('permission_id', (int)$id)
                             ->get();
                     }
                 }]
-            ])->paginate(10);
+            ])->paginate(100);
 
 
 
@@ -48,7 +77,7 @@ class CollaboratorController extends Controller
                         if ($key !== 'count') {
                             $explode = explode(',', $value);
                             array_push($grupo_primario, str_replace("CN=", '', $explode[0]));
-                            array_push($grupo_secundario, str_replace("OU=", '', str_replace("CN=",'',$explode[1])));
+                            array_push($grupo_secundario, str_replace("OU=", '', str_replace("CN=", '', $explode[1])));
                         }
                     }
                 }
@@ -71,30 +100,28 @@ class CollaboratorController extends Controller
     public function update(Request $request)
     {
         $rules = [
-            'id_collaborator' => 'required|numeric|exists:collaborators,id_collaborator',
-            'id_permission' => 'required|numeric|exists:permissions,id_permission',
+            'collaborator_id' => 'required|numeric|exists:collaborators,collaborator_id',
+            'permission_id' => 'required|numeric|exists:permissions,permission_id',
         ];
 
         $feedback = [
-            'id_collaborator.required' => 'O campo de id do colaborador vazio',
-            'id_permission.required' => 'O campo de id da permissão vazio',
-            'id_collaborator.numeric' => 'O campo de id do colaborador deve ser numérico',
-            'id_permission.numeric' => 'O campo de id da permissão deve ser numérico',
-            'id_collaborator.exists' => 'Colaborador não encontrado',
-            'id_permission.exists' => 'Permissão inválida!',
+            'collaborator_id.required' => 'O campo de id do colaborador vazio',
+            'permission_id.required' => 'O campo de id da permissão vazio',
+            'collaborator_id.numeric' => 'O campo de id do colaborador deve ser numérico',
+            'permission_id.numeric' => 'O campo de id da permissão deve ser numérico',
+            'collaborator_id.exists' => 'Colaborador não encontrado',
+            'permission_id.exists' => 'Permissão inválida!',
         ];
 
-        $request->validate($rules, $feedback);
 
         try {
-            $colaborador = Collaborator::find($request->id_collaborator);
-            $colaborador->id_permission = $request->id_permission;
+            $colaborador = Collaborator::find($request->collaborator_id);
+            $colaborador->permission_id = $request->permission_id;
 
             $colaborador->save();
             return response()->json(['message' => 'Permissão alterada com sucesso!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao salvar os dados'], 500);
-            // return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -122,19 +149,20 @@ class CollaboratorController extends Controller
     }
 
 
-    public function collaboratorsByPermission(){
+    public function collaboratorsByPermission()
+    {
         $permissions = Permission::get();
         $data = array();
         foreach ($permissions as $key => $permission) {
-           $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
+            $collaborator = Collaborator::where('permission_id', $permission->id)->orderBy('id')->get();
 
-           $item = array(
+            $item = array(
                 'id' => $permission->id,
                 'name' => $permission->name,
                 'total' => $collaborator->count(),
                 'collaborators' => $collaborator,
-           );
-           array_push($data, $item);
+            );
+            array_push($data, $item);
         }
         return $data;
     }

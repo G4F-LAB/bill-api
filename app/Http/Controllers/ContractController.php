@@ -38,7 +38,7 @@ class ContractController extends Controller
 
             $contrato = Contract::find($request->contract_id);
             
-            $contrato->collaborator()->attach($request->collaborator_id);
+            $contrato->collaborators()->attach($request->collaborator_id);
             return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

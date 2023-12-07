@@ -22,6 +22,9 @@ class ChecklistController extends Controller
     public function getAll(){
         try{
         $checklist = Checklist::all();
+        $checklist = Checklist::select('checklist.*')
+                ->join('itens', 'posts.user_id', '=', 'users.id')
+                ->join('comments', 'comments.post_id', '=', 'posts.id');
         return response()->json($checklist,200);
 
         }catch(\Exception $e){
