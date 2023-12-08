@@ -50,10 +50,10 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Colaboradores e Permissões
-    Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
-    Route::middleware('check.permission:Admin, Executivo, Operacao')->put('/colaborador', [CollaboratorController::class , 'update']);
-    Route::middleware('check.permission:Admin, Executivo, Operacao')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
-    Route::middleware('check.permission:Admin, Executivo')->post('/collaborators/create', [CollaboratorController::class , 'create']);
+    Route::middleware('check.permission:Admin, Executivo, Operacao, TI')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,TI')->put('/collaborators', [CollaboratorController::class , 'update']);
+    Route::middleware('check.permission:Admin, Executivo, Operacao, TI')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
+    Route::middleware('check.permission:Admin, Executivo, TI')->post('/collaborators/create', [CollaboratorController::class , 'create']);
 
     //Vincular um colaborador a um contrato
     Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/colaborador/contrato', [ContractController::class , 'collaborator']);

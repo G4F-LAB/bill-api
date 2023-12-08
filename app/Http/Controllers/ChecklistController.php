@@ -51,7 +51,7 @@ class ChecklistController extends Controller
 
                 $buscarChecklist = Checklist::where('contract_id', $contractId)->orWhere("id",$id)->orderBy('date_checklist','DESC')->limit(3)->get();
                 return response()->json($buscarChecklist, 200);
-            
+
             } else {
                 return response()->json(['error' => 'Checklist não encontrado'], 404);
             }
@@ -124,15 +124,17 @@ class ChecklistController extends Controller
         function checklistItens(Request $request)
         {
             try {
-                $id_itens = Item::where('checklist_id', $request->id)->pluck('id');
+                $id_itens = Item::where('checklist_id', $request->id)->pluck('file_naming_id');
 
                 if ($id_itens->isEmpty()) {
                     return response()->json(['error' => 'Items não encontrado.'], 200);
                 }
 
+                // return response()->json($id_itens, 200);
+
                 $file_names = FileNaming::whereIn('id', $id_itens)->get();
-                $data_checklist = Checklist::where('contract_id', $request->id)->first();
-                $get_contract = Contract::where('id', $data_checklist['id'])->first();
+                $data_checklist = Checklist::where('id', $request->id)->first();
+                $get_contract = Contract::where('id', $data_checklist['contract_id'])->first();
                 $carbonData = Carbon::parse($data_checklist['checklist_date ']);
                 $data['contract'] = $get_contract;
                 $data['contract']['mes_ano'] = $carbonData->format('F/Y');

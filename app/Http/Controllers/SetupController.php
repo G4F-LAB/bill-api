@@ -113,7 +113,7 @@ class SetupController extends Controller
     {
         try {
 
-            $permissions = Permission::all();
+            $permissions = Permission::orderBy('id', 'asc')->get();
 
             if (!$permissions)
                 return response()->json(['error' => 'Menu não encontrado'], 404);

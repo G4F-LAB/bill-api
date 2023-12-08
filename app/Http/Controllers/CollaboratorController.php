@@ -59,7 +59,7 @@ class CollaboratorController extends Controller
                             ->get();
                     }
                 }]
-            ])->paginate(10);
+            ])->paginate(100);
 
 
 
@@ -100,30 +100,28 @@ class CollaboratorController extends Controller
     public function update(Request $request)
     {
         $rules = [
-            'id_collaborator' => 'required|numeric|exists:collaborators,id_collaborator',
-            'id_permission' => 'required|numeric|exists:permissions,id_permission',
+            'collaborator_id' => 'required|numeric|exists:collaborators,collaborator_id',
+            'permission_id' => 'required|numeric|exists:permissions,permission_id',
         ];
 
         $feedback = [
-            'id_collaborator.required' => 'O campo de id do colaborador vazio',
-            'id_permission.required' => 'O campo de id da permissão vazio',
-            'id_collaborator.numeric' => 'O campo de id do colaborador deve ser numérico',
-            'id_permission.numeric' => 'O campo de id da permissão deve ser numérico',
-            'id_collaborator.exists' => 'Colaborador não encontrado',
-            'id_permission.exists' => 'Permissão inválida!',
+            'collaborator_id.required' => 'O campo de id do colaborador vazio',
+            'permission_id.required' => 'O campo de id da permissão vazio',
+            'collaborator_id.numeric' => 'O campo de id do colaborador deve ser numérico',
+            'permission_id.numeric' => 'O campo de id da permissão deve ser numérico',
+            'collaborator_id.exists' => 'Colaborador não encontrado',
+            'permission_id.exists' => 'Permissão inválida!',
         ];
 
-        $request->validate($rules, $feedback);
 
         try {
-            $colaborador = Collaborator::find($request->id_collaborator);
-            $colaborador->id_permission = $request->id_permission;
+            $colaborador = Collaborator::find($request->collaborator_id);
+            $colaborador->permission_id = $request->permission_id;
 
             $colaborador->save();
             return response()->json(['message' => 'Permissão alterada com sucesso!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao salvar os dados'], 500);
-            // return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
