@@ -10,7 +10,7 @@ use App\Models\Collaborator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 class ChecklistController extends Controller
 {
     public function __construct(Checklist $checklist)
@@ -20,14 +20,17 @@ class ChecklistController extends Controller
 
 
     public function getAll(){
-        try{
-        $checklist = Checklist::all();
-        $checklist = Checklist::select('checklist.*')
-                ->join('itens', 'posts.user_id', '=', 'users.id')
-                ->join('comments', 'comments.post_id', '=', 'posts.id');
+        try{        
+        $checklist = DB::table('checklists')
+                ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
+                ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
+                ->join('file_types', 'file_types.id', '=', 'itens.file_type_id')
+                ->select('*')
+                ->get();
         return response()->json($checklist,200);
 
         }catch(\Exception $e){
+            dd($e);
             return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
         }
     }
@@ -36,10 +39,15 @@ class ChecklistController extends Controller
 
     public function getById($id){
         try {
-            $checklist = Checklist::find($id);
-
+            $checklist = DB::table('checklists')
+            ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
+            ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
+            ->join('file_types', 'file_types.id', '=', 'itens.file_type_id')
+            ->where('checklists.id', '=', $id)
+            ->select('*')
+            ->get();
             if($checklist) {
-                $contractId = $checklist->contract_id;
+                $contractId = $checklist[0]->contract_id;
 
                 $buscarChecklist = Checklist::where('contract_id', $contractId)->orWhere("id",$id)->orderBy('date_checklist','DESC')->limit(3)->get();
                 return response()->json($buscarChecklist, 200);
