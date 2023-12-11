@@ -59,12 +59,13 @@ class Checklist extends Model
             'sector.required' => 'O campo do setor é de preenchimento obrigatório.'
 
         ];
-
     }
 
-    public function contract()
-    {
+    public function contract(){
         return $this->belongsTo(Contract::class);
     }
 
+    public function itens() {
+        return $this->hasMany(Item::class);
+    }
 }
