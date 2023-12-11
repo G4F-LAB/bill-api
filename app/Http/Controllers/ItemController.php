@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\Item;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
 use App\Services\ItemService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 class ItemController extends Controller
 {
-    // public function __construct(
-    //     protected ItemService $service,
-    // ) {
-    // }
-
+    public function __construct(Item $item, Checklist $checklist) {
+        $this->item = $item;
+        $this->checklist = $checklist;
+    }
     
     public function show()
     {
@@ -46,9 +46,16 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
-        try{ 
-            $item = $this->new($request);
-            return response()->json(['message'=>'Item criado com sucesso'],200);
+        try{
+            if ($request->has('status'))$this->item->status = $request->status;
+            if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
+            if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
+            if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
+            if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
+            $this->item->save();
+
+            $this->checklist->sync_itens($this->item->checklist_id);
+            return response()->json(['message'=>'Item salvo com sucesso!'],200);
 
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
@@ -61,17 +68,24 @@ class ItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try{ 
-            
-            $item = Item::find($id);
+        try{
+            $item = $this->item->find($id);
             
             if(!$item){
                 return response()->json([
                     'error' => 'Item não encontrado'
                 ], Response::HTTP_NOT_FOUND);
             }            
-                                  
-            $item = $this->updateItem($request, $item);
+            
+            //if ($request->has('id'))$item->id = $request->id;
+            if ($request->has('status'))$item->status = $request->status;
+            if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
+            if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
+            if ($request->has('file_competence_id'))$item->file_competence_id = $request->file_competence_id;
+            if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+            $item->save();
+            
+            $this->checklist->sync_itens($item->checklist_id);
             return response()->json(['message'=>'Item atualizado com sucesso'],200);
 
         }catch(\Exception $e){
@@ -108,24 +122,13 @@ class ItemController extends Controller
 
     public function updateItem(Request $request, Item $item)
     {
-        if ($request->has('id'))$item->id = $request->id;
-        if ($request->has('status'))$item->status = $request->status;
-        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
-        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
-        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
-        $item->save();
+        
         // return response()->json(['message'=>'Item atualizado com sucesso'],200);
     }
 
     public function new(Request $request)
     {
-        $item = new Item();
-        if ($request->has('status'))$item->status = $request->status;
-        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
-        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
-        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
-        //dd($item);
-        $item->save();
+        
 
         
     }

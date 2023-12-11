@@ -68,4 +68,21 @@ class Checklist extends Model
     public function itens() {
         return $this->hasMany(Item::class);
     }
+
+    public function sync_itens($id) {
+        $checklist = $this->with('itens')->find($id);
+        $total_itens = count($checklist->itens);
+        $total_complete = 0;
+        
+        if($total_itens > 0) {
+            foreach($checklist->itens as $index => $item){
+                if($item->status) $total_complete = $total_complete + 1;
+            }
+
+            $percentage = floor(($total_complete*100)/$total_itens);
+            $checklist->completion = $percentage;
+            $checklist->save();
+        }
+        return $checklist;
+    }
 }

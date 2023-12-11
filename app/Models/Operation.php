@@ -15,14 +15,16 @@ class Operation extends Model
     use SoftDeletes;
     protected $fillables = [
         'name',
-        'manager_id'
+        'manager_id',
+        'reference'
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Operation')->logOnly([
             'name',
-            'manager_id'
+            'manager_id',
+            'reference'
         ]);
     }
 

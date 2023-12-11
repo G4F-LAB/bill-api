@@ -18,27 +18,11 @@ class AnalyticsController extends Controller {
     }
 
     public function getMyAnalytics(Request $request) {
-        $current_date = now();
-        $last_months = [];
-
-        for ($i = 0; $i < 12; $i++) {
-            $sub_date = $current_date->copy()->subMonths($i);
-            $last_months[] = $sub_date->format('Y-m');
-        }
-
-        $user_contracts = $this->contract->with('operation','checklist')
-                                    ->whereHas('operation',function($query) {
-                                        $query->where('manager_id',$this->auth_user->id);
-                                    })->whereHas('checklist',function($query) {
-                                        $query->whereNotNull('id')->orderBy('id', 'desc')->first();
-                                    })->get();
-
-        /*$contract_checklists = $this->checklist->with('contract')->with('item')
-                                    ->whereHas('operation',function($query) {
-                                        $query->where('manager_id',$this->auth_user->id);
-                                    })->whereHas('checklist',function($query) {
-                                        $query->where('manager_id',$this->contract->id)->orderBy('id DESC')->first();
-                                    })->get();*/
+        $user_contracts = $this->contract->with(['operation','checklist' => function($query) {
+                                $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[now()->format('m'),now()->format('Y')]);
+                            }])->whereHas('operation',function($query) {
+                                $query->where('manager_id',$this->auth_user->id);
+                            })->get();
 
         if($user_contracts->isEmpty()) return response()->json(['error' => 'Não foram encontrados contratos']);
         $total = count($user_contracts);
@@ -49,6 +33,6 @@ class AnalyticsController extends Controller {
                 'total_contracts' => $total
             ]
         ];
-        return response()->json(['succes' => $response], 200);
+        return response()->json(['success' => $response], 200);
     }
 }

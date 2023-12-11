@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->unsignedInteger('manager_id')->nullable();
+            $table->unsignedInteger('reference')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
