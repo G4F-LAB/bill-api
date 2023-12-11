@@ -15,7 +15,7 @@ class ItemController extends Controller
     // ) {
     // }
 
-    
+
     public function show()
     {
         try{
@@ -23,10 +23,10 @@ class ItemController extends Controller
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
             $itens = Item::all();
             return response()->json($itens, 200);
-    
+
         }catch(\Exception $e){
             return response()->json(['error'=>'Não foi possivel acessar os Itens'],500);
-        }  
+        }
     }
 
 
@@ -35,25 +35,25 @@ class ItemController extends Controller
         try{
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
-            $itens = Item::find($id);  
+            $itens = Item::find($id);
             return response()->json($itens, 200);
-    
+
         }catch(\Exception $e){
             return response()->json(['error'=>'Não foi possivel acessar os Itens'],500);
-        }  
-     
+        }
+
     }
 
     public function store(Request $request)
     {
-        try{ 
+        try{
             $item = $this->new($request);
             return response()->json(['message'=>'Item criado com sucesso'],200);
 
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
-       
+
     }
 
     /**
@@ -61,23 +61,23 @@ class ItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try{ 
-            
+        try{
+
             $item = Item::find($id);
-            
+
             if(!$item){
                 return response()->json([
                     'error' => 'Item não encontrado'
                 ], Response::HTTP_NOT_FOUND);
-            }            
-                                  
+            }
+
             $item = $this->updateItem($request, $item);
             return response()->json(['message'=>'Item atualizado com sucesso'],200);
 
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
-       
+
     }
 
     /**
@@ -86,23 +86,23 @@ class ItemController extends Controller
     public function destroy(string $id)
     {
         try{
-            $item = Item::find($id);  
-            //dd($item); 
+            $item = Item::find($id);
+            //dd($item);
             if (!$item) {
                 return response()->json([
                     'error' => 'Not Found'
                 ], Response::HTTP_NOT_FOUND);
             }
-        
+
             $item->id = $id;
             $item->deleted_at = date('Y/m/d H:i');
             $item->save();
-    
+
             return response()->json(['message'=>'Item deletado com sucesso'],200);
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
-        
+
     }
 
 
@@ -127,6 +127,6 @@ class ItemController extends Controller
         //dd($item);
         $item->save();
 
-        
+
     }
 }

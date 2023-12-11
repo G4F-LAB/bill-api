@@ -28,7 +28,7 @@ class FileNaming extends Model
     }
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('FileNaming')->logOnly([
             'file_name',
             'standard_file_naming'
@@ -43,6 +43,11 @@ class FileNaming extends Model
             'standard_file_naming.required' => 'O campo Nomenclatura é de preenchimento obrigatório.'
         ];
 
+    }
+
+    public function items()
+    {
+        return $this->hasMany(Item::class);
     }
 
 }
