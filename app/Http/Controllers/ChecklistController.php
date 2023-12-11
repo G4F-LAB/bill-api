@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class ChecklistController extends Controller
 {
+
+    public $checklist;
     public function __construct(Checklist $checklist)
     {
         $this->checklist = $checklist;
@@ -126,25 +128,26 @@ class ChecklistController extends Controller
         }
     }
 
-    function checklistItens(Request $request)
-    {
-        try {
-            $id_itens = Item::where('checklist_id', $request->id)->pluck('id');
+        function checklistItens(Request $request)
+        {
+            try{
+            $items = Item::with('fileNaming')->where('checklist_id', $request->id)->get();
+            $contract_id = Checklist::where('id', $request->id)->pluck('contract_id');
+            $contract = Contract::where('id', $contract_id)->first();
 
-            if ($id_itens->isEmpty()) {
-                return response()->json(['error' => 'Items não encontrado.'], 200);
-            }
+            $data['contract'] = $contract;
+            $data['itens'] = $items;
 
-            $file_names = FileNaming::whereIn('id', $id_itens)->get();
-            $data_checklist = Checklist::where('contract_id', $request->id)->first();
-            $get_contract = Contract::where('id', $data_checklist['id'])->first();
-            $carbonData = Carbon::parse($data_checklist['checklist_date ']);
-            $data['contract'] = $get_contract;
-            $data['contract']['mes_ano'] = $carbonData->format('F/Y');
-            $data['name_itens'] = $file_names;
             return response()->json($data, 200);
-        } catch (\Exception $exception) {
-            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+
+            }catch(\Exception $e){
+                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
+            }
         }
+
+
     }
-}
+
+
+
+

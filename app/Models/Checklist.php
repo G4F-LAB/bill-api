@@ -12,7 +12,7 @@ class Checklist extends Model
 {
     use LogsActivity;
     protected $primaryKey = 'id';
-    protected $fillable = [ 
+    protected $fillable = [
         'contract_id',
         'date_checklist',
         'object_contract',
@@ -33,13 +33,13 @@ class Checklist extends Model
         'accept' => 'boolean',
         'sector' => 'required|string',
         'signed_by' => 'string'
-        
+
         ];
     }
 
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Checklist')->logOnly([
         'contract_id',
         'date_checklist',
@@ -50,7 +50,7 @@ class Checklist extends Model
         'sector',
         'signed_by']);
     }
-    
+
     public function feedback() {
         return[
             'contract.required' => 'O campo do contrato é de preenchimento obrigatório.',

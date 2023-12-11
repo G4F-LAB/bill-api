@@ -88,7 +88,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/item/{id}', [ItemController::class, 'getbyID']);
     Route::middleware('check.permission: Admin')->post('/item', [ItemController::class, 'store']);
     Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
-    Route::middleware('check.permission: Admin')->patch('/item/{id}', [ItemController::class, 'destroy']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/item/{id}', [ItemController::class, 'destroy']);
 
     //Operações
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operacoes', [OperationController::class, 'getAll']);
