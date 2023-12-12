@@ -31,4 +31,8 @@ class Operation extends Model
     public function contract() {
         return $this->hasMany(Contract::class);
     }
+
+    public function executive() {
+        return $this->belongsTo(Executive::class);
+    }
 }

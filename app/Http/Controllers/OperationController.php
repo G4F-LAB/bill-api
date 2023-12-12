@@ -61,7 +61,7 @@ class OperationController extends Controller
     public function delete(Request $request, $id)
     {
         try {
-            $operation = Operation::find($id);
+            $operation = Operation::findOrFail($id);
             $operation->deleted_at = now();
             $operation->save();
             return response()->json(['message' => 'Registro com id = ' . $operation->id . ' foi excluído com sucesso!'], 200);

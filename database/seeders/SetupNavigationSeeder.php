@@ -4,8 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
-class SetupNavigation extends Seeder
+class SetupNavigationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,7 +15,7 @@ class SetupNavigation extends Seeder
      */
     public function run()
     {
-        \DB::table("setup_navigations")->insert([
+        DB::table("setup_navigations")->insert([
             [
                 "parent_id"=>NULL,
                 "name"=> "Dashboard",
@@ -22,7 +23,7 @@ class SetupNavigation extends Seeder
                 "icon"=>"ant-design:home-outlined",
                 "path"=> "/analytics",
                 "sort"=> 2,
-                "permissions_id"=> "[1,2,3,4,5,6,7,8]",
+                "permission_ids"=> "[1,2,3,4,5,6,7,8]",
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
@@ -33,7 +34,7 @@ class SetupNavigation extends Seeder
                 "icon"=>"fa-solid:users",
                 "path"=> "/collaborators",
                 "sort"=> 5,
-                "permissions_id"=> "[1,7,8]",
+                "permission_ids"=> "[1,7,8]",
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
@@ -44,7 +45,7 @@ class SetupNavigation extends Seeder
                 "icon"=>NULL,
                 "path"=> "/collaborators/permissions",
                 "sort"=> 5,
-                "permissions_id"=> "[1,3,7,8]",
+                "permission_ids"=> "[1,3,7,8]",
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
@@ -55,7 +56,7 @@ class SetupNavigation extends Seeder
                 "icon"=>NULL,
                 "path"=> "/collaborators",
                 "sort"=> 0,
-                "permissions_id"=> "[1,3,7,8]",
+                "permission_ids"=> "[1,3,7,8]",
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],

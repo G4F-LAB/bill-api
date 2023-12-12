@@ -82,6 +82,7 @@ class ChecklistController extends Controller
             $this->checklist->date_checklist  = $request->date_checklist;
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
+            $this->checklist->sector = $request->sector;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContractDateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\TesteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ExecutiveController;
 use App\Http\Controllers\FileCompetenceController;
 use App\Http\Controllers\OperationController;
 
@@ -71,6 +73,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
 
     //Analytics
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
@@ -95,6 +98,13 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operacoes/{id}', [OperationController::class, 'delete']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes', [OperationController::class, 'create']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes/{id}', [OperationController::class, 'update']);
+
+    //Executivo
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo/{id}', [ExecutiveController::class, 'getById']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/executivo/{id}', [ExecutiveController::class, 'delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/executivo', [ExecutiveController::class, 'create']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/executivo/{id}', [ExecutiveController::class, 'update']);
 
     //Competencia
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/competencias', [FileCompetenceController::class, 'getAll']);

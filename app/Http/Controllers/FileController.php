@@ -73,6 +73,7 @@ class FileController extends Controller
 
         foreach ($fileNames as $name) {
 
+            // se o nome do arquivo já da lista de nomes (presentes no banco)
             if (strpos($filename, $name) !== FALSE) {
                 $filenameplus = str_replace($name, '', $filename);
 

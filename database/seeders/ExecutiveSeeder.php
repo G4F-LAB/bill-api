@@ -20,13 +20,11 @@ class ExecutiveSeeder extends Seeder
         DB::table('executives')->insert([
             [
                 'name'=> 'Gerência Executiva 1',
-                'operations'=>[1,3,6,8,9],
                 'created_at'=> now()->toDateTimeString(),
                 'updated_at'=> now()->toDateTimeString(),
             ],
             [
                 'name'=> 'Gerência Executiva 2',
-                'operations'=>[2,4,5,7,10],
                 'created_at'=> now()->toDateTimeString(),
                 'updated_at'=> now()->toDateTimeString(),
             ],
