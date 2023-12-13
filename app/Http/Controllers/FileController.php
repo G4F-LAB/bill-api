@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\FileNaming;
 use App\Models\Item;
 use App\Models\File;
+use App\Models\Checklist;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -73,21 +74,28 @@ class FileController extends Controller
 
         foreach ($fileNames as $name) {
 
-            // se o nome do arquivo já da lista de nomes (presentes no banco)
+            // se o nome do arquivo estiver na lista de nomes (presentes no banco)
             if (strpos($filename, $name) !== FALSE) {
+                // retira o nome adicional enviado
                 $filenameplus = str_replace($name, '', $filename);
 
                 $file_naming_id = array_search($name, $fileNames);
+                // busca o id do item associado ao nome do arquivo
                 $item_id = array_search($file_naming_id , $items->toArray());
 
                 $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
 
                 if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
                     try {
+                        // salva o arquivo com o id do item, o camnho e o nome complementar/adicional
                         $saveFile = File::updateOrCreate(
                             ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
                         );
                         Item::where('id', $item_id)->update(['status' => true]);
+
+                        $checklist = Checklist::find($checklist_id);
+                        $checklist->sync_itens();
+
                         $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
                     } catch (\Throwable $th) {
                         //throw $th;

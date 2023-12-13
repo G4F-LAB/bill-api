@@ -20,7 +20,7 @@ class ExecutiveController extends Controller
     public function getById($id)
     {
         try {
-            $executive = Executive::findOrFail($id);
+            $executive = Executive::with('operations')->findOrFail($id);
             return response()->json($executive, 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => 'Não foi possivel encontrar os dados.'], 500);

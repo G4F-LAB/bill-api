@@ -69,7 +69,8 @@ class Checklist extends Model
         return $this->hasMany(Item::class);
     }
 
-    public function sync_itens($id) {
+    public function sync_itens($id = NULL) {
+        if($id == NULL) $id = $this->id;
         $checklist = $this->with('itens')->find($id);
         $total_itens = count($checklist->itens);
         $total_complete = 0;

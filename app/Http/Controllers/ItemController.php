@@ -6,15 +6,13 @@ use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\Checklist;
 use Illuminate\Http\Request;
-use App\Services\ItemService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 class ItemController extends Controller
 {
-    // public function __construct(
-    //     protected ItemService $service,
-    // ) {
-    // }
+    public function __construct(Item $item) {
+        $this->item = $item;
+    }
 
 
     public function show()
@@ -48,7 +46,17 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         try{
-            $item = $this->new($request);
+            if ($request->has('status'))$this->item->status = $request->status;
+            if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
+            if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
+            if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
+            if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
+            //dd($item);
+            $this->item->save();
+
+            $checklist = Checklist::find($this->item->checklist_id);
+            $checklist->sync_itens();
+
             return response()->json(['message'=>'Item criado com sucesso'],200);
 
         }catch(\Exception $e){
@@ -64,7 +72,7 @@ class ItemController extends Controller
     {
         try{
 
-            $item = Item::find($id);
+            $this->item = Item::find($id);
 
             if(!$item){
                 return response()->json([
@@ -72,7 +80,17 @@ class ItemController extends Controller
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $item = $this->updateItem($request, $item);
+            if ($request->has('id'))$this->item->id = $request->id;
+            if ($request->has('status'))$this->item->status = $request->status;
+            if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
+            if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
+            if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
+            if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
+            $this->item->save();
+
+            $checklist = Checklist::find($this->item->checklist_id);
+            $checklist->sync_itens();
+
             return response()->json(['message'=>'Item atualizado com sucesso'],200);
 
         }catch(\Exception $e){
@@ -103,20 +121,6 @@ class ItemController extends Controller
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
-
-    }
-
-
-    public function updateItem(Request $request, Item $item)
-    {
-        
-        // return response()->json(['message'=>'Item atualizado com sucesso'],200);
-    }
-
-    public function new(Request $request)
-    {
-        
-
 
     }
 }
