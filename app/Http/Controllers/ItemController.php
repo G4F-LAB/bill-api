@@ -123,4 +123,30 @@ class ItemController extends Controller
         }
 
     }
+
+    public function updateItem(Request $request, Item $item)
+    {
+        if ($request->has('id'))$item->id = $request->id;
+        if ($request->has('status'))$item->status = $request->status;
+        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
+        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
+        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+        $item->save();
+        // return response()->json(['message'=>'Item atualizado com sucesso'],200);
+    }
+
+    public function new(Request $request)
+    {
+        $item = new Item();
+        if ($request->has('status'))$item->status = $request->status;
+        if ($request->has('file_naming_id'))$item->file_naming_id = $request->file_naming_id;
+        if ($request->has('file_type_id'))$item->file_type_id = $request->file_type_id;
+        if ($request->has('checklist_id'))$item->checklist_id = $request->checklist_id;
+        if ($request->has('file_competence_id'))$item->file_competence_id = $request->file_competence_id;
+        //dd($item);
+        $item->save();
+
+
+    }
+
 }
