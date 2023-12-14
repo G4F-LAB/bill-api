@@ -10,17 +10,19 @@ class ExecutiveController extends Controller
     public function getAll()
     {
         try {
-            $executive = Executive::with('operations')->get();
+            $executive = Executive::with('operations.collaborator')->get();
             return response()->json($executive, 200);
         } catch (\Exception $e) {
-            return response()->json(['erro' => 'Não foi possivel encontrar os dados.'], 500);
+            return response()->json(['erro' => $e->getMessage()], 500);
         }
     }
 
     public function getById($id)
     {
         try {
-            $executive = Executive::with('operations')->findOrFail($id);
+            $executive = Executive::with(['operations' => function ($query) {
+                $query->orderBy('id');
+            }, 'operations.collaborator'])->findOrFail($id);
             return response()->json($executive, 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => 'Não foi possivel encontrar os dados.'], 500);

@@ -35,4 +35,8 @@ class Operation extends Model
     public function executive() {
         return $this->belongsTo(Executive::class);
     }
+
+    public function collaborator() {
+        return $this->belongsTo(Collaborator::class,'manager_id','id');
+    }
 }

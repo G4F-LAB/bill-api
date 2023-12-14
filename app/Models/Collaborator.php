@@ -51,6 +51,10 @@ class Collaborator extends Model
         return $this->hasMany(Contract::class, 'id', 'manager_id');
     }
 
+    public function operation() {
+        return $this->hasMany(Operation::class,'manager_id','id');
+    }
+
 
     protected function nameInitials(): Attribute
     {

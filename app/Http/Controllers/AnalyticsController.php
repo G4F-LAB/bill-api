@@ -27,6 +27,17 @@ class AnalyticsController extends Controller {
         if($user_contracts->isEmpty()) return response()->json(['error' => 'Não foram encontrados contratos']);
         $total = count($user_contracts);
 
+        foreach($user_contracts as $contract) {
+            if(!$contract->checklist->isEmpty()){
+                $checklist_array = $contract->checklist->toArray();
+
+                foreach($checklist_array as $checklist) {
+                    $checklist_sync = Checklist::find($checklist['id']);
+                    $checklist_sync->sync_itens();
+                }
+            }
+        }
+
         $response = [
             'contracts' => [
                 'list' => $user_contracts,
