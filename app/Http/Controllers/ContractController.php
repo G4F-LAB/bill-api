@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\Contract;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -14,16 +15,23 @@ class ContractController extends Controller
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
-        $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
-
+        $contracts = Contract::with('operation.collaborator')
+            ->where([
+                ['contractual_situation', '=', true],
+                [function ($query) use ($request) {
+                    if (($s = $request->q)) {
+                        $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                            ->get();
+                    }
+                }]
+            ])->paginate(500);
+        
         //Puxar todos os contratos, incluindo os encerrados
-        if ($request->has('encerrados')) {
-            $contracts = Contract::with('manager')->get();
-            return response()->json($contracts, 200);
-        }
+        // if ($request->has('encerrados')) {
+        //     $contracts = Contract::with('manager')->get();
+        //     return response()->json($contracts, 200);
+        // }
 
-        $contracts = Contract::with('manager')->where('contractual_situation', true)->get();
         return response()->json($contracts, 200);
     }
 
@@ -108,4 +116,19 @@ class ContractController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function checklistByContractID($id,Request $request) {
+        try{
+            $checklist = Contract::with('checklist')->where('id',$id)
+            ->first();
+            return response()->json($checklist);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+       
+    }
+
+
+
 }

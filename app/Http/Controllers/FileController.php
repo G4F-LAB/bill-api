@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
-    public function __construct() {
+    public function __construct(Collaborator $collaborator) {
         $this->env = env('APP_ENV') ? env('APP_ENV') : 'developer';
+        $this->auth_user = $collaborator->getAuthUser();
     }
 
     public function uploadChecklistFiles(Request $request) {
@@ -71,6 +72,11 @@ class FileController extends Controller
         $fileNames = self::getChecklistFilesName($items);
         
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
+
+        $permission = $this->auth_user->getAuthUserPermission();
+        
+        $item_id = array_search($file_naming_id , $items->toArray());
+        if(!in_array($permission->name,FileType::uploadRules())) return response()->json();
 
         foreach ($fileNames as $name) {
 

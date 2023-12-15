@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -55,6 +56,9 @@ class Collaborator extends Model
         return $this->hasMany(Operation::class,'manager_id','id');
     }
 
+    public function executive() {
+        return $this->hasOne(Executive::class);
+    }
 
     protected function nameInitials(): Attribute
     {
@@ -66,4 +70,12 @@ class Collaborator extends Model
         );
     }
 
+    public function getAuthUser() {
+        return $this->where('objectguid', Auth::user()->getConvertedGuid())->first();
+    }
+
+    public function getAuthUserPermission() {
+        $user = $this->getAuthUser();
+        return Permission::where($user->permission_id);
+    }
 }

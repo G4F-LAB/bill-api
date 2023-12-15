@@ -47,30 +47,30 @@ class ChecklistController extends Controller
 
 
 
-    public function getById($id)
-    {
-        try {
-            $checklist = Checklist::find($id);
+    // public function getById($id)
+    // {
+    //     try {
+            
+    //         /*$checklist = Checklist::find($id);
 
-            if ($checklist) {
-                $contractId = $checklist->contract_id;
+    //         if ($checklist) {
+    //             $contractId = $checklist->contract_id;
 
-                $buscarChecklist = DB::table('checklists')
-                    ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
-                    ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
-                    ->join('file_types', 'file_types.id', '=', 'itens.file_type_id')
-                    ->join('contracts', 'contracts.id', '=', 'checklists.contract_id')
-                    ->where('contract_id', $contractId)
-                    //>orWhere("id",$id)
-                    ->orderBy('date_checklist', 'DESC')->limit(3)->get();
-                return response()->json($buscarChecklist, 200);
-            } else {
-                return response()->json(['error' => 'Checklist não encontrado'], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    //             $buscarChecklist = DB::table('checklists')
+    //                 ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
+    //                 ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
+    //                 ->join('file_types', 'file_types.id', '=', 'checklists.sector_id')
+    //                 ->join('contracts', 'contracts.id', '=', 'checklists.contract_id')
+    //                 ->where('contract_id', $contractId)
+    //                 ->orderBy('date_checklist', 'DESC')->limit(3)->get();
+    //             return response()->json($buscarChecklist, 200);
+    //         } else {
+    //             return response()->json(['error' => 'Checklist não encontrado'], 404);
+    //         }*/
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 
 
     public function store(Request $request)

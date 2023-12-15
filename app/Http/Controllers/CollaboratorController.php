@@ -41,8 +41,6 @@ class CollaboratorController extends Controller
     public function getAllDb(Request $request)
     {
 
-        $search = $request->q;
-
 
         try {
 

@@ -37,7 +37,7 @@ class Contract extends Model
     }
 
     public function manager() {
-        return $this->belongsTo(Collaborator::class,'manager_id', 'id');
+        return $this->belongsTo(Operation::class,'manager_id', 'id');
     }
 
     public function checklist(){
