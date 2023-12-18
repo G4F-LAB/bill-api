@@ -76,6 +76,6 @@ class Collaborator extends Model
 
     public function getAuthUserPermission() {
         $user = $this->getAuthUser();
-        return Permission::where($user->permission_id);
+        return Permission::where('id',$user->permission_id)->first();
     }
 }

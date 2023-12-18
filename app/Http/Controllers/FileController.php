@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\FileNaming;
 use App\Models\Item;
 use App\Models\File;
+use App\Models\FileType;
 use App\Models\Checklist;
+use App\Models\Collaborator;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -59,7 +61,7 @@ class FileController extends Controller
     }
 
     function getChecklistFilesName($ids) {
-        $names = FileNaming::whereIn('id', $ids)->pluck('standard_file_naming', 'id')->all();
+        $names = FileNaming::whereIn('id', $ids)->select('id','standard_file_naming','file_type_id')->get()->toArray();
         return $names;
     }
 
@@ -70,48 +72,59 @@ class FileController extends Controller
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
         
         $fileNames = self::getChecklistFilesName($items);
-        
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
         $permission = $this->auth_user->getAuthUserPermission();
-        
-        $item_id = array_search($file_naming_id , $items->toArray());
-        if(!in_array($permission->name,FileType::uploadRules())) return response()->json();
+        foreach ($fileNames as $fileAttrs) {
 
-        foreach ($fileNames as $name) {
+            $name = $fileAttrs['standard_file_naming'];
+            $id = $fileAttrs['id'];
+            $file_type_id = $fileAttrs['file_type_id'];
 
             // se o nome do arquivo estiver na lista de nomes (presentes no banco)
             if (strpos($filename, $name) !== FALSE) {
-                // retira o nome adicional enviado
-                $filenameplus = str_replace($name, '', $filename);
+                
+                $file_type = FileType::find($file_type_id);
+                // recupera as regras de upload baseado no tipo do arquivo (file_type)
+                $rules = FileType::uploadRules()[$file_type->files_category];
+                
+                // verifica se o usuário logado tem permissão para inserir o arquivo
+                if(in_array($permission->name,$rules)) {
 
-                $file_naming_id = array_search($name, $fileNames);
-                // busca o id do item associado ao nome do arquivo
-                $item_id = array_search($file_naming_id , $items->toArray());
+                    // retira o nome adicional enviado
+                    $filenameplus = str_replace($name, '', $filename);
+                    $file_naming_id = $id; //array_search($name, $fileNames);
 
-                $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
+                    // busca o id do item associado ao nome do arquivo
+                    $item_id = array_search($file_naming_id , $items->toArray());
 
-                if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
-                    try {
-                        // salva o arquivo com o id do item, o camnho e o nome complementar/adicional
-                        $saveFile = File::updateOrCreate(
-                            ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
-                        );
-                        Item::where('id', $item_id)->update(['status' => true]);
+                    $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
 
-                        $checklist = Checklist::find($checklist_id);
-                        $checklist->sync_itens();
+                    if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
+                        try {
+                            // salva o arquivo com o id do item, o camnho e o nome complementar/adicional
+                            $saveFile = File::updateOrCreate(
+                                ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
+                            );
+                            Item::where('id', $item_id)->update(['status' => true]);
 
-                        $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
-                    } catch (\Throwable $th) {
-                        //throw $th;
-                        $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $filename];
+                            $checklist = Checklist::find($checklist_id);
+                            $checklist->sync_itens();
+
+                            $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
+                        } catch (\Throwable $th) {
+                            //throw $th;
+                            $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $name];
+                        }
+                        
+                    } else{
+                        $data = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $name];
                     }
-                    
-                } else{
-                    $data = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $name];
-                } 
+                } else {
+                    $data = ['status' => 'Error', 'message'=> 'Você não tem permissão para subir esse arquivo','name' => $name];
+                }
 
+                break;
             }else{
                 $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido','name' => $filename];
 

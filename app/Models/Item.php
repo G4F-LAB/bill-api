@@ -56,8 +56,9 @@ class Item extends Model
         ];
 
     }
+
     public function checklist() {
-        return $this->belongsTo(Checklist::class)->withTimestamps();
+        return $this->belongsTo(Checklist::class);
     }
 
     public function file_nomenclatures() {

@@ -82,22 +82,22 @@ class ChecklistController extends Controller
             ->where('contract_id', $request->contract_id)
             ->whereYear('date_checklist', '=' , date('Y', strtotime($request->date_checklist)))
             ->whereMonth('date_checklist','=', date('m',strtotime($request->date_checklist)))
-            ->where('sector',$request->sector)->first();
+            ->where('sector_id',$request->sector)->first();
 
             if ($verificacaoArea) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist,ja existe esse cehcklist.'],404);
+                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
             }
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
-            $this->checklist->sector = $request->sector;
+            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
-            return response()->json(['message' => 'Checklista criado com sucesso'], 200);
+            return response()->json(['message' => 'Checklist criado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
