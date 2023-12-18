@@ -50,7 +50,7 @@ class ChecklistController extends Controller
     // public function getById($id)
     // {
     //     try {
-            
+
     //         /*$checklist = Checklist::find($id);
 
     //         if ($checklist) {
@@ -145,12 +145,13 @@ class ChecklistController extends Controller
         function checklistItens(Request $request)
         {
             try{
-            $items = Item::with('fileNaming')->where('checklist_id', $request->id)->get();
+            $items = Item::with('fileNaming')->where('checklist_id', $request->id);
             $contract_id = Checklist::where('id', $request->id)->pluck('contract_id');
             $contract = Contract::where('id', $contract_id)->first();
 
             $data['contract'] = $contract;
-            $data['itens'] = $items;
+            $data['itens'] = $items->get();
+            $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
 
             return response()->json($data, 200);
 
