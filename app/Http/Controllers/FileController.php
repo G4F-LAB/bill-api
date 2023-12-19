@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FileNaming;
+use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\File;
 use App\Models\FileType;
@@ -35,7 +36,7 @@ class FileController extends Controller
                     array_push($result, self::saveChecklistFiles($checklist_id, $items, $archive));
                 }
             }
-            else 
+            else
             {
                 array_push($result, self::saveChecklistFiles($checklist_id, $items, $file));
             }
@@ -43,7 +44,7 @@ class FileController extends Controller
 
             $response = [
                 'checklist_id' => $checklist_id,
-                'files' => $result 
+                'files' => $result
             ];
 
             return response()->json($response, 200);
@@ -54,7 +55,7 @@ class FileController extends Controller
 
     }
 
-    
+
     function getChecklistItems($checklist_id) {
         $items = Item::where('checklist_id',  $checklist_id )->pluck('file_naming_id', 'id');
         return $items;
@@ -67,10 +68,10 @@ class FileController extends Controller
 
 
     function saveChecklistFiles($checklist_id, $items, $file){
-        
+
         $filetype = $file->getClientOriginalExtension();
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
-        
+
         $fileNames = self::getChecklistFilesName($items);
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
@@ -132,7 +133,7 @@ class FileController extends Controller
 
         }
         return $data;
-      
+
     }
- 
+
 }
