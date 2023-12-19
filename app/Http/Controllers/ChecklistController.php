@@ -145,18 +145,30 @@ class ChecklistController extends Controller
         function checklistItens(Request $request)
         {
             try{
-            $items = Item::with('fileNaming')->where('checklist_id', $request->id);
-            $contract_id = Checklist::where('id', $request->id)->pluck('contract_id');
-            $contract = Contract::where('id', $contract_id)->first();
+                $items = Item::with('fileNaming')->with('files')->where('checklist_id', $request->id)->get();
+                $this->checklist = Checklist::find($request->id);
+                $contract = Contract::find($this->checklist->contract_id);
 
-            $data['contract'] = $contract;
-            $data['itens'] = $items->get();
-            $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
+                $data['checklist'] = $this->checklist;
+                $data['contract'] = $contract;
+                $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
 
-            return response()->json($data, 200);
+                $items = $items->toArray();
+                foreach($items as $index => $item) {
+                    $files = $item['files'];
+                    foreach($files as $index2 => $file) {
+                        if(!empty($file)) {
+                            $items[$index]['files'][$index2]['full_path'] = env('AWS_URL').$file['path'];
+                        }
+                    }
+                }
+
+                $data['itens'] = $items;
+
+                return response()->json($data, 200);
 
             }catch(\Exception $e){
-                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
+                return response()->json(['error'=>$e->getMessage()],500);
             }
         }
 

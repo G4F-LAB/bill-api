@@ -31,6 +31,6 @@ class File extends Model
 
     public function item()
     {
-        return $this->hasOne('Item');
+        return $this->belongsTo('Item');
     }
 }
