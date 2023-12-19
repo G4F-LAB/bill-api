@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FileNaming;
+use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\File;
 use App\Models\FileType;
 use App\Models\Checklist;
-use App\Models\Collaborator;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -35,7 +35,7 @@ class FileController extends Controller
                     array_push($result, self::saveChecklistFiles($checklist_id, $items, $archive));
                 }
             }
-            else 
+            else
             {
                 array_push($result, self::saveChecklistFiles($checklist_id, $items, $file));
             }
@@ -43,7 +43,7 @@ class FileController extends Controller
 
             $response = [
                 'checklist_id' => $checklist_id,
-                'files' => $result 
+                'files' => $result
             ];
 
             return response()->json($response, 200);
@@ -54,7 +54,7 @@ class FileController extends Controller
 
     }
 
-    
+
     function getChecklistItems($checklist_id) {
         $items = Item::where('checklist_id',  $checklist_id )->pluck('file_naming_id', 'id');
         return $items;
@@ -67,10 +67,10 @@ class FileController extends Controller
 
 
     function saveChecklistFiles($checklist_id, $items, $file){
-        
+
         $filetype = $file->getClientOriginalExtension();
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
-        
+
         $fileNames = self::getChecklistFilesName($items);
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
@@ -83,11 +83,11 @@ class FileController extends Controller
 
             // se o nome do arquivo estiver na lista de nomes (presentes no banco)
             if (strpos($filename, $name) !== FALSE) {
-                
+
                 $file_type = FileType::find($file_type_id);
                 // recupera as regras de upload baseado no tipo do arquivo (file_type)
                 $rules = FileType::uploadRules()[$file_type->files_category];
-                
+
                 // verifica se o usuário logado tem permissão para inserir o arquivo
                 if(in_array($permission->name,$rules)) {
 
@@ -98,7 +98,7 @@ class FileController extends Controller
                     // busca o id do item associado ao nome do arquivo
                     $item_id = array_search($file_naming_id , $items->toArray());
 
-                    $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
+                    $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName();
 
                     if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
                         try {
@@ -116,7 +116,7 @@ class FileController extends Controller
                             //throw $th;
                             $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $name];
                         }
-                        
+
                     } else{
                         $data = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $name];
                     }
@@ -132,7 +132,7 @@ class FileController extends Controller
 
         }
         return $data;
-      
+
     }
- 
+
 }
