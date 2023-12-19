@@ -9,7 +9,6 @@ use App\Models\Item;
 use App\Models\File;
 use App\Models\FileType;
 use App\Models\Checklist;
-use App\Models\Collaborator;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -84,11 +83,11 @@ class FileController extends Controller
 
             // se o nome do arquivo estiver na lista de nomes (presentes no banco)
             if (strpos($filename, $name) !== FALSE) {
-                
+
                 $file_type = FileType::find($file_type_id);
                 // recupera as regras de upload baseado no tipo do arquivo (file_type)
                 $rules = FileType::uploadRules()[$file_type->files_category];
-                
+
                 // verifica se o usuário logado tem permissão para inserir o arquivo
                 if(in_array($permission->name,$rules)) {
 
@@ -99,7 +98,7 @@ class FileController extends Controller
                     // busca o id do item associado ao nome do arquivo
                     $item_id = array_search($file_naming_id , $items->toArray());
 
-                    $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName(); 
+                    $path = "/$this->env/book/checklists/$checklist_id/". $file->getClientOriginalName();
 
                     if($upload = Storage::disk('s3')->put($path, file_get_contents($file), 'public')){
                         try {
@@ -117,7 +116,7 @@ class FileController extends Controller
                             //throw $th;
                             $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $name];
                         }
-                        
+
                     } else{
                         $data = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $name];
                     }
