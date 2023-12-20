@@ -57,15 +57,15 @@ class Item extends Model
 
     }
     public function checklist() {
-        return $this->belongsTo(Checklist::class)->withTimestamps();
+        return $this->belongsTo(Checklist::class);
     }
 
     public function file_nomenclatures() {
-        return $this->belongsTo(Item::class,'file_nomenclatures', 'file_naming_id', 'id')->withTimestamps();
+        return $this->belongsTo(Item::class,'file_nomenclatures', 'file_naming_id', 'id');
     }
 
     public function file_types() {
-        return $this->belongsTo(Item::class,'file_types', 'file_type_id', 'id')->withTimestamps();
+        return $this->belongsTo(Item::class,'file_types', 'file_type_id', 'id');
     }
 
     public function fileNaming()

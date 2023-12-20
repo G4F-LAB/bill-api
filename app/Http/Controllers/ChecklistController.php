@@ -82,17 +82,17 @@ class ChecklistController extends Controller
             ->where('contract_id', $request->contract_id)
             ->whereYear('date_checklist', '=' , date('Y', strtotime($request->date_checklist)))
             ->whereMonth('date_checklist','=', date('m',strtotime($request->date_checklist)))
-            ->where('sector',$request->sector)->first();
+            ->where('sector_id',$request->sector_id)->first();
 
             if ($verificacaoArea) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist,ja existe esse cehcklist.'],404);
+                return response()->json(['error'=> 'Não foi possivel criar checklist,ja existe esse checklist.'],200);
             }
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
-            $this->checklist->sector = $request->sector;
+            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
@@ -145,14 +145,35 @@ class ChecklistController extends Controller
         function checklistItens(Request $request)
         {
             try{
-            $items = Item::with('fileNaming')->where('checklist_id', $request->id)->get();
-            $contract_id = Checklist::where('id', $request->id)->pluck('contract_id');
-            $contract = Contract::where('id', $contract_id)->first();
+                //define as datas
+                $dataAtual = Carbon::now();
+                $months = [];
+                for ($i = 2; $i >= 0; $i--) {
+                    $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
+                }
+                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
+                //define as datas
 
-            $data['contract'] = $contract;
-            $data['itens'] = $items;
+                $id = $request->id;
+                $reference = ($request->reference) ? $request->reference : $months[2] ;
 
-            return response()->json($data, 200);
+                $itens = Item::with('checklist', 'fileNaming')->whereHas('checklist',function($query) use($id,$reference) {
+                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
+                })->get();
+
+                $id_checklist = Checklist::where('contract_id', $id)
+                    ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
+                    ->value('id');
+
+
+                $contract = Contract::where('id', $id)->first();
+
+                $data['contract'] = $contract;
+                $data['checklist_id'] = $id_checklist;
+                $data['itens'] = $itens;
+                $data['current_dates'] = $months;
+
+                return response()->json($data, 200);
 
             }catch(\Exception $e){
                 return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);

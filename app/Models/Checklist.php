@@ -74,7 +74,7 @@ class Checklist extends Model
         $checklist = $this->with('itens')->find($id);
         $total_itens = count($checklist->itens);
         $total_complete = 0;
-        
+
         if($total_itens > 0) {
             foreach($checklist->itens as $index => $item){
                 if($item->status) $total_complete = $total_complete + 1;
