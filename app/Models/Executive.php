@@ -13,10 +13,15 @@ class Executive extends Model
 
     protected $fillable = [
         'name',
+        'manager_id',
         'operations'
     ];
 
     public function operations(){
         return $this->hasMany(Operation::class);
+    }
+
+    public function manager(){
+        return $this->hasOne(Collaborator::class);
     }
 }

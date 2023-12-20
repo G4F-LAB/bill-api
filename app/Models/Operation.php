@@ -16,7 +16,8 @@ class Operation extends Model
     protected $fillables = [
         'name',
         'manager_id',
-        'reference'
+        'reference',
+        'executive_id'
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -24,7 +25,8 @@ class Operation extends Model
         return LogOptions::defaults()->useLogName('Operation')->logOnly([
             'name',
             'manager_id',
-            'reference'
+            'reference',
+            'executive_id'
         ]);
     }
 
@@ -34,9 +36,11 @@ class Operation extends Model
 
     public function executive() {
         return $this->belongsTo(Executive::class);
-    }
+    } 
 
     public function collaborator() {
         return $this->belongsTo(Collaborator::class,'manager_id','id');
     }
+
+
 }

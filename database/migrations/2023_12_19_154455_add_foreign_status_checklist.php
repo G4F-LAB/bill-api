@@ -13,12 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('executives', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->unsignedInteger('manager_id')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+        Schema::table('checklists', function(Blueprint $table) {
+            $table->foreign('status_id')->references('id')->on('status_checklist');
         });
     }
 
@@ -29,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('executives');
+        Schema::table('checklists', function(Blueprint $table) {
+            $table->dropForeign('checklist_status_id_foreign');
+        });
     }
 };

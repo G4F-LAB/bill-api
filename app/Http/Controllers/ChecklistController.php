@@ -47,30 +47,30 @@ class ChecklistController extends Controller
 
 
 
-    public function getById($id)
-    {
-        try {
-            $checklist = Checklist::find($id);
+    // public function getById($id)
+    // {
+    //     try {
 
-            if ($checklist) {
-                $contractId = $checklist->contract_id;
+    //         /*$checklist = Checklist::find($id);
 
-                $buscarChecklist = DB::table('checklists')
-                    ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
-                    ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
-                    ->join('file_types', 'file_types.id', '=', 'itens.file_type_id')
-                    ->join('contracts', 'contracts.id', '=', 'checklists.contract_id')
-                    ->where('contract_id', $contractId)
-                    //>orWhere("id",$id)
-                    ->orderBy('date_checklist', 'DESC')->limit(3)->get();
-                return response()->json($buscarChecklist, 200);
-            } else {
-                return response()->json(['error' => 'Checklist não encontrado'], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    //         if ($checklist) {
+    //             $contractId = $checklist->contract_id;
+
+    //             $buscarChecklist = DB::table('checklists')
+    //                 ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
+    //                 ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
+    //                 ->join('file_types', 'file_types.id', '=', 'checklists.sector_id')
+    //                 ->join('contracts', 'contracts.id', '=', 'checklists.contract_id')
+    //                 ->where('contract_id', $contractId)
+    //                 ->orderBy('date_checklist', 'DESC')->limit(3)->get();
+    //             return response()->json($buscarChecklist, 200);
+    //         } else {
+    //             return response()->json(['error' => 'Checklist não encontrado'], 404);
+    //         }*/
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 
 
     public function store(Request $request)
@@ -93,11 +93,12 @@ class ChecklistController extends Controller
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
             $this->checklist->sector_id = $request->sector_id;
+            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
-            return response()->json(['message' => 'Checklista criado com sucesso'], 200);
+            return response()->json(['message' => 'Checklist criado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -110,8 +111,8 @@ class ChecklistController extends Controller
     {
         try {
 
-            $checklist = Checklist::find($id);
-            if (!$checklist) {
+            $this->checklist = $this->checklist->find($id);
+            if (empty($this->checklist)) {
                 return response()->json(['message' => 'Checklist não existe'], 404);
             }
 
@@ -119,23 +120,30 @@ class ChecklistController extends Controller
                 $dinamicRules = array();
 
                 //aplica regras dinâmicas para os campos que foram enviados
-                foreach ($checklist->rules() as $input => $rule) {
+                foreach ($this->checklist->rules() as $input => $rule) {
                     if (array_key_exists($input, $request->all())) {
                         $dinamicRules[$input] = $rule;
                     }
                 }
-                $request->validate($dinamicRules, $checklist->feedback());
+                $request->validate($dinamicRules, $this->checklist->feedback());
             } else {
-                $request->validate($checklist->rules(), $checklist->feedback());
+                $request->validate($this->checklist->rules(), $this->checklist->feedback());
             }
 
-            if ($request->has('date_checklist')) $checklist->date_checklist  = $request->date_checklist;
-            if ($request->has('object_contract')) $checklist->object_contract = $request->object_contract;
-            if ($request->has('shipping_method')) $checklist->shipping_method = $request->shipping_method;
-            if ($request->has('obs')) $checklist->obs = $request->obs;
-            if ($request->has('accept')) $checklist->accept = $request->accept;
-            if ($request->has('signed_by')) $checklist->signed_by = $request->signed_by;
-            $checklist->save();
+            if ($request->has('date_checklist')) $this->checklist->date_checklist  = $request->date_checklist;
+            if ($request->has('object_contract')) $this->checklist->object_contract = $request->object_contract;
+            if ($request->has('shipping_method')) $this->checklist->shipping_method = $request->shipping_method;
+            if ($request->has('obs')) $this->checklist->obs = $request->obs;
+            if ($request->has('accept')) $this->checklist->accept = $request->accept;
+            if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
+
+            // validação pendente
+            if(!empty($this->checklist->signed_by) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
+
+            // finalizado
+            if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 5;
+
+            $this->checklist->save();
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage()], 500);
@@ -174,9 +182,10 @@ class ChecklistController extends Controller
                 $data['current_dates'] = $months;
 
                 return response()->json($data, 200);
+                return response()->json($data, 200);
 
             }catch(\Exception $e){
-                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
+                return response()->json(['error'=>$e->getMessage()],500);
             }
         }
 

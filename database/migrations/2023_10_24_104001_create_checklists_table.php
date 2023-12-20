@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('obs')->nullable();
             $table->boolean('accept');
             $table->string('sector', 100);
-            $table->unsignedBigInteger('signed_by');
+            $table->unsignedBigInteger('signed_by')->nullable();
             $table->unsignedSmallInteger('completion')->default(0);
             $table->timestamps();
         });

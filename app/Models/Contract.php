@@ -14,6 +14,7 @@ class Contract extends Model
 
     protected $primaryKey = 'id';
     protected $hidden = ['pivot'];
+    
     protected $fillable = [
         'client_id',
         'name',
@@ -37,7 +38,7 @@ class Contract extends Model
     }
 
     public function manager() {
-        return $this->belongsTo(Collaborator::class,'manager_id', 'id');
+        return $this->belongsTo(Operation::class,'manager_id', 'id');
     }
 
     public function checklist(){

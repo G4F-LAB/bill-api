@@ -56,6 +56,7 @@ class Item extends Model
         ];
 
     }
+
     public function checklist() {
         return $this->belongsTo(Checklist::class);
     }
@@ -73,4 +74,7 @@ class Item extends Model
         return $this->belongsTo(FileNaming::class);
     }
 
+    public function files() {
+        return $this->hasMany(File::class);
+    }
 }

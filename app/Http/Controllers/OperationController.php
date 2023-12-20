@@ -5,36 +5,53 @@ namespace App\Http\Controllers;
 use App\Models\Collaborator;
 use App\Models\Operation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OperationController extends Controller
 {
     //
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $operations = Operation::all();
-        return response()->json($operations, 200);
+        $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+        if ($request->has('q')) {
+            $operations = Operation::with('contract.collaborator')
+                ->where('manager_id', $collaborator->id)
+                ->get();
+            return response()->json($operations, 200);
+        }
     }
 
     public function create(Request $request)
     {
         try {
             //code...
-            $manager = Collaborator::find($request->manager_id);
+            if ($request->has('manager_id')) {
+                $manager = Collaborator::find($request->manager_id);
+                if (empty($manager)) return response()->json(['erro' => 'Gerente de Operação não encontrado'], 200);
+            }
 
-            if (empty($manager)) return response()->json(['erro' => 'Colaborador não encontrado'], 200);
+            if ($request->has('executive_id')) {
+                $executive = Collaborator::find($request->executive_id);
+                if (empty($executive)) return response()->json(['erro' => 'Gerente Executivo não encontrado'], 200);
+            }
 
             $operation_old = Operation::where('name', 'like', '%' . $request->name . '%')->withTrashed()->first();
 
             if ($operation_old) {
                 $operation_old->deleted_at = null;
-                $operation_old->manager_id = $manager->id;
+                if ($request->has('manager_id')) $operation_old->manager_id = $manager->id;
+                if ($request->has('executive_id')) $operation_old->executive_id = $executive->id;
+                if ($request->has('reference')) $operation_old->reference = $request->reference;
+
                 $operation_old->save();
                 return response()->json($operation_old, 200);
             }
 
             $operation = new Operation();
             $operation->name = $request->name;
-            $operation->manager_id = $manager->id;
+            if ($request->has('manager_id')) $operation->manager_id = $manager->id;
+            if ($request->has('executive_id')) $operation->executive_id = $executive->id;
+            if ($request->has('reference')) $operation->reference = $request->reference;
             $operation->save();
             return response()->json($operation, 200);
         } catch (\Exception $exception) {
@@ -50,8 +67,11 @@ class OperationController extends Controller
             $operation = Operation::find($id);
             if ($request->has('name')) $operation->name = $request->name;
             if ($request->has('manager_id')) $operation->manager_id = Collaborator::find($request->manager_id)->id;
+            if ($request->has('executive_id')) $operation->executive_id = Collaborator::find($request->executive_id)->id;
+            if ($request->has('reference')) $operation->reference = $request->reference;
+
             $operation->save();
-            return response()->json($operation, 200);
+            return response()->json([$operation, 'message' => 'Operação atualizada com sucesso!'], 200);
         } catch (\Exception $exception) {
             return response()->json([$exception->getMessage()], 500);
             //throw $th;

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Collaborator;
 use App\Models\Executive;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExecutiveController extends Controller
 {
@@ -17,12 +19,14 @@ class ExecutiveController extends Controller
         }
     }
 
-    public function getById($id)
-    {
+    public function getById()
+    {            
         try {
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+
             $executive = Executive::with(['operations' => function ($query) {
                 $query->orderBy('id');
-            }, 'operations.collaborator'])->findOrFail($id);
+            }, 'operations.collaborator'])->where('manager_id','=', $colaborador->id)->get();
             return response()->json($executive, 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => 'Não foi possivel encontrar os dados.'], 500);
@@ -31,8 +35,11 @@ class ExecutiveController extends Controller
 
     public function create(Request $request)
     {
-        // return response()->json($request, 200);
         try {
+            $manager = Collaborator::find($request->manager_id);
+
+            if (empty($manager)) return response()->json(['erro' => 'Colaborador não encontrado'], 200);
+
             $executive_old = Executive::where('name', 'like', '%' . $request->name . '%')->withTrashed()->first();
             if ($executive_old) {
                 $executive_old->deleted_at = null;
@@ -41,6 +48,7 @@ class ExecutiveController extends Controller
             }
             $executive = new Executive();
             $executive->name = $request->name;
+            $executive->manager_id = $request->manager_id;
             $executive->save();
             return response()->json($executive, 200);
         } catch (\Exception $e) {

@@ -23,13 +23,14 @@ class File extends Model
     public function getActivitylogOptions(): LogOptions
     {        
         return LogOptions::defaults()->useLogName('File')->logOnly([
-        'item_id',
-        'complementary_name',
-        'path'
-    ]);
+            'item_id',
+            'complementary_name',
+            'path'
+        ]);
     }
+
     public function item()
     {
-        return $this->hasOne('Item');
+        return $this->belongsTo('Item');
     }
 }
