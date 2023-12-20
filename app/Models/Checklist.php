@@ -69,21 +69,44 @@ class Checklist extends Model
         return $this->hasMany(Item::class);
     }
 
+    public function status() {
+        return $this->belongsTo(StatusChecklist::class);
+    }
+
     public function sync_itens($id = NULL) {
         if($id == NULL) $id = $this->id;
         $checklist = $this->with('itens')->find($id);
         $total_itens = count($checklist->itens);
         $total_complete = 0;
+        $progress = false;
         
         if($total_itens > 0) {
             foreach($checklist->itens as $index => $item){
-                if($item->status) $total_complete = $total_complete + 1;
+                if($item->status){
+                    $total_complete = $total_complete + 1;
+                    $progress = true;
+                }
             }
 
             $percentage = floor(($total_complete*100)/$total_itens);
+            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; // checklist saiu de 0%, foi para 'Em progresso'
+            if($checklist->completion < 100 && $percentage == 100) $checklist = 3; // checklist abaixo de 100% e tem a porcentagem atualizada para 100%
             $checklist->completion = $percentage;
             $checklist->save();
         }
         return $checklist;
+    }
+
+    public function update_status() {
+        $ok = false;
+        if(!empty($this->signed_by) && $this->completion == 100){
+            $this->status_id = 4;
+            $ok = true;
+        } 
+        if(!empty($this->signed_by) && $accept && $this->completion == 100){
+            $this->status_id = 5;
+            $ok = true;
+        } 
+        return $ok;
     }
 }

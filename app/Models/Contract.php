@@ -14,6 +14,7 @@ class Contract extends Model
 
     protected $primaryKey = 'id';
     protected $hidden = ['pivot'];
+    
     protected $fillable = [
         'client_id',
         'name',

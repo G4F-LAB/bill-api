@@ -13,13 +13,21 @@ class CollaboratorController extends Controller
     public function create(Request $request)
     {
         
-        $username = $request->nome;
-        $permission = $request->permission;
+        $username = $request->name;
+        $permission = $request->permission_id;
 
     
         try {
+            $existinUser = Collaborator::where('name',$username)->first();
+
+            if($existinUser){
+                return response()->json(['erro'=>'O colaborador já existe'])
+            }else{
+                
+            }
+
             $user = Container::getConnection('default')->query()->where('samaccountname', $username)->first();
-           
+            
             if ($user) {
                 $collaborator = new Collaborator();
                 $collaborator->name = $user['displayname'][0];
@@ -27,7 +35,7 @@ class CollaboratorController extends Controller
                 $collaborator->permission_id = $permission;
                 $collaborator->save();
 
-                return response()->json($collaborator, 200);
+                return response()->json([$collaborator, 'message' => 'Colaborador adicionado com sucesso!'], 200);
             } else {
                 return response()->json(['error' => 'Usuário não encontrado']);
             }

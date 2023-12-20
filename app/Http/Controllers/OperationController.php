@@ -5,14 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Collaborator;
 use App\Models\Operation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OperationController extends Controller
 {
     //
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $operations = Operation::all();
-        return response()->json($operations, 200);
+        $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+        if ($request->has('q')) {
+            $operations = Operation::with('contract.collaborator')
+                ->where('manager_id', $collaborator->id)
+                ->get();
+            return response()->json($operations, 200);
+        }
     }
 
     public function create(Request $request)
