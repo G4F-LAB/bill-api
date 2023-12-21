@@ -78,8 +78,9 @@ class Checklist extends Model
         $checklist = $this->with('itens')->find($id);
         $total_itens = count($checklist->itens);
         $total_complete = 0;
+
         $progress = false;
-        
+
         if($total_itens > 0) {
             foreach($checklist->itens as $index => $item){
                 if($item->status){
@@ -102,11 +103,11 @@ class Checklist extends Model
         if(!empty($this->signed_by) && $this->completion == 100){
             $this->status_id = 4;
             $ok = true;
-        } 
+        }
         if(!empty($this->signed_by) && $accept && $this->completion == 100){
             $this->status_id = 5;
             $ok = true;
-        } 
+        }
         return $ok;
     }
 }

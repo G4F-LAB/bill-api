@@ -45,6 +45,27 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+
+
+        // if ($request->checklist_id == null) {
+        //     try {
+
+        //     $checklist = new Checklist();
+        //     $checklist->contract_id  = $request->contract_id;
+        //     $checklist->date_checklist  = $request->date_checklist;
+        //     $checklist->object_contract = $request->object_contract;
+        //     $checklist->shipping_method = $request->shipping_method;
+        //     $checklist->sector_id = $request->sector_id;
+        //     $checklist->obs = $request->obs;
+        //     $checklist->accept = $request->accept;
+        //     $checklist->signed_by = $request->signed_by;
+        //     $checklist->save();
+        //     return response()->json(['message'=>$checklist->id],200);
+        //     } catch (\Exception $e) {
+        //         return response()->json(['error' =>  $e->getMessage()], 500);
+        //     }
+        // }
+
         try{
             if ($request->has('status'))$this->item->status = $request->status;
             if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
@@ -53,12 +74,9 @@ class ItemController extends Controller
             if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
             //dd($item);
             $this->item->save();
-
-            $checklist = Checklist::find($this->item->checklist_id);
-            $checklist->sync_itens();
-
+            // $checklist = Checklist::find($this->item->checklist_id);
+            // $checklist->sync_itens();
             return response()->json(['message'=>'Item criado com sucesso'],200);
-
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
         }
@@ -74,11 +92,19 @@ class ItemController extends Controller
 
             $this->item = Item::find($id);
 
-            if(!$this->item->isEmpty()){
+            // print_r($this->item);exit;
+
+            if (!$this->item) {
                 return response()->json([
                     'error' => 'Item não encontrado'
                 ], Response::HTTP_NOT_FOUND);
             }
+
+            // if($this->item->isEmpty()){
+            //     return response()->json([
+            //         'error' => 'Item não encontrado'
+            //     ], Response::HTTP_NOT_FOUND);
+            // }
 
             if ($request->has('id'))$this->item->id = $request->id;
             if ($request->has('status'))$this->item->status = $request->status;
@@ -88,8 +114,8 @@ class ItemController extends Controller
             if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
             $this->item->save();
 
-            $checklist = Checklist::find($this->item->checklist_id);
-            $checklist->sync_itens();
+            // $checklist = Checklist::find($this->item->checklist_id);
+            // $checklist->sync_itens();
 
             return response()->json(['message'=>'Item atualizado com sucesso'],200);
 

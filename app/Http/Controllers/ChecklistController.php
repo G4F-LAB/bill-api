@@ -149,6 +149,44 @@ class ChecklistController extends Controller
         }
     }
 
+        function checklistItensCreate(Request $request)
+        {
+            try{
+                //define as datas
+                $dataAtual = Carbon::now();
+                $months = [];
+                for ($i = 2; $i >= 0; $i--) {
+                    $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
+                }
+                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
+                //define as datas
+
+                $id = $request->id;
+                $reference = ($request->reference) ? $request->reference : $months[2] ;
+
+                $itens = Item::with('checklist', 'fileNaming')->whereHas('checklist',function($query) use($id,$reference) {
+                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
+                })->get();
+
+                $id_checklist = Checklist::where('contract_id', $id)
+                    ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
+                    ->value('id');
+
+
+                $contract = Contract::where('id', $id)->first();
+
+                $data['contract'] = $contract;
+                $data['checklist_id'] = $id_checklist;
+                $data['itens'] = $itens;
+                $data['current_dates'] = $months;
+
+                return response()->json($data, 200);
+
+            }catch(\Exception $e){
+                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
+            }
+        }
+
         function checklistItens(Request $request)
         {
             try{
@@ -180,7 +218,11 @@ class ChecklistController extends Controller
         }
 
 
-    }
+}
+
+
+
+
 
 
 
