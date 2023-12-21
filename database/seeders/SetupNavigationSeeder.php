@@ -60,6 +60,17 @@ class SetupNavigationSeeder extends Seeder
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
+            [
+                "parent_id"=>NULL,
+                "name"=> "Contratos",
+                "slug"=>NULL,
+                "icon"=> "clarity:contract-line",
+                "path"=> "/contracts",
+                "sort"=> 20,
+                "permission_ids"=> "[1,2,3,4,5,6,7,8]",
+                "created_at"=> now(),
+                "updated_at"=> now(),
+            ],
         ]);
     }
 }
