@@ -82,17 +82,16 @@ class ChecklistController extends Controller
             ->where('contract_id', $request->contract_id)
             ->whereYear('date_checklist', '=' , date('Y', strtotime($request->date_checklist)))
             ->whereMonth('date_checklist','=', date('m',strtotime($request->date_checklist)))
-            ->where('sector_id',$request->sector_id)->first();
+            ->where('sector_id',$request->sector)->first();
 
             if ($verificacaoArea) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist,ja existe esse checklist.'],200);
+                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
             }
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
-            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
@@ -153,35 +152,56 @@ class ChecklistController extends Controller
         function checklistItensCreate(Request $request)
         {
             try{
-                //define as datas
-                $dataAtual = Carbon::now();
-                $months = [];
-                for ($i = 2; $i >= 0; $i--) {
-                    $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
-                }
-                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
-                //define as datas
+                $items = Item::with('fileNaming')->with('files')->where('checklist_id', $request->id)->get();
+                $this->checklist = Checklist::find($request->id);
+                $contract = Contract::find($this->checklist->contract_id);
 
-                $id = $request->id;
-                $reference = ($request->reference) ? $request->reference : $months[2] ;
-
-                $itens = Item::with('checklist', 'fileNaming')->whereHas('checklist',function($query) use($id,$reference) {
-                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
-                })->get();
-
-                $id_checklist = Checklist::where('contract_id', $id)
-                    ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
-                    ->value('id');
-
-
-                $contract = Contract::where('id', $id)->first();
-
+                $data['checklist'] = $this->checklist;
                 $data['contract'] = $contract;
-                $data['checklist_id'] = $id_checklist;
-                $data['itens'] = $itens;
-                $data['current_dates'] = $months;
+                $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
+
+                $items = $items->toArray();
+                foreach($items as $index => $item) {
+                    $files = $item['files'];
+                    foreach($files as $index2 => $file) {
+                        if(!empty($file)) {
+                            $items[$index]['files'][$index2]['full_path'] = env('AWS_URL').$file['path'];
+                        }
+                    }
+                }
+
+                $data['itens'] = $items;
 
                 return response()->json($data, 200);
+
+            }catch(\Exception $e){
+                return response()->json(['error'=>$e->getMessage()],500);
+            }
+        }
+
+        function checklistItens(Request $request)
+        {
+            try{
+                $items = Item::with('fileNaming')->with('files')->where('checklist_id', $request->id)->get();
+                $this->checklist = Checklist::find($request->id);
+                $contract = Contract::find($this->checklist->contract_id);
+
+                $data['checklist'] = $this->checklist;
+                $data['contract'] = $contract;
+                $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
+
+                $items = $items->toArray();
+                foreach($items as $index => $item) {
+                    $files = $item['files'];
+                    foreach($files as $index2 => $file) {
+                        if(!empty($file)) {
+                            $items[$index]['files'][$index2]['full_path'] = env('AWS_URL').$file['path'];
+                        }
+                    }
+                }
+
+                $data['itens'] = $items;
+
                 return response()->json($data, 200);
 
             }catch(\Exception $e){
@@ -190,7 +210,11 @@ class ChecklistController extends Controller
         }
 
 
-    }
+}
+
+
+
+
 
 
 
