@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\Contract;
+use App\Models\Checklist;
+use App\Models\Operation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -14,21 +16,28 @@ class ContractController extends Controller
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
-        $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
-
+        $contracts = Contract::with('operation.collaborator')
+            ->where([
+                ['contractual_situation', '=', true],
+                [function ($query) use ($request) {
+                    if (($s = $request->q)) {
+                        $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                            ->get();
+                    }
+                }]
+            ])->paginate(500);
+        
         //Puxar todos os contratos, incluindo os encerrados
-        if ($request->has('encerrados')) {
-            $contracts = Contract::with('manager')->get();
-            return response()->json($contracts, 200);
-        }
+        // if ($request->has('encerrados')) {
+        //     $contracts = Contract::with('manager')->get();
+        //     return response()->json($contracts, 200);
+        // }
 
-        $contracts = Contract::with('manager')->where('contractual_situation', true)->get();
         return response()->json($contracts, 200);
     }
 
     //Vincular um colaborador a um contrato
-    public function collaborator(Request $request)
+    public function collaboratorContract(Request $request)
     {
             
         try {
@@ -38,7 +47,7 @@ class ContractController extends Controller
 
             $contrato = Contract::find($request->contract_id);
             
-            $contrato->collaborators()->attach($request->collaborator_id);
+            $contrato->collaborator()->attach($request->collaborator_id);
             return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -77,35 +86,136 @@ class ContractController extends Controller
     public function updateContracts()
     {
         try {
-            $response = Http::withHeaders([
-                'Content-type' => 'application/json',
-                'x-uuid' => 'B7DA9848-514D-42AC-82FD-1391E124D20C',
-                'x-api-key' => 'rO4km1L2j5SFYU071iSLY8I6O1lOK8uxC78TquVscM'
-            ])
-                ->withBody(json_encode([
-                    'table_name' => 'R018CCU',
-                    'nav' => [
-                        'page_items' => 500
-                    ],
-                ]), 'application/json')
-                ->get('https://senior.g4fcorporate.com/table/list');
-            $jsonData = $response->json();
+            $references = Operation::pluck('reference','id')->toArray();
+            $pcc_classific_c = array();
+            $resultAPIViewContracts = self::requestAPIViewContracts();
+            $resultAPIViewCentrodeCusto = self::requestAPIViewCentroCusto();
+            $array = [];
 
-
-            foreach ($jsonData['data']['list'] as $contract) {
-                $contract_find = Contract::where('client_id',$contract['codccu'])->first();
-
-                if (empty($contract_find)) {
-                    $new_contract = new Contract();
-                    $new_contract->client_id = $contract['codccu'];
-                    $new_contract->name = $contract['nomccu'];
-                    $new_contract->contractual_situation = true;
-                    $new_contract->save();
-                } 
+            foreach($resultAPIViewCentrodeCusto as $key => $result){
+                array_push($pcc_classific_c ,$result['Pcc_classific_c']);
             }
+            
+            foreach($resultAPIViewContracts as $index => $result){
+                foreach($resultAPIViewCentrodeCusto as $key => $result2){
+                    if($result['CONTA_GEREN'] == $result2['Pcc_classific_c']) {
+                        $array[] = [
+                            'Cd_pcc_reduzid' => $result2['Cd_pcc_reduzid'],
+                            'Pcc_classific_c' => $result2['Pcc_classific_c'],
+                            'CD_OBJETO' => $result['CD_OBJETO'],
+                            'DESC_GEREN' => $result['DESC_GEREN'],
+                            'CONTA_GEREN' => $result['CONTA_GEREN'],
+                            'SITUACAO' => $result['SITUACAO']
+                        ];
+                    }
+                }           
+            }
+
+            foreach ($array as $contract) {
+                foreach($references as $key => $reference){
+                    if((string)$reference == $contract['CD_OBJETO']){
+                        $contract_find_active = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
+                        $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();
+                        if (empty($contract_find_active)) {             
+                            if($contract['SITUACAO'] == "ATIVO"){
+                                $new_contract = new Contract();
+                                $new_contract->client_id = $contract['Cd_pcc_reduzid'];
+                                $new_contract->name = $contract['DESC_GEREN'];
+                                $new_contract->contractual_situation = true;
+                                $new_contract->operation_id = $key;
+                                $new_contract->save();                           
+                            }
+                        }elseif($contract_closed && $contract['SITUACAO'] == "ATIVO"){    
+                            $new_contract = Contract::find($contract_closed['id']);                                 
+                            $new_contract->contractual_situation = true;
+                            $new_contract->operation_id = $key;
+                            $new_contract->save();
+                        }
+                    }
+                }
+            }
+
             return response()->json(['message' => 'Contratos atualizados com sucesso!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
+
+    public function requestAPIViewContracts()
+    {
+        try {
+            $valueTrue = true;
+            $result = array();
+            for($i = 1;$valueTrue == true ; $i++  ){
+                $response = Http::withHeaders([
+                    'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+                ])
+                    ->withBody(json_encode([                 
+                        "filtros" => [
+                            "pagina" => $i
+                        ]            
+                    ]), 'application/json')
+                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CONTRATOS');
+                $jsonData = $response->json();
+                
+                foreach ($jsonData['d'] as $key => $contract) {
+                    array_push($result, $contract);
+                    if($contract['mensagem'] == "Nenhum registro encontrado." ){
+                        $valueTrue = false;
+                    }
+                }
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function requestAPIViewCentroCusto()
+    {
+        try {
+            $valueTrue = true;
+            $result = array();
+            for($i = 1;$valueTrue == true ; $i++  ){
+                $response = Http::withHeaders([
+                    'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+                ])
+                    ->withBody(json_encode([                 
+                        "filtros" => [
+                            "pagina" => $i
+                        ]            
+                    ]), 'application/json')
+                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CENTRO_CUSTO');
+                $jsonData = $response->json();
+                
+                foreach ($jsonData['d'] as $key => $contract) {
+                    array_push($result, $contract);
+                    if($contract['mensagem'] == "Nenhum registro encontrado." ){
+                        $valueTrue = false;
+                    }
+                }
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function checklistByContractID($id,Request $request) {
+        try{
+            $checklist = Contract::with('checklist.status')->where('id',$id)
+            ->first();
+            return response()->json($checklist);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+       
+    }
+
+
+
 }

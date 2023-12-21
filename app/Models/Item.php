@@ -13,7 +13,7 @@ class Item extends Model
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
-    
+
     protected $table = 'itens';
     protected $primaryKey = 'id';
     protected $fillable = [
@@ -23,20 +23,20 @@ class Item extends Model
         'checklist_id'
     ];
 
- 
+
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('item')->logOnly(['file_type_id',
         'status',
         'file_naming_id',
         'checklist_id']);
 
-       
+
     }
-  
+
     public function rules()
     {
-        return [            
+        return [
             'checklist_id' => 'required',
             'file_naming_id' => 'required',
             'file_type_id' => 'required',
@@ -56,16 +56,25 @@ class Item extends Model
         ];
 
     }
+
     public function checklist() {
-        return $this->belongsTo(Item::class,'checklist', 'checklist_id', 'id')->withTimestamps();
+        return $this->belongsTo(Checklist::class);
     }
 
     public function file_nomenclatures() {
-        return $this->belongsTo(Item::class,'file_nomenclatures', 'file_naming_id', 'id')->withTimestamps();
+        return $this->belongsTo(Item::class,'file_nomenclatures', 'file_naming_id', 'id');
     }
 
     public function file_types() {
-        return $this->belongsTo(Item::class,'file_types', 'file_type_id', 'id')->withTimestamps();
+        return $this->belongsTo(Item::class,'file_types', 'file_type_id', 'id');
     }
-    
+
+    public function fileNaming()
+    {
+        return $this->belongsTo(FileNaming::class);
+    }
+
+    public function files() {
+        return $this->hasMany(File::class);
+    }
 }

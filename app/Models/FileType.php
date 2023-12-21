@@ -22,4 +22,12 @@ class FileType extends Model
         ]);
     }
     public $timestamps = false;
+
+    public static function uploadRules() {
+        $rules = [
+            'Recursos Humanos' => ['Rh','Operacao','Admin'],
+            'Financeiro' => ['Fin','Operacao','Admin']
+        ];
+        return $rules;
+    }
 }

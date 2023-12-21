@@ -13,7 +13,7 @@ class ChecklistSeeder extends Seeder
      * @return void
      */
     public function run()
-    
+
     {
         $data_checklist = "2023-10-20";
         $data_checklist1 = "2023-09-10";
@@ -23,10 +23,10 @@ class ChecklistSeeder extends Seeder
                 'date_checklist' => \DB::raw("TO_DATE('09-2023', 'MM-YYYY')"),
                 'object_contract' => 'hsajfh',
                 'shipping_method' => 'email',
+                'sector'=> 'RH',
                 'obs' => 'teste',
                 'accept' => false,
-                'sector' => 'teste',
-                'signed_by' => 1,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -35,10 +35,10 @@ class ChecklistSeeder extends Seeder
                 'date_checklist' => \DB::raw("TO_DATE('10-2023', 'MM-YYYY')"),
                 'object_contract' => 'teste-controller',
                 'shipping_method' => 'teste',
+                'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'sector' => 'teste-3',
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -47,10 +47,10 @@ class ChecklistSeeder extends Seeder
                 'date_checklist' => \DB::raw("TO_DATE('11-2023', 'MM-YYYY')"),
                 'object_contract' => 'teste-controller',
                 'shipping_method' => 'teste',
+                'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'sector' => 'teste-3',
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -59,14 +59,38 @@ class ChecklistSeeder extends Seeder
                 'date_checklist' => \DB::raw("TO_DATE('12-2023', 'MM-YYYY')"),
                 'object_contract' => 'teste-controller',
                 'shipping_method' => 'teste',
+                'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'sector' => 'teste-3',
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'contract_id' => '104',
+                'date_checklist' => \DB::raw("TO_DATE('12-2023', 'MM-YYYY')"),
+                'object_contract' => 'teste-controller',
+                'shipping_method' => 'teste',
+                'sector'=> 'RH',
+                'obs' => 'teste',
+                'accept' => false,
+                'signed_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'contract_id' => '131',
+                'date_checklist' => \DB::raw("TO_DATE('12-2023', 'MM-YYYY')"),
+                'object_contract' => 'teste-controller',
+                'shipping_method' => 'teste',
+                'sector'=> 'RH',
+                'obs' => 'teste',
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         ]);
     }
 }
-    
+

@@ -15,18 +15,32 @@ class Operation extends Model
     use SoftDeletes;
     protected $fillables = [
         'name',
-        'manager_id'
+        'manager_id',
+        'reference',
+        'executive_id'
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Operation')->logOnly([
             'name',
-            'manager_id'
+            'manager_id',
+            'reference',
+            'executive_id'
         ]);
     }
 
     public function contract() {
-        return $this->belongsTo(Contract::class);
+        return $this->hasMany(Contract::class);
     }
+
+    public function executive() {
+        return $this->belongsTo(Executive::class);
+    } 
+
+    public function collaborator() {
+        return $this->belongsTo(Collaborator::class,'manager_id','id');
+    }
+
+
 }

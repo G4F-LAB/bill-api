@@ -12,24 +12,31 @@ class CollaboratorController extends Controller
 
     public function create(Request $request)
     {
-        
-        $username = $request->nome;
-        $permission = $request->permission;
 
-    
+        $username = $request->name;
+        $permission = $request->permission_id;
+
+
         try {
-            $user = Container::getConnection('default')->query()->where('samaccountname', $username)->first();
-           
-            if ($user) {
-                $collaborator = new Collaborator();
-                $collaborator->name = $user['displayname'][0];
-                $collaborator->objectguid = $this->guid_to_str($user['objectguid'][0]);
-                $collaborator->permission_id = $permission;
-                $collaborator->save();
+            $existinUser = Collaborator::where('name', $username)->first();
 
-                return response()->json($collaborator, 200);
+            if ($existinUser) {
+                return response()->json(['erro' => 'O colaborador já existe']);
             } else {
-                return response()->json(['error' => 'Usuário não encontrado']);
+
+                $user = Container::getConnection('default')->query()->where('samaccountname', $username)->first();
+
+                if ($user) {
+                    $collaborator = new Collaborator();
+                    $collaborator->name = $user['displayname'][0];
+                    $collaborator->objectguid = $this->guid_to_str($user['objectguid'][0]);
+                    $collaborator->permission_id = $permission;
+                    $collaborator->save();
+
+                    return response()->json([$collaborator, 'message' => 'Colaborador adicionado com sucesso!'], 200);
+                } else {
+                    return response()->json(['error' => 'Usuário não encontrado']);
+                }
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
@@ -40,8 +47,6 @@ class CollaboratorController extends Controller
 
     public function getAllDb(Request $request)
     {
-
-        $search = $request->q;
 
 
         try {

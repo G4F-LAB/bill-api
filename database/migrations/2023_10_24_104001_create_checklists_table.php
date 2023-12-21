@@ -21,8 +21,9 @@ return new class extends Migration
             $table->string('shipping_method');
             $table->string('obs')->nullable();
             $table->boolean('accept');
-            $table->string('sector',100);
-            $table->unsignedBigInteger('signed_by');
+            $table->string('sector', 100);
+            $table->unsignedBigInteger('signed_by')->nullable();
+            $table->unsignedSmallInteger('completion')->default(0);
             $table->timestamps();
         });
 

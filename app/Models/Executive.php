@@ -4,25 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-class Permission extends Model
+
+class Executive extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     use LogsActivity;
-
     protected $fillable = [
         'name',
+        'manager_id',
+        'operations'
     ];
-    public $timestamps = false;
+
     public function getActivitylogOptions(): LogOptions
     {        
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'name',           
+            'name',
+            'manager_id',
+            'operations',
         ]);
     }
-    public function colaborador() {
-        //hasMany: (Nome da classe de modelo, foreign_key, 'local_key')
-        return $this->hasMany(Collaborator::class, 'id', 'permission_id');
+    public function operations(){
+        return $this->hasMany(Operation::class);
+    }
+
+    public function manager(){
+        return $this->belongsTo(Collaborator::class);
     }
 }

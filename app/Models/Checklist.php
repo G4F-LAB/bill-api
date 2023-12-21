@@ -12,7 +12,7 @@ class Checklist extends Model
 {
     use LogsActivity;
     protected $primaryKey = 'id';
-    protected $fillable = [ 
+    protected $fillable = [
         'contract_id',
         'date_checklist',
         'object_contract',
@@ -33,13 +33,13 @@ class Checklist extends Model
         'accept' => 'boolean',
         'sector' => 'required|string',
         'signed_by' => 'string'
-        
+
         ];
     }
 
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Checklist')->logOnly([
         'contract_id',
         'date_checklist',
@@ -50,7 +50,7 @@ class Checklist extends Model
         'sector',
         'signed_by']);
     }
-    
+
     public function feedback() {
         return[
             'contract.required' => 'O campo do contrato é de preenchimento obrigatório.',
@@ -59,12 +59,55 @@ class Checklist extends Model
             'sector.required' => 'O campo do setor é de preenchimento obrigatório.'
 
         ];
-
     }
 
-    public function contract()
-    {
+    public function contract(){
         return $this->belongsTo(Contract::class);
     }
 
+    public function itens() {
+        return $this->hasMany(Item::class);
+    }
+
+    public function status() {
+        return $this->belongsTo(StatusChecklist::class);
+    }
+
+    public function sync_itens($id = NULL) {
+        if($id == NULL) $id = $this->id;
+        $checklist = $this->with('itens')->find($id);
+        $total_itens = count($checklist->itens);
+        $total_complete = 0;
+
+        $progress = false;
+
+        if($total_itens > 0) {
+            foreach($checklist->itens as $index => $item){
+                if($item->status){
+                    $total_complete = $total_complete + 1;
+                    $progress = true;
+                }
+            }
+
+            $percentage = floor(($total_complete*100)/$total_itens);
+            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; // checklist saiu de 0%, foi para 'Em progresso'
+            if($checklist->completion < 100 && $percentage == 100) $checklist = 3; // checklist abaixo de 100% e tem a porcentagem atualizada para 100%
+            $checklist->completion = $percentage;
+            $checklist->save();
+        }
+        return $checklist;
+    }
+
+    public function update_status() {
+        $ok = false;
+        if(!empty($this->signed_by) && $this->completion == 100){
+            $this->status_id = 4;
+            $ok = true;
+        }
+        if(!empty($this->signed_by) && $accept && $this->completion == 100){
+            $this->status_id = 5;
+            $ok = true;
+        }
+        return $ok;
+    }
 }
