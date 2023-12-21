@@ -152,30 +152,38 @@ class ChecklistController extends Controller
         function checklistItensCreate(Request $request)
         {
             try{
-                $items = Item::with('fileNaming')->with('files')->where('checklist_id', $request->id)->get();
-                $this->checklist = Checklist::find($request->id);
-                $contract = Contract::find($this->checklist->contract_id);
-
-                $data['checklist'] = $this->checklist;
-                $data['contract'] = $contract;
-                $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
-
-                $items = $items->toArray();
-                foreach($items as $index => $item) {
-                    $files = $item['files'];
-                    foreach($files as $index2 => $file) {
-                        if(!empty($file)) {
-                            $items[$index]['files'][$index2]['full_path'] = env('AWS_URL').$file['path'];
-                        }
-                    }
+                //define as datas
+                $dataAtual = Carbon::now();
+                $months = [];
+                for ($i = 2; $i >= 0; $i--) {
+                    $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
+                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
+                //define as datas
 
-                $data['itens'] = $items;
+                $id = $request->id;
+                $reference = ($request->reference) ? $request->reference : $months[2] ;
+
+                $itens = Item::with('checklist', 'fileNaming')->whereHas('checklist',function($query) use($id,$reference) {
+                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
+                })->get();
+
+                $id_checklist = Checklist::where('contract_id', $id)
+                    ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
+                    ->value('id');
+
+
+                $contract = Contract::where('id', $id)->first();
+
+                $data['contract'] = $contract;
+                $data['checklist_id'] = $id_checklist;
+                $data['itens'] = $itens;
+                $data['current_dates'] = $months;
 
                 return response()->json($data, 200);
 
             }catch(\Exception $e){
-                return response()->json(['error'=>$e->getMessage()],500);
+                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
             }
         }
 
