@@ -9,6 +9,8 @@ class StatusChecklist extends Model
 {
     use HasFactory;
 
+    protected $table = 'status_checklist';
+
     public function checklist() {
         return $this->hasMany(Checklist::class);
     }
