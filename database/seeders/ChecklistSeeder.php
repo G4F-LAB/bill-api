@@ -13,7 +13,7 @@ class ChecklistSeeder extends Seeder
      * @return void
      */
     public function run()
-    
+
     {
         $data_checklist = "2023-10-20";
         $data_checklist1 = "2023-09-10";
@@ -26,7 +26,7 @@ class ChecklistSeeder extends Seeder
                 'sector'=> 'RH',
                 'obs' => 'teste',
                 'accept' => false,
-                'signed_by' => 1,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -37,8 +37,8 @@ class ChecklistSeeder extends Seeder
                 'shipping_method' => 'teste',
                 'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -49,8 +49,8 @@ class ChecklistSeeder extends Seeder
                 'shipping_method' => 'teste',
                 'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -61,8 +61,8 @@ class ChecklistSeeder extends Seeder
                 'shipping_method' => 'teste',
                 'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -73,8 +73,8 @@ class ChecklistSeeder extends Seeder
                 'shipping_method' => 'teste',
                 'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -85,12 +85,12 @@ class ChecklistSeeder extends Seeder
                 'shipping_method' => 'teste',
                 'sector'=> 'RH',
                 'obs' => 'teste',
-                'accept' => true,
-                'signed_by' => 1,
+                'accept' => false,
+                'signed_by' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         ]);
     }
 }
-    
+
