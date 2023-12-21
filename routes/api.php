@@ -73,6 +73,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/items/create', [ChecklistController::class,'checklistItensCreate']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
 
     //Analytics

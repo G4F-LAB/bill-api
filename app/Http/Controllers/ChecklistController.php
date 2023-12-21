@@ -150,7 +150,7 @@ class ChecklistController extends Controller
         }
     }
 
-        function checklistItens(Request $request)
+        function checklistItensCreate(Request $request)
         {
             try{
                 //define as datas
