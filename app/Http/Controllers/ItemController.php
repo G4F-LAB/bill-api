@@ -74,8 +74,8 @@ class ItemController extends Controller
             if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
             //dd($item);
             $this->item->save();
-            $checklist = Checklist::find($this->item->checklist_id);
-            $checklist->sync_itens();
+            // $checklist = Checklist::find($this->item->checklist_id);
+            // $checklist->sync_itens();
             return response()->json(['message'=>'Item criado com sucesso'],200);
         }catch(\Exception $e){
             return response()->json(['erro'=> $e->getMessage()],500);
@@ -114,8 +114,8 @@ class ItemController extends Controller
             if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
             $this->item->save();
 
-            $checklist = Checklist::find($this->item->checklist_id);
-            $checklist->sync_itens();
+            // $checklist = Checklist::find($this->item->checklist_id);
+            // $checklist->sync_itens();
 
             return response()->json(['message'=>'Item atualizado com sucesso'],200);
 
