@@ -10,7 +10,6 @@ class File extends Model
 {
     use HasFactory;
     use LogsActivity;
-
     protected $table = 'files';
     protected $primaryKey = 'id';
 

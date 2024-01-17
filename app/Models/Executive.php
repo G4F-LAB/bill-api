@@ -5,23 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Executive extends Model
 {
     use HasFactory;
     use SoftDeletes;
-
+    use LogsActivity;
     protected $fillable = [
         'name',
         'manager_id',
         'operations'
     ];
 
+    public function getActivitylogOptions(): LogOptions
+    {        
+        return LogOptions::defaults()->useLogName('Contract')->logOnly([
+            'name',
+            'manager_id',
+            'operations',
+        ]);
+    }
     public function operations(){
         return $this->hasMany(Operation::class);
     }
 
     public function manager(){
-        return $this->hasOne(Collaborator::class);
+        return $this->belongsTo(Collaborator::class);
     }
 }

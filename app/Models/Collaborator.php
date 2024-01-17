@@ -6,17 +6,33 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Collaborator extends Model
 {
     use HasFactory;
-
+    use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'collaborators';
     protected $appends = ['name_initials'];
     protected $hidden = ['pivot'];
-    
+    protected $fillable = [
+        'id',
+        'collaborators',
+        'name_initials',
+        'pivot',
+    ];
+
+    public function getActivitylogOptions(): LogOptions
+    {        
+        return LogOptions::defaults()->useLogName('Contract')->logOnly([
+            'id',
+            'collaborators',
+            'name_initials',
+            'pivot',
+        ]);
+    }
 
     public function permission()
     {
