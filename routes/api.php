@@ -40,9 +40,9 @@ Route::middleware(['handle.cors'])->post('/login', [AuthController::class, 'logi
 Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Auth
-    Route::get('/refresh', [AuthController::class, 'refresh']);
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/refresh', [AuthController::class, 'refresh']);
 
     //Setup
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
@@ -59,13 +59,15 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Vincular um colaborador a um contrato
     Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/collaborators/contract', [ContractController::class , 'collaboratorContract']);
-
+    Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/collaborators/contract1', [ContractController::class , 'collaboratorContract1']);
     //Contratos
     Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contracts', [ContractController::class, 'getAllContracts']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->put('/contracts', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/contracts/new', [ContractController::class, 'updateContracts']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/contracts/{id}/checklist', [ContractController::class, 'checklistByContractID']);
-
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/dctf/files', [FileController::class,'uploadDctf']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/contract/ocurrences', [FileController::class,'searchOcurrence']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/contract/files', [FileController::class,'uploadContractFiles']);
 
     //CheckList//
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
