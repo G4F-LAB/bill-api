@@ -71,6 +71,29 @@ class SetupNavigationSeeder extends Seeder
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
+            [
+                "parent_id"=>5,
+                "name"=> "Lista",
+                "slug"=>NULL,
+                "icon"=> NULL,
+                "path"=> "/contracts",
+                "sort"=> 25,
+                "permission_ids"=> "[1,2,3,4,5,6,7,8]",
+                "created_at"=> now(),
+                "updated_at"=> now(),
+            ],
+            [
+                "parent_id"=>5,
+                "name"=> "Subir Arquivos",
+                "slug"=>NULL,
+                "icon"=> NULL,
+                "path"=> "/contracts/uploads",
+                "sort"=> 25,
+                "permission_ids"=> "[1,2,3,4,5,6,7,8]",
+                "created_at"=> now(),
+                "updated_at"=> now(),
+            ],
+
         ]);
     }
 }
