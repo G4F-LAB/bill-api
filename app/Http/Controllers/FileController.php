@@ -150,28 +150,80 @@ class FileController extends Controller
         $data = [];
 
         // busca de todos itens de checklist do mês atual
-        $itens = Item::with('fileNaming','checklist')
+        $itens = Item::with('fileNaming','checklist','files')
                     ->whereHas('checklist', function($query) use($month,$year) {
                         $query->whereRaw('extract(month from date_checklist) = ? and extract(year from date_checklist) = ?',[$month,$year]);
                     })
-                    ->get()->toArray();
+                    ->whereHas('fileNaming', function($query) {
+                        $query->where('default',true);
+                    })
+                    ->get()->toArray();//print_r($itens);
+
+        //print_r($itens);
+
+        $file_names = FileNaming::where('default',true)->pluck('standard_file_naming')->all();
 
         foreach($files as $file_array) {
 
+            //'0' => ['arquivo1','arquivo2','arquivo3']
             foreach($file_array[0] as $archive) {
-                foreach ($itens as $key => $item) {
+                
+                $filetype = $archive->getClientOriginalExtension();
+                $filename = substr($archive->getClientOriginalName(), 0, -strlen($filetype) -1);
+
+                // referencia 
+                // 1 => Mês anterior (Mês atual - 2)
+                // 2 => Mês de prestação de serviço (Mês atual - 1)
+                $sub_months = '';
+                if($file_array[1] == 1) {
+                    $sub_months = 2;
+                }elseif($file_array[1] == 2) {
+                    $sub_months = 1;
+                }
+                $ref_date = now()->subMonths($sub_months)->format('Y-m');
+                $path = "/$this->env/book/default/$ref_date/". $archive->getClientOriginalName();
+
+                if(in_array($filename,$file_names) && !Storage::disk('s3')->exists($path)){
+                    //echo "1 - $filename\n\n";
+                    if($upload = Storage::disk('s3')->put($path, file_get_contents($archive), 'public')){
+                        $saveFile = File::updateOrCreate(['path' => $path]);
+                        $msg = [
+                            'status' => 'Ok',
+                            'file_id'=> $saveFile->id,
+                            'file_url'=> env('AWS_URL').$path,
+                            'file_name' => $filename
+                        ];
+                        $data['uploaded_files'][] = $msg;
+                    }
+                }elseif(in_array($filename,$file_names) && Storage::disk('s3')->exists($path)) {
+                    //echo "2 - $filename\n\n";
+                    $msg = ['status' => 'Error', 'message'=> 'Arquivo já adicionado','name' => $filename];
+                }elseif(!in_array($filename,$file_names)) {
+                    //echo "3 - $filename\n\n";
+                    $msg = ['status' => 'Error', 'message'=> 'O arquivo não é padrão','name' => $filename];
+                }
+
+                /*foreach ($itens as $key => $item) {
                     $file_name = $item['file_naming']['standard_file_naming'];
 
-                    $filetype = $archive->getClientOriginalExtension();
-                    $filename = substr($archive->getClientOriginalName(), 0, -strlen($filetype) -1);
     
                     // verificação apenas do itens dos checklists do mês se possuem algum item DCTFWEB 
                     if(
-                        strpos($filename,'DCTF') !== FALSE 
-                        && strpos($item['file_naming']['standard_file_naming'],'DCTF') !== FALSE
+                        (
+                            (strpos($filename,'DCTF') !== FALSE && strpos($item['file_naming']['standard_file_naming'],'DCTF') !== FALSE) ||
+                            (strpos($item['file_naming']['standard_file_naming'],$filename) !== FALSE)
+                        )
+                        strpos($item['file_naming']['standard_file_naming'],$filename) !== FALSE
                         && $file_array[1] == $item['file_competence_id']
                     ) {
-                        if($item['status'] == FALSE){
+                        //print_r($item);
+                        if(!empty($item['files'])) {
+
+                            if(true) {
+
+                            }
+                        }
+                        //if($item['status'] == FALSE){
 
                             // inserir arquivos
                             $path = "/$this->env/book/checklists/{$item['checklist_id']}/". $archive->getClientOriginalName();
@@ -198,12 +250,12 @@ class FileController extends Controller
                                     //break;
                                 } catch (\Throwable $th) {
                                     //echo $th->getMessage()."\n\n";
-                                    $msg = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $filename];
+                                    $msg = ['status' => 'Error', 'message'=> $th->getMessage(),'name' => $filename];
                                 }
         
-                            } else{
-                                $msg = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $filename];
-                            }
+                            // } else{
+                            //     $msg = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $filename];
+                            // }
                         }else {
                             $msg = ['status' => 'Error', 'message'=> 'Arquivo já enviado','name' => $filename];
                         }
@@ -211,7 +263,7 @@ class FileController extends Controller
                     }else {
                         $msg = ['status' => 'Error', 'message'=> 'Arquivo inválido para upload','name' => $filename];
                     }
-                }
+                }*/
                 if($msg['status'] == 'Error') $data['errors'][] = $msg;
             }
         }
@@ -267,7 +319,7 @@ class FileController extends Controller
                     $related_contracts_by_cto = Contract::where('name', 'ilike','%'.$result_file['first_name'].'%')->get()->toArray();
 
                     if(empty($related_contracts_by_cto)) {
-                        $occurrences[$filename]['occurrences'][] = '';
+                        $occurrences['not_found_contracts'][] = $file->getClientOriginalName().$file->getClientOriginalExtension();
                     } else {
                         $occurrences[$filename]['occurrences'][] = $related_contracts_by_cto;
                     }
@@ -320,6 +372,10 @@ class FileController extends Controller
                             }
                         }
                     }*/
+                }else {
+                    $occurrences['not_found_checklist_itens'][] = [
+                        'file' => $file->getClientOriginalName()
+                    ];
                 }
                 // se o indice 'contracts' já existir é feito a tratativa de agrupamento de dados para os contratos
                 if(isset($occurrences['contracts'])) {
