@@ -147,8 +147,26 @@ class FileController extends Controller
         $year = now()->format('Y');
         $files = $request->file;
         $data = [];
+        $request_errors = [];
+        $request_errors['status'] = 'Error';
 
-        /* APLICAR REGRAS DE VALIDAÇÂO PARA OS INDICES DO ARRAY
+        foreach($files as $index => $file_array) {
+            if(!isset($file_array[0]) || empty($file_array[0])){
+                $request_errors['errors'][] = [
+                    'message' => "Índice de arquivos não existente ou vazio no array $index"
+                ];
+            }
+
+            if(!isset($file_array[1]) || empty($file_array[1])){
+                $request_errors['errors'][] = [
+                    'message' => "Índice de competência não existente ou vazio no array $index"
+                ];
+            }
+        }
+
+        if(!empty($request_errors['errors'])) return response()->json($request_errors,200);
+        
+        /*
             array() = [
                 [0] => [
                     '0' => ['arquivo1','arquivo2','arquivo3'],
