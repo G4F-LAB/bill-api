@@ -16,6 +16,7 @@ class Item extends Model
 
     protected $table = 'itens';
     protected $primaryKey = 'id';
+    protected $hidden = ['pivot'];
     protected $fillable = [
         'file_type_id',
         'status',
@@ -75,6 +76,6 @@ class Item extends Model
     }
 
     public function files() {
-        return $this->hasMany(File::class);
+        return $this->belongsToMany(File::class, 'files_itens','item_id','file_id')->withTimestamps();
     }
 }

@@ -59,13 +59,13 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Vincular um colaborador a um contrato
     Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/collaborators/contract', [ContractController::class , 'collaboratorContract']);
-    Route::middleware('check.permission:Admin, Executivo, Operacao')->post('/collaborators/contract1', [ContractController::class , 'collaboratorContract1']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/collaborators/typescontracts', [ContractController::class , 'getContractsOfCollab']);
     //Contratos
     Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contracts', [ContractController::class, 'getAllContracts']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->put('/contracts', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/contracts/new', [ContractController::class, 'updateContracts']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/contracts/{id}/checklist', [ContractController::class, 'checklistByContractID']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/dctf/files', [FileController::class,'uploadDctf']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/default/files', [FileController::class,'uploadDefaultFiles']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/contract/ocurrences', [FileController::class,'searchOcurrence']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/contract/files', [FileController::class,'uploadContractFiles']);
 
@@ -81,7 +81,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Analytics
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
-
+    // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FileNaming;
+use App\Models\FilesItens;
 use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\File;
@@ -11,7 +12,7 @@ use App\Models\FileType;
 use App\Models\Checklist;
 use App\Models\Contract;
 use Illuminate\Support\Facades\Storage;
-
+use Carbon\Carbon;
 
 
 class FileController extends Controller
@@ -136,7 +137,7 @@ class FileController extends Controller
 
     }
 
-    public function uploadDctf(Request $request) {//return response()->json($request->all());
+    public function uploadDefaultFiles(Request $request) {
         $rules = [
             'file' => 'required|array'
         ];
@@ -144,10 +145,21 @@ class FileController extends Controller
 
         $month = now()->format('m');
         $year = now()->format('Y');
-        $month = 12;
-        $year = 2023;
         $files = $request->file;
         $data = [];
+
+        /* APLICAR REGRAS DE VALIDAÇÂO PARA OS INDICES DO ARRAY
+            array() = [
+                [0] => [
+                    '0' => ['arquivo1','arquivo2','arquivo3'],
+                    '1' => 1
+                ],
+                [1] => [
+                    '0' => ['arquivo1','arquivo2','arquivo3'],
+                    '1' => 2
+                ]
+            ]
+        */
 
         // busca de todos itens de checklist do mês atual
         $itens = Item::with('fileNaming','checklist','files')
@@ -157,12 +169,14 @@ class FileController extends Controller
                     ->whereHas('fileNaming', function($query) {
                         $query->where('default',true);
                     })
-                    ->get()->toArray();//print_r($itens);
-
-        //print_r($itens);
+                    ->get()->toArray();
 
         $file_names = FileNaming::where('default',true)->pluck('standard_file_naming')->all();
 
+        // [0] => [
+        //     '0' => ['arquivo1','arquivo2','arquivo3'],
+        //     '1' => 1
+        // ],
         foreach($files as $file_array) {
 
             //'0' => ['arquivo1','arquivo2','arquivo3']
@@ -180,18 +194,59 @@ class FileController extends Controller
                 }elseif($file_array[1] == 2) {
                     $sub_months = 1;
                 }
+
+                // vigencia do arquivo
+                //$ref_date = Carbon::createFromFormat('Y-m-d', '2023-12-01')->startOfMonth();
                 $ref_date = now()->subMonths($sub_months)->format('Y-m');
                 $path = "/$this->env/book/default/$ref_date/". $archive->getClientOriginalName();
+                $date_archive = substr($path,strrpos($path, '/')-7,7);
 
+                // se arquivo estiver na lista de arquivos default e não estiver inserido no repositório -> lógica de inserção
                 if(in_array($filename,$file_names) && !Storage::disk('s3')->exists($path)){
                     //echo "1 - $filename\n\n";
                     if($upload = Storage::disk('s3')->put($path, file_get_contents($archive), 'public')){
                         $saveFile = File::updateOrCreate(['path' => $path]);
+                        $synchro_itens = [];
+
+                        foreach($itens as $item) {
+
+                            $sub_months = NULL;
+                            if($item['file_competence_id'] == 1) {
+                                $sub_months = 2;
+                            }elseif($item['file_competence_id'] == 2) {
+                                $sub_months = 1;
+                            }
+
+                            // pega a data de vigência do item a partir da data de checklist 
+                            $date_item = Carbon::createFromFormat('Y-m-d', $item['checklist']['date_checklist'])->startOfMonth();
+                            $date_item = $date_item->subMonths($sub_months)->format('Y-m');
+
+                            if(
+                                $item['file_naming']['standard_file_naming'] == $filename // o nome do arquivo deve ser igual ao nome do item
+                                && $date_item == $date_archive // a data de vigencia do checklist do item deve ser igual a data no caminho do arquivo
+                            ){
+                                $file_item = FilesItens::where('item_id', $item['id'])->where('file_id',$saveFile->id)->first();
+                                if(empty($file_item)) {
+                                    $saveFile->itens()->attach($item['id']);
+                                    $item_copy = $item;
+                                    unset($item_copy['file_naming']);
+                                    unset($item_copy['checklist']);
+                                    unset($item_copy['files']);
+                                    $synchro_itens[] = $item_copy;
+                                    Item::where('id', $item['id'])->update(['status' => true]);
+                                    $checklist = Checklist::where('id',$item['checklist_id'])->first();
+                                    $checklist->sync_itens();
+                                }
+                            }
+                        }
+
                         $msg = [
                             'status' => 'Ok',
                             'file_id'=> $saveFile->id,
                             'file_url'=> env('AWS_URL').$path,
-                            'file_name' => $filename
+                            'file_name' => $filename,
+                            'synchronized_itens' => $synchro_itens
+
                         ];
                         $data['uploaded_files'][] = $msg;
                     }
@@ -205,7 +260,6 @@ class FileController extends Controller
 
                 /*foreach ($itens as $key => $item) {
                     $file_name = $item['file_naming']['standard_file_naming'];
-
     
                     // verificação apenas do itens dos checklists do mês se possuem algum item DCTFWEB 
                     if(
@@ -267,18 +321,6 @@ class FileController extends Controller
                 if($msg['status'] == 'Error') $data['errors'][] = $msg;
             }
         }
-        /*
-            array() = [
-                [0] => [
-                    '0' => ['arquivo1','arquivo2','arquivo3'],
-                    '1' => 1
-                ],
-                [1] => [
-                    '0' => ['arquivo1','arquivo2','arquivo3'],
-                    '1' => 2
-                ]
-            ]
-        */
         return response()->json($data,200);
     }
 
