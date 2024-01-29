@@ -45,8 +45,6 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
-
-
         // if ($request->checklist_id == null) {
         //     try {
 
@@ -66,20 +64,45 @@ class ItemController extends Controller
         //     }
         // }
 
-        try{
-            if ($request->has('status'))$this->item->status = $request->status;
-            if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
-            if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
-            if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
-            if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
-            //dd($item);
-            $this->item->save();
-            // $checklist = Checklist::find($this->item->checklist_id);
-            // $checklist->sync_itens();
-            return response()->json(['message'=>'Item criado com sucesso'],200);
-        }catch(\Exception $e){
-            return response()->json(['erro'=> $e->getMessage()],500);
+        $id_filenames = $request->file_naming_id;
+        $success = true;
+
+        foreach ($id_filenames as $id) {
+            try {
+                $item = new Item;
+
+                if ($request->has('status')) $item->status = $request->status;
+                if ($request->has('file_naming_id')) $item->file_naming_id = $id;
+                if ($request->has('file_type_id')) $item->file_type_id = $request->file_type_id;
+                if ($request->has('file_competence_id')) $item->file_competence_id = $request->file_competence_id;
+                if ($request->has('checklist_id')) $item->checklist_id = $request->checklist_id;
+
+                $item->save();
+            } catch (\Illuminate\Database\QueryException $e) {
+                $success = false;
+            }
         }
+
+        if ($success) {
+            return response()->json(['message' => 'Itens criados com sucesso'], 200);
+        } else {
+            return response()->json(['message' => 'Erro ao criar alguns itens'], 500);
+        }
+
+        // try{
+        //     if ($request->has('status'))$this->item->status = $request->status;
+        //     if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
+        //     if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
+        //     if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
+        //     if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
+        //     //dd($item);
+        //     $this->item->save();
+        //     // $checklist = Checklist::find($this->item->checklist_id);
+        //     // $checklist->sync_itens();
+        //     return response()->json(['message'=>'Item criado com sucesso'],200);
+        // }catch(\Exception $e){
+        //     return response()->json(['erro'=> $e->getMessage()],500);
+        // }
 
     }
 

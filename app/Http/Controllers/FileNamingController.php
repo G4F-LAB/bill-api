@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\FileNaming;
+use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -93,6 +94,15 @@ class FileNamingController extends Controller
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
             // return response()->json(['error'=> $exception->getMessage()], 500);
         }
+    }
+
+    public function getAllRelCheklist(Request $request)
+    {
+        $id_checklist = $request->id;
+        $filenaming_registered = Item::where('checklist_id', $id_checklist)->pluck('file_naming_id')->toArray();
+        $file_naming = FileNaming::whereNotIn('id', $filenaming_registered)->get();
+
+        return response()->json($file_naming, 200);
     }
 
 
