@@ -12,6 +12,7 @@ class File extends Model
     use LogsActivity;
     protected $table = 'files';
     protected $primaryKey = 'id';
+    protected $hidden = ['pivot'];
 
     protected $fillable = [
         'item_id',
@@ -28,8 +29,8 @@ class File extends Model
         ]);
     }
 
-    public function item()
+    public function itens()
     {
-        return $this->belongsTo('Item');
+        return $this->belongsToMany(Item::class,'files_itens','file_id','item_id')->withTimestamps();
     }
 }

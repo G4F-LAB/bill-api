@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\Checklist;
+use App\Models\File;
+use App\Models\FileNaming;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
 class ItemController extends Controller
 {
     public function __construct(Item $item) {
@@ -45,6 +49,18 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+        $errors = [];
+        $item = Item::where('checklist_id',$request->checklist_id)->where('file_naming_id',$request->file_naming_id)->first();
+
+        $errors['status'] = 'Error';
+        if(!empty($item)) {
+            $errors['errors'][] = [
+                'message' => 'O item com o nome escolhido já existe para esse checklist!',
+                'Item' => $item
+            ];
+        }
+
+        if(!empty($errors['errors'])) return response()->json($errors,422);
         // if ($request->checklist_id == null) {
         //     try {
 
@@ -64,45 +80,53 @@ class ItemController extends Controller
         //     }
         // }
 
-        $id_filenames = $request->file_naming_id;
-        $success = true;
+        try{
+            //if ($request->has('status'))$this->item->status = $request->status;
+            if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
+            if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
+            if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
+            if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
+            //dd($item);
+            $this->item->save();
 
-        foreach ($id_filenames as $id) {
-            try {
-                $item = new Item;
+            $checklist = Checklist::where('id',$this->item->checklist_id)->first();
+            $sub_months = NULL;
 
-                if ($request->has('status')) $item->status = $request->status;
-                if ($request->has('file_naming_id')) $item->file_naming_id = $id;
-                if ($request->has('file_type_id')) $item->file_type_id = $request->file_type_id;
-                if ($request->has('file_competence_id')) $item->file_competence_id = $request->file_competence_id;
-                if ($request->has('checklist_id')) $item->checklist_id = $request->checklist_id;
-
-                $item->save();
-            } catch (\Illuminate\Database\QueryException $e) {
-                $success = false;
+            if($this->item->file_competence_id == 1) {
+                $sub_months = 2;
+            }elseif($this->item->file_competence_id == 2) {
+                $sub_months = 1;
             }
-        }
 
-        if ($success) {
-            return response()->json(['message' => 'Itens criados com sucesso'], 200);
-        } else {
-            return response()->json(['message' => 'Erro ao criar alguns itens'], 500);
-        }
+            $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth();//->subMonths($competence);print_r($date);
+            $date = $date->subMonths($sub_months)->format('Y-m');
 
-        // try{
-        //     if ($request->has('status'))$this->item->status = $request->status;
-        //     if ($request->has('file_naming_id'))$this->item->file_naming_id = $request->file_naming_id;
-        //     if ($request->has('file_type_id'))$this->item->file_type_id = $request->file_type_id;
-        //     if ($request->has('file_competence_id'))$this->item->file_competence_id = $request->file_competence_id;
-        //     if ($request->has('checklist_id'))$this->item->checklist_id = $request->checklist_id;
-        //     //dd($item);
-        //     $this->item->save();
-        //     // $checklist = Checklist::find($this->item->checklist_id);
-        //     // $checklist->sync_itens();
-        //     return response()->json(['message'=>'Item criado com sucesso'],200);
-        // }catch(\Exception $e){
-        //     return response()->json(['erro'=> $e->getMessage()],500);
-        // }
+            $files = File::where('path','ilike',"%$date%")->get()->toArray();
+            $item_name = FileNaming::where('id',$this->item->file_naming_id)->first();
+
+            $file_found = '';
+            foreach($files as $file) {
+                $file_name = substr($file['path'],strrpos($file['path'],'/')+1);
+                if(strpos($file_name,$item_name->standard_file_naming) !== FALSE) {
+                    $file_found = File::find($file['id']);
+                    break;
+                }
+            }
+
+            if(!empty($file_found)){
+                $file_found->itens()->attach($this->item->id);
+                $this->item->status = true;
+                $checklist->syncItens();
+            }
+
+            return response()->json([
+                                    'status'=>'Criado',
+                                    'message'=> 'Item criado com sucesso!',
+                                    'Item' => $this->item->load('files')
+                                ],201);
+        }catch(\Exception $e){
+            return response()->json(['erro'=> $e->getMessage()],500);
+        }
 
     }
 
