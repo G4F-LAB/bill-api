@@ -11,6 +11,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ItemController;
+
+
 
 class ChecklistController extends Controller
 {
@@ -78,34 +81,15 @@ class ChecklistController extends Controller
         // return response()->json($request->duplicate,200);
 
         try {
-            // $verificacaoArea = $this->checklist
-            // ->where('contract_id', $request->contract_id)
-            // ->whereYear('date_checklist', '=' , date('Y', strtotime($request->date_checklist)))
-            // ->whereMonth('date_checklist','=', date('m',strtotime($request->date_checklist)))
-            // ->where('sector_id',$request->sector)->first();
-
-            // // return $verificacaoArea;
-
-            // if ($verificacaoArea) {
-            //     return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
-            // }
-            // return $request;
-
-            $checklistExists = Checklist::where('contract_id', $request->contract_id)
-                ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
-                ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-                ->where('sector_id', $request->sector_id)
-                ->exists();
-
-            if ($checklistExists) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
-            };
+            // $checklistExists = Checklist::where('contract_id', $request->contract_id)
+            //     ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
+            //     ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
+            //     ->where('sector_id', $request->sector_id)
+            //     ->exists();
 
             // if ($checklistExists) {
-            //     return 'existe';
-            // } else {
-            //     return 'noope';
-            // }
+            //     return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
+            // };
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
@@ -117,12 +101,9 @@ class ChecklistController extends Controller
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
 
-            // return response()->json($this->checklist->id, 200);
-            // exit;
-
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
-                if ($duplicated != true) {
+                if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
@@ -136,34 +117,23 @@ class ChecklistController extends Controller
 
     public function duplicateItems($duplicate, $checklist, $contract_id){
 
-        $errors = [];
+        $data = [
+            "file_naming_id" => [],
+            "checklist_id" => $checklist,
+            "status" => true,
+            "file_competence_id" => 1
+        ];
 
         $checklist_id_copy = Checklist::where([
             'contract_id' => $contract_id,
             'date_checklist' => $duplicate.'-01'
         ])->value('id');
 
-        $fileNamingIds = Item::where('checklist_id',$checklist_id_copy)->pluck('file_naming_id');
+        $data['file_naming_id'] = Item::where('checklist_id',$checklist_id_copy)->pluck('file_naming_id');
 
+        $itemController = new ItemController(null);
 
-        foreach ($fileNamingIds as $fileNamingId) {
-            try {
-                $item = new Item;
-                $item->status = true;
-                $item->file_naming_id = $fileNamingId;
-                $item->file_competence_id = 2;
-                $item->checklist_id = $checklist;
-                $item->save();
-            } catch (\Illuminate\Database\QueryException $e) {
-                $errors[] = $e->getMessage();
-            }
-        }
-
-        if (count($errors) > 0) {
-            return ['errors' => $errors];
-        } else {
-            return true;
-        }
+        return $itemController->addItems($data);
     }
 
 
