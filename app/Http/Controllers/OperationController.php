@@ -14,7 +14,7 @@ class OperationController extends Controller
     {
         $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if ($request->has('q')) {
-            $operations = Operation::with('contract.collaborator')
+            $operations = Operation::with('contract.collaborators')
                 ->where('manager_id', $collaborator->id)
                 ->get();
             return response()->json($operations, 200);

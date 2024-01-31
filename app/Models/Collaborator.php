@@ -73,7 +73,7 @@ class Collaborator extends Model
     }
 
     public function executive() {
-        return $this->hasOne(Executive::class);
+        return $this->hasOne(Executive::class, 'manager_id', 'id');
     }
 
     protected function nameInitials(): Attribute
@@ -93,5 +93,50 @@ class Collaborator extends Model
     public function getAuthUserPermission() {
         $user = $this->getAuthUser();
         return Permission::where('id',$user->permission_id)->first();
+    }
+
+    public function is_analyst() {
+        $analyst = false;
+        $permission = Permission::where('name','ilike','%Analista%')->first();
+        if($permission->id == $this->permission_id) {
+            $analyst = true;
+        }
+        return $analyst;
+    }
+
+    public function is_executive() {
+        $executive = false;
+        $permission = Permission::where('name','ilike','%Executivo%')->first();
+        if($permission->id == $this->permission_id) {
+            $executive = true;
+        }
+        return $executive;
+    }
+
+    public function is_manager() {
+        $manager = false;
+        $permission = Permission::where('name','ilike','%Operacao%')->first();
+        if($permission->id == $this->permission_id) {
+            $manager = true;
+        }
+        return $manager;
+    }
+
+    public function is_hr() {
+        $hr = false;
+        $permission = Permission::where('name','ilike','%Rh%')->first();
+        if($permission->id == $this->permission_id) {
+            $hr = true;
+        }
+        return $hr;
+    }
+
+    public function is_fin() {
+        $fin = false;
+        $permission = Permission::where('name','ilike','%Fin%')->first();
+        if($permission->id == $this->permission_id) {
+            $fin = true;
+        }
+        return $fin;
     }
 }

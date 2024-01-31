@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Collaborator;
 use App\Models\Contract;
@@ -14,7 +13,7 @@ use App\Models\Operation;
 class AnalyticsController extends Controller {
     
     public function __construct(Collaborator $collaborator,Contract $contract,Checklist $checklist,Executive $executive,Operation $operation){
-        $this->auth_user = $collaborator->where('objectguid', Auth::user()->getConvertedGuid())->first();
+        $this->auth_user = $collaborator->getAuthUser();
         $this->contract = $contract;
         $this->checklist = $checklist;
         $this->executive = $executive;
@@ -22,55 +21,69 @@ class AnalyticsController extends Controller {
     }
 
     public function getMyAnalytics(Request $request) {
-
+        $id = $request->input('id');
         $month = now()->format('m');
         $year = now()->format('Y');
-
-        if($this->auth_user->permission_id == 2) {
-
+    
+        if($this->auth_user->is_executive()) {
+    
             $this->executive = $this->executive->with('manager')->where('manager_id',$this->auth_user->id)->first();
-            $operations = $this->operation->with(['contract.checklist' => function($query) use($month,$year) {
+            $operationsQuery = $this->operation->with(['contract.checklist' => function($query) use($month,$year) {
                                 $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$month,$year]);
-                            }])->where('executive_id',$this->executive->id)->get()->toArray();
-
-            //print_r($operations);
-
-            //$total_contracts = count($user_contracts);
-            $total_complete_checklists = 0;
-
+                            }])->where('executive_id',$this->executive->id);
+                            
+            if($id){
+                $operationsQuery=$operationsQuery->where('id', $id);
+            }
+            $operations = $operationsQuery->get()->toArray();
+                        
+                    
             foreach($operations as $index => $operation) {
                 $contracts = $operation['contract'];
-
-                foreach($contracts as $index2 => $contract) {
-
-                    $checklists = $contract['checklist'];
-
-                    foreach($checklists as $index3 => $checklist) {
-
-                        if(count($contract['checklist']) == 1 && $checklist['completion'] == 100) {
-                            if(!isset($operations[$index]['complete_checklists'])){
-                                $operations[$index]['complete_checklists'] = 0;
-                            } else {
-                                $operations[$index]['complete_checklists'] = $operations[$index]['complete_checklists'] + 1;
-                            }
     
+                if(!isset($operation['complete_checklists'])){
+                    $operations[$index]['complete_checklists'] = 0;
+                }
+                if(!isset($operation['total_contracts'])){
+                    $operations[$index]['total_contracts'] = 0;
+                }
+                if(!isset($operation['total_checklists'])){
+                    $operations[$index]['total_checklists'] = 0;
+                }
+    
+                foreach($contracts as $index2 => $contract) {
+                    $checklists = $contract['checklist'];
+                    $operations[$index]['total_contracts'] = $operations[$index]['total_contracts'] + 1;
+    
+                    foreach($checklists as $index3 => $checklist) {
+                        $operations[$index]['total_checklists'] = $operations[$index]['total_checklists'] + 1;
+    
+                        if(count($contract['checklist']) == 1 && $checklist['completion'] == 100) {
+                            $operations[$index]['complete_checklists'] = $operations[$index]['complete_checklists'] + 1;
+                            
                         }elseif(count($contract['checklist']) > 1){
                             if($contracts[$index2]['checklist'][0]['completion'] == 100 && $contracts[$index2]['checklist'][1]['completion'] == 100) {
-                                if(!isset($operations[$index]['complete_checklists'])){
-                                    
-                                    $operations[$index]['complete_checklists'] = 0;
-                                } else {
-                                    $operations[$index]['complete_checklists'] = $operations[$index]['complete_checklists'] + 1;
-                                }
+                                $operations[$index]['complete_checklists'] = $operations[$index]['complete_checklists'] + 1;
                             }
                         }
                     }
-                    //print_r($contract);
+                }
+    
+               
+                if($operations[$index]['total_checklists'] > 0) {
+                    $operations[$index]['percentage_complete'] = round(($operations[$index]['complete_checklists'] / $operations[$index]['total_checklists']) * 100);
+                } else {
+                    $operations[$index]['percentage_complete'] = 0;
                 }
             }
-            print_r($operations);die;
-
-            return response()->json(['success' => $this->executive], 200);
+    
+            $response = [
+                'gerencia' => $this->executive,
+                'operacoes' => $operations
+            ];
+    
+            return response()->json(['success' => $response], 200);
+    
 
         }else {
             $user_contracts = $this->contract->with(['operation.executive','checklist' => function($query) use($month,$year) {

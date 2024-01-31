@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('client_id',50)->unique();
             $table->string('name',150);
+            $table->string('alias',150);
             $table->boolean('contractual_situation');
             $table->unsignedBigInteger('operation_id')->nullable();
             $table->timestamps();

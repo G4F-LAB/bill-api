@@ -16,8 +16,9 @@ class ChecklistController extends Controller
 {
 
     public $checklist;
-    public function __construct(Checklist $checklist)
+    public function __construct(Checklist $checklist, Collaborator $collaborator)
     {
+        $this->user = $collaborator->getAuthUser();
         $this->checklist = $checklist;
     }
 
@@ -190,7 +191,20 @@ class ChecklistController extends Controller
         function checklistItens(Request $request)
         {
             try{
-                $items = Item::with('fileNaming')->with('files')->where('checklist_id', $request->id)->get();
+                $type = NULL;
+                if($this->user->is_hr()) {
+                    $type = 1;
+                }
+                if($this->user->is_fin()) {
+                    $type = 2;
+                }
+                $items = Item::with('fileNaming')->with('files')
+                    ->when(!empty($type), function($query) use($type){
+                        $query->whereHas('fileNaming', function($query2) use($type) {
+                            $query2->where('file_type_id',$type);
+                        });
+                    })
+                    ->where('checklist_id', $request->id)->get();
                 $this->checklist = Checklist::find($request->id);
                 $contract = Contract::find($this->checklist->contract_id);
 
