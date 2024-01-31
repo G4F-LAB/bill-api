@@ -33,7 +33,8 @@ class SetupController extends Controller
                 "path" => $item->path,
                 "icon" => $item->icon,
                 "sort" => $item->sort,
-                "permission_ids" => $item->permission_ids
+                "permission_ids" => $item->permission_ids,
+                "description" => $item->description
             ];
 
             $childrens = SetupNavigation::where('parent_id', $item->id)->whereJsonContains('permission_ids', [$colaborador->permission_id])->orderBy('sort', 'asc')->get();
@@ -54,6 +55,7 @@ class SetupController extends Controller
         $path = $request->path;
         $icon = $request->icon;
         $sort = $request->sort;
+        $description = $request->description;
 
         $permission_ids = array();
         if(is_array($request->permission_ids)){
@@ -80,6 +82,9 @@ class SetupController extends Controller
             }
             if(isset($permission_ids)){
                 $menu->permission_ids = $permission_ids;
+            }
+            if(isset($description)){
+                $menu->description = $description;
             }
 
             $menu->path = $path;
