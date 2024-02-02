@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
+use App\Models\Permission;
 use App\Models\Contract;
 use App\Models\Executive;
 use App\Models\Operation;
@@ -12,11 +13,37 @@ use Illuminate\Support\Facades\Http;
 
 class ContractController extends Controller
 {
+    public function __construct(Collaborator $collaborator) {
+        $this->user = $collaborator->getAuthUser();
+    }
 
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
-            $contracts = Contract::with('operation.collaborator')            
+        $permission = Permission::where('name','ilike','')->first();
+            $contracts = Contract::with([
+                'checklist' => function($query){
+                    $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[now()->format('m'),now()->format('Y')]);
+                }
+                ,'operation'
+                ,'operation.executive'
+                ,'collaborators'
+                ])
+            ->when($this->user->is_analyst(), function($query) {
+                $query->whereHas('collaborators', function($query2) {
+                    $query2->where('collaborator_id',$this->user->id);
+                });
+            })
+            ->when($this->user->is_executive(), function($query) {
+                $query->whereHas('operation.executive', function($query2) {
+                    $query2->where('manager_id',$this->user->id);
+                });
+            })
+            ->when($this->user->is_manager(), function($query) {
+                $query->whereHas('operation', function($query2) {
+                    $query2->where('manager_id',$this->user->id);
+                });
+            })
             ->where([
                 ['contractual_situation', '=', true],
                 [function ($query) use ($request) {
@@ -30,8 +57,9 @@ class ContractController extends Controller
                         $query->whereNotIn('id',explode(',',$request->ids));
                     }
                 }]
-            ])->orderBy('id','ASC')
-            ->paginate(500);
+            ])->orderBy('id','ASC')->get();
+            // ->orderBy('id','ASC')
+            // ->paginate(500);
         // }
         //Puxar todos os contratos, incluindo os encerrados
         // if ($request->has('encerrados')) {
@@ -53,7 +81,7 @@ class ContractController extends Controller
          
             $contrato = Contract::find($request->contract_id);
             
-            $contrato->collaborator()->attach($request->collaborator_id);
+            $contrato->collaborators()->attach($request->collaborator_id);
             return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -297,7 +325,5 @@ class ContractController extends Controller
         }
        
     }
-
-
 
 }

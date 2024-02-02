@@ -84,17 +84,9 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Não foi possível conectar ao servidor, tente novamente mais tarde.'], 500);
         }
-    }
+    }    
+    
 
-    public function refresh()
-    {
-        try {
-            $token = auth('api')->refresh();
-            return response()->json(['token' => $token]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Falha ao buscar novo token'], 500);
-        }
-    }
 
     public function logout()
     {
@@ -127,6 +119,16 @@ class AuthController extends Controller
         }
 
         return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+    }
+
+    public function refresh()
+    {
+        try {
+            $token = auth('api')->refresh();
+            return response()->json(['token' => $token]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Falha ao buscar novo token'], 500);
+        }
     }
 
     public function me()
