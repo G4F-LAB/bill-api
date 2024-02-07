@@ -92,7 +92,7 @@ class ItemController extends Controller
             try {
                 $this->item = new Item();
 
-                $this->item->status = $data['status'];
+                $this->item->status = false;
                 $this->item->file_naming_id = $file_naming_id;
                 $this->item->file_competence_id = $data['file_competence_id'];
                 $this->item->checklist_id = $data['checklist_id'];
