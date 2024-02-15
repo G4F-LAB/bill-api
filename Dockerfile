@@ -11,7 +11,7 @@ WORKDIR /app
 
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Set the entrypoint command to run the Laravel application
-CMD php artisan migrate && php artisan db:seed --class=PermissionSeeder && php artisan db:seed --class=FileNamingSeeder && php artisan db:seed --class=FileTypeSeeder && php artisan db:seed --class=OperationSeeder && php artisan db:seed --class=FileCompetenceSeeder && php artisan serve --host=0.0.0.0 --port=80
+CMD php artisan migrate && php artisan serve --host=0.0.0.0 --port=80
 
 # Ensure all of our files are owned by the same user and group.
 RUN chown -R application:application .
