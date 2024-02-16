@@ -79,7 +79,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/items/create', [ChecklistController::class,'checklistItensCreate']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/{reference}', [ChecklistController::class,'getDataChecklist']);
-
+    //automate
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
     //Analytics
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);

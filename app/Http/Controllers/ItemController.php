@@ -107,7 +107,7 @@ class ItemController extends Controller
                     $sub_months = 1;
                 }
 
-                $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth(); //->subMonths($competence);print_r($date);
+                $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth();
                 $date = $date->subMonths($sub_months)->format('Y-m');
 
                 $files = File::where('path', 'ilike', "%$date%")->get()->toArray();
@@ -126,7 +126,7 @@ class ItemController extends Controller
                 if (!empty($file_found)) {
                     $file_found->itens()->attach($this->item->id);
                     $this->item->status = true;
-                    $checklist->syncItens();
+                    $checklist->sync_itens();
                 }
 
             } catch (\Exception $e) {
