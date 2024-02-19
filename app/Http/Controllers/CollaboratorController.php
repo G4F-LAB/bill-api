@@ -6,9 +6,14 @@ use Illuminate\Http\Request;
 use LdapRecord\Container;
 use App\Models\Collaborator;
 use App\Models\Permission;
+use App\Models\Operation;
+use App\Models\CollaboratorsOperations;
 
 class CollaboratorController extends Controller
 {
+    public function __construct(Collaborator $collaborator) {
+        $this->collaborator = $collaborator->getAuthUser();
+    }
 
     public function create(Request $request)
     {
@@ -171,4 +176,72 @@ class CollaboratorController extends Controller
         }
         return $data;
     }
+
+    public function collaboratorOperation(Request $request)
+    {
+        try {
+            $errors = [];
+            $operation = Operation::where('id',$request->operation_id)->first();
+            $collaborator = Collaborator::where('id',$request->collaborator_id)->first();
+
+            if(!$operation) $errors[] = 'Operação não encontrada';
+            if(!$collaborator) $errors[] = 'Colaborador não encontrado';
+
+            if(!empty($errors)) return response()->json(['status'=>'error','messages'=>$errors],422);
+
+            $collaborator_operation = CollaboratorsOperations::withTrashed()
+                ->where('operation_id',$operation->id)
+                ->where('collaborator_id',$collaborator->id)
+                ->first();
+
+            if($collaborator_operation && $collaborator_operation->deleted_at == NULL){
+                return response()->json(['status'=> 'error','message'=>'Colaborador já vinculado à operação'],422);
+            }elseif($collaborator_operation && $collaborator_operation->deleted_at != NULL) {
+                $collaborator_operation->deleted_at = NULL;
+                $collaborator_operation->save();
+                return response()->json(['status' => 'ok','message' => 'Colaborador vinculado com sucesso!'], 201);
+            }
+            
+            $operation->collaborators()->attach($collaborator->id);
+            return response()->json(['status' => 'ok','message' => 'Colaborador vinculado com sucesso!'], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAllManagers(Request $request)
+    {
+        try {
+            $colaboradores = Collaborator::where(
+                    'permission_id','3')->orWhere('permission_id', '=', '2')
+                    ->get();
+            return response()->json($colaboradores, 200);
+        } catch (\Exception) {
+            return response()->json(['error' => 'Falha ao buscar colaboradores'], 500);
+        }
+    }
+
+    public function unlinkCollaborator(Request $request) {
+        try {
+            $errors = [];
+            $operation = Operation::where('id',$request->operation_id)->first();
+            $collaborator = Collaborator::where('id',$request->collaborator_id)->first();
+
+            if(!$operation) $errors[] = 'Operação não encontrada';
+            if(!$collaborator) $errors[] = 'Colaborador não encontrado';
+
+            if(!empty($errors)) return response()->json(['status'=>'error','messages'=>$errors],422);
+
+            $collaborator_operation = CollaboratorsOperations::where('operation_id',$operation->id)
+                ->where('collaborator_id',$collaborator->id)
+                ->first();
+
+            if(!$collaborator_operation) return response()->json(['status'=> 'error','message'=>'Não há vínculo do colaborador com a operação!'],422);
+            $collaborator_operation->delete();
+            return response()->json(['status' => 'ok','message' => 'Colaborador desvinculado com sucesso da operação!'], 200);
+        }catch(\Exception $e) {
+            return response()->json($e->getMessage(),500);
+        }
+    }
+
 }
