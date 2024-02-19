@@ -13,7 +13,8 @@ class FileNamingController extends Controller
     public function getAll()
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
+            return response()->json(['error' => 'Acesso não permitido.'], 403);
 
         $file_naming = FileNaming::all();
 
@@ -23,7 +24,8 @@ class FileNamingController extends Controller
     public function getByID(Request $request)
     {
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
+            return response()->json(['error' => 'Acesso não permitido.'], 403);
 
         $file_naming = FileNaming::find($request->id);
 
@@ -34,7 +36,8 @@ class FileNamingController extends Controller
     {
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            if (!$colaborador->hasPermission(['Admin']))
+                return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = new FileNaming();
             $file_naming->file_name = trim($request->file_name);
@@ -53,7 +56,8 @@ class FileNamingController extends Controller
         try {
 
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            if (!$colaborador->hasPermission(['Admin']))
+                return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = FileNaming::find($request->id_file_naming);
 
@@ -79,7 +83,8 @@ class FileNamingController extends Controller
         try {
 
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            if (!$colaborador->hasPermission(['Admin']))
+                return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = FileNaming::find($request->id_file_naming);
 
@@ -102,8 +107,26 @@ class FileNamingController extends Controller
         $filenaming_registered = Item::where('checklist_id', $id_checklist)->pluck('file_naming_id')->toArray();
         $file_naming = FileNaming::whereNotIn('id', $filenaming_registered)->get();
 
-        return response()->json($file_naming, 200);
-    }
+        $dataGrouped = [];
 
+        foreach ($file_naming as $item) {
+            $group = $item['group'];
+            if (!array_key_exists($group, $dataGrouped)) {
+                $dataGrouped[$group] = [];
+            }
+            $dataGrouped[$group][] = $item;
+        }
+
+        $dataGroupedFormatted = [];
+        foreach ($dataGrouped as $group => $items) {
+            $grupoFormatado = [
+                'group' => $group,
+                'items' => $items,
+            ];
+            $dataGroupedFormatted[] = $grupoFormatado;
+        }
+        
+        return response()->json($dataGroupedFormatted, 200);
+    }
 
 }

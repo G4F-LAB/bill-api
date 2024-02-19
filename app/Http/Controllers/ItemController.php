@@ -95,6 +95,7 @@ class ItemController extends Controller
                 $this->item = new Item();
 
                 $this->item->status = false;
+                $this->item->status = false;
                 $this->item->file_naming_id = $file_naming_id;
                 $this->item->file_competence_id = $data['file_competence_id'];
                 $this->item->checklist_id = $data['checklist_id'];
@@ -109,7 +110,7 @@ class ItemController extends Controller
                     $sub_months = 1;
                 }
 
-                $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth(); //->subMonths($competence);print_r($date);
+                $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth();
                 $date = $date->subMonths($sub_months)->format('Y-m');
 
                 $files = File::where('path', 'ilike', "%$date%")->get()->toArray();
