@@ -82,15 +82,15 @@ class ChecklistController extends Controller
         // return response()->json($request->duplicate,200);
 
         try {
-            // $checklistExists = Checklist::where('contract_id', $request->contract_id)
-            //     ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
-            //     ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-            //     ->where('sector_id', $request->sector_id)
-            //     ->exists();
+            $checklistExists = Checklist::where('contract_id', $request->contract_id)
+                ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
+                ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
+                ->where('sector_id', $request->sector_id)
+                ->exists();
 
-            // if ($checklistExists) {
-            //     return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
-            // };
+            if ($checklistExists) {
+                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
+            };
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
@@ -188,6 +188,7 @@ class ChecklistController extends Controller
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
+                //$dataAtual = Carbon::createFromFormat('Y-m-d', '2024-01-31')->startOfMonth();
                 $months = [];
                 $id_contract = $request->id;
                 $current_dates = [];
@@ -195,7 +196,7 @@ class ChecklistController extends Controller
                 for ($i = 2; $i >= 0; $i--) {
                     $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
-                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
+                $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
 
                 foreach ($months as $month) {
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
