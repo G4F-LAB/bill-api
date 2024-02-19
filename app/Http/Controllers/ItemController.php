@@ -7,10 +7,12 @@ use App\Models\Item;
 use App\Models\Checklist;
 use App\Models\File;
 use App\Models\FileNaming;
+use App\Models\FilesItens;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
 {
@@ -92,7 +94,7 @@ class ItemController extends Controller
             try {
                 $this->item = new Item();
 
-                $this->item->status = $data['status'];
+                $this->item->status = false;
                 $this->item->file_naming_id = $file_naming_id;
                 $this->item->file_competence_id = $data['file_competence_id'];
                 $this->item->checklist_id = $data['checklist_id'];
@@ -126,6 +128,7 @@ class ItemController extends Controller
                 if (!empty($file_found)) {
                     $file_found->itens()->attach($this->item->id);
                     $this->item->status = true;
+                    $this->item->save();
                     $checklist->syncItens();
                 }
 
@@ -209,5 +212,41 @@ class ItemController extends Controller
             return response()->json(['erro' => $e->getMessage()], 500);
         }
 
+    }
+
+    public function exportFiles(Request $request) {
+        if(!empty($request->ids)){
+            $id_itens = explode(',',$request->ids);
+            $files = [];
+
+            foreach($id_itens as $id_item) {
+                $file_itens = FilesItens::where('item_id',$id_item)->get()->toArray();
+                if(!empty($file_itens)) {
+                    
+                    foreach($file_itens as $file_item) {
+                        $files[] = File::where('id', $file_item['file_id'])->first()->toArray()['path'];
+                    }
+                }
+            }
+
+            $zip = new \ZipArchive();
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/zip');
+            $response->headers->set('Content-Disposition', 'attachment; filename=itens.zip');
+
+            if($zip->open(storage_path('app/itens.zip'), \ZipArchive::CREATE) === TRUE) {
+                foreach($files as $path) {
+                    if(Storage::disk('s3')->exists($path)) {
+                        $tempImage = tempnam(sys_get_temp_dir(), basename($path));
+                        copy(env('AWS_URL').$path, $tempImage);
+                        $zip->addFile($tempImage,basename($path));
+                    }
+                }
+
+                $zip->close();
+                return response()->download(storage_path('app/itens.zip'));
+            }
+
+        }
     }
 }
