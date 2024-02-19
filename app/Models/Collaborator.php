@@ -58,22 +58,27 @@ class Collaborator extends Model
     }
 
 
-    public function contracts()
-    {
-        return $this->belongsToMany(Contract::class, 'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
-    }
+    // public function contracts()
+    // {
+    //     return $this->belongsToMany(Contract::class, 'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
+    // }
 
     public function manager()
     {
         return $this->hasMany(Contract::class, 'id', 'manager_id');
     }
 
-    public function operation() {
-        return $this->hasMany(Operation::class,'manager_id','id');
+    public function operations()
+    {
+        return $this->belongsToMany(Operation::class, 'collaborator_operations', 'collaborator_id', 'operation_id')->withTimestamps();
     }
 
     public function executive() {
         return $this->hasOne(Executive::class, 'manager_id', 'id');
+    }
+
+    public function executives() {
+        return $this->belongsTo(Executive::class,'manager_id','id');
     }
 
     protected function nameInitials(): Attribute
