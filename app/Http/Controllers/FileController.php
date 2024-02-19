@@ -9,6 +9,7 @@ use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\File;
 use App\Models\FileType;
+use App\Models\AutomacaoErrors;
 use App\Models\Checklist;
 use App\Models\Contract;
 use Illuminate\Support\Facades\Storage;
@@ -106,17 +107,22 @@ class FileController extends Controller
                         try {
                             // salva o arquivo com o id do item, o camnho e o nome complementar/adicional
                             $saveFile = File::updateOrCreate(
-                                ['item_id' => $item_id, 'path' => $path, 'complementary_name' => $filenameplus],
+                                ['path' => $path, 'complementary_name' => $filenameplus],
                             );
-                            Item::where('id', $item_id)->update(['status' => true]);
+                            //Item::where('id', $item_id)->update(['status' => true]);
+                            $file_item = FilesItens::where('item_id', $item_id)->where('file_id',$saveFile->id)->first();
 
-                            $checklist = Checklist::find($checklist_id);
-                            $checklist->sync_itens();
+                            if(empty($file_item)) {
+                                $saveFile->itens()->attach($item_id);
+                                Item::where('id', $item_id)->update(['status' => true]);
+                                $checklist = Checklist::find($checklist_id);
+                                $checklist->sync_itens();
+                            }
 
                             $data = ['status' => 'Ok', 'item_id' => $item_id, 'file_id'=> $saveFile->id, 'file_url'=> env('AWS_URL').$path, 'name' => $filename];
                         } catch (\Throwable $th) {
                             //throw $th;
-                            $data = ['status' => 'Error', 'message'=> 'Error ao salvar arquivo no banco','name' => $name];
+                            $data = ['status' => 'Error', 'message'=> $th->getMessage(),'name' => $name];
                         }
 
                     } else{
@@ -216,11 +222,18 @@ class FileController extends Controller
                 // vigencia do arquivo
                 //$ref_date = Carbon::createFromFormat('Y-m-d', '2023-12-01')->startOfMonth();
                 $ref_date = now()->subMonths($sub_months)->format('Y-m');
-                $path = "/$this->env/book/default/$ref_date/". $archive->getClientOriginalName();
+                $path = '';
+                if(stripos($filename,'CAGED') !== FALSE) {
+                    $path = "/$this->env/book/default/". $archive->getClientOriginalName();
+                }else {
+                    $path = "/$this->env/book/default/$ref_date/". $archive->getClientOriginalName();
+                }
+                
                 $date_archive = substr($path,strrpos($path, '/')-7,7);
 
                 // se arquivo estiver na lista de arquivos default e não estiver inserido no repositório -> lógica de inserção
-                if(in_array($filename,$file_names) && !Storage::disk('s3')->exists($path)){
+                // && !Storage::disk('s3')->exists($path)
+                if(in_array($filename,$file_names)){
                     //echo "1 - $filename\n\n";
                     if($upload = Storage::disk('s3')->put($path, file_get_contents($archive), 'public')){
                         $saveFile = File::updateOrCreate(['path' => $path]);
@@ -268,9 +281,9 @@ class FileController extends Controller
                         ];
                         $data['uploaded_files'][] = $msg;
                     }
-                }elseif(in_array($filename,$file_names) && Storage::disk('s3')->exists($path)) {
-                    //echo "2 - $filename\n\n";
-                    $msg = ['status' => 'Error', 'message'=> 'Arquivo já adicionado','name' => $filename];
+                // }elseif(in_array($filename,$file_names) && Storage::disk('s3')->exists($path)) {
+                //     //echo "2 - $filename\n\n";
+                //     $msg = ['status' => 'Error', 'message'=> 'Arquivo já adicionado','name' => $filename];
                 }elseif(!in_array($filename,$file_names)) {
                     //echo "3 - $filename\n\n";
                     $msg = ['status' => 'Error', 'message'=> 'O arquivo não é padrão','name' => $filename];
@@ -379,7 +392,7 @@ class FileController extends Controller
                     $related_contracts_by_cto = Contract::where('name', 'ilike','%'.$result_file['first_name'].'%')->get()->toArray();
 
                     if(empty($related_contracts_by_cto)) {
-                        $occurrences['not_found_contracts'][] = $file->getClientOriginalName().$file->getClientOriginalExtension();
+                        $occurrences['not_found_contracts'][] = $file->getClientOriginalName();
                     } else {
                         $occurrences[$filename]['occurrences'][] = $related_contracts_by_cto;
                     }
@@ -573,5 +586,58 @@ class FileController extends Controller
         $result['file_alias'] = $string .= "_CTO{$cto}";
 
         return $result;
+    }
+
+    // Nomenclatura errada ou contrato não encontrado
+    // Checklist ou item não encontrado
+    public function automacao(Request $request) {
+
+        // $not_found = false;
+        // $occurrences = $this->getOccurrence($request);
+        
+        $rules = [
+            'errors' => 'required|array'
+        ];
+        $request->validate($rules);
+
+        // $errors = [
+        //     'wrong_name' => [],
+        //     'not_found_item' => [],
+        //     'not_found_contract' => []
+        // ];
+
+        foreach($request->errors as $error) {
+            $automacaoErrors = new AutomacaoErrors();
+            $automacaoErrors->path = $error->path;
+            $automacaoErrors->filename = $error->filename;
+            $automacaoErrors->error = $error->error;
+            $automacaoErrors->save();
+        }
+
+        //print_r($occurrences['not_found_contracts']);
+
+        // if(isset($occurrences['file_occurrences'])) {
+        //     foreach($occurrences['file_occurrences'] as $occurrence) {
+        //         $errors['wrong_name']['files'][] = $occurrence['filename'];
+        //         $automacaoErrors->path = '';
+        //     }
+        //     $errors['wrong_name']['message'] = 'Nomenclatura fora do padrão ou não encontrada';
+        // }
+
+        // if(isset($occurrences['not_found_checklist_itens'])) {
+        //     foreach($occurrences['not_found_checklist_itens'] as $occurrence) {
+        //         $errors['not_found_item']['files'][] = $occurrence['file'];
+        //     }
+        //     $errors['not_found_item']['message'] = 'Itens ou checklist(s) não encontrado(s)';
+        // }
+
+        // if(isset($occurrences['not_found_contracts'])) {
+        //     foreach($occurrences['not_found_contracts'] as $occurrence) {
+        //         $errors['not_found_contract']['files'][] = $occurrence;
+        //     }
+        //     $errors['not_found_contract']['message'] = 'Contrato não encontrado';
+        // }
+
+        return response()->json(['message' => 'Erros salvos com sucesso'], 201);
     }
 }
