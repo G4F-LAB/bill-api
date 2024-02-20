@@ -33,9 +33,6 @@ class ChecklistNotification extends Notification
      */
     public function via($notifiable)
     {
-        // dd($notifiable);
-        $this->toMail($notifiable);
-        dd(12);
         return ['mail'];
        
     }
@@ -55,11 +52,11 @@ class ChecklistNotification extends Notification
             throw $th;
         }
        
-
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+        // Melhoria integração com front
+        // return (new MailMessage)
+        //             ->line('The introduction to the notification.')
+        //             ->action('Notification Action', url('/'))
+        //             ->line('Thank you for using our application!');
     }
 
     /**

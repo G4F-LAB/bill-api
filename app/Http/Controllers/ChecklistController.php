@@ -101,19 +101,18 @@ class ChecklistController extends Controller
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
-
-            // Send Notifications
-            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
-            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
-
             $this->checklist->save();
-          
+            
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
+
+            // Send Notifications
+            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 

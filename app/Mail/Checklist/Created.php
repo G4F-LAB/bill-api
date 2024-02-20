@@ -24,12 +24,9 @@ class Created extends Mailable
      */
     public function __construct($checklist)
     {
-        $this->id = $checklist->id;
+        $this->checklist = $checklist;
         $this->month = Carbon::parse($checklist->date_checklist)->translatedFormat('F');
-        //
-    //    $data =  $this->envelope();
-   
-
+        $this->url = env('APP_URL') ? env('APP_URL') : 'https://book.hml.g4f.com.br';
     }
 
     /**
@@ -55,8 +52,7 @@ class Created extends Mailable
             view: 'emails.checklist.created',
             with: [
                 'month' => $this->month,
-                'id' => $this->id,
-                'url' => 'https://book.hml.g4f.com.br/checklist/create/539/' .$this->id
+                'url' => "{$this->url}/contracts/{$this->checklist->contract_id}/checklist/{$this->checklist->id}/items"
             ],
         );
     }
