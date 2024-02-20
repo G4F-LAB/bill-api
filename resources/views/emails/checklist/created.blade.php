@@ -167,7 +167,7 @@
 
                                 <tr>
                                     <td align="center" height="70" style="height:70px;">
-                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;"><img width="100" border="0" style="display: block; width: 100px;" src="https://book.hml.g4f.com.br/logo-light.svg" alt="" /></a>
+                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;"><img width="100" border="0" style="display: block; width: 100px;" src="https://g4files.us-east-1.linodeobjects.com/homolog/book/assets/logo-light.svg" alt="" /></a>
                                     </td>
                                 </tr>
                             </table>
@@ -193,7 +193,7 @@
                     <tr>
 
                         <td align="center" class="section-img">
-                            <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="https://img.freepik.com/free-vector/businessman-holding-pencil-big-complete-checklist-with-tick-marks_1150-35019.jpg" style="display: block; width: 590px;" width="590" border="0" alt="" /></a>
+                            <a href="" style=" border-style: none !important; display: block; border: 0 !important;"><img src="http://g4files.us-east-1.linodeobjects.com/homolog/book/assets/checklist_mail.png" style="display: block; width: 590px;" width="590" border="0" alt="" /></a>
 
 
 
@@ -314,7 +314,7 @@
                                 <tr>
                                     <!-- logo -->
                                     <td align="left">
-                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;"><img width="80" border="0" style="display: block; width: 80px;" src="https://book.hml.g4f.com.br/logo-light.svg" alt="" /></a>
+                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;"><img width="80" border="0" style="display: block; width: 80px;" src="https://g4files.us-east-1.linodeobjects.com/homolog/book/assets/logo-light.svg" alt="" /></a>
                                     </td>
                                 </tr>
 
