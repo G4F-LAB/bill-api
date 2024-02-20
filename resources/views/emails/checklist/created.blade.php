@@ -209,7 +209,7 @@
 
                             <div style="line-height: 35px">
 
-                                Checklist de <span style="color: #21475a;">Fevereiro</span> de 2024 já disponível
+                                Checklist de <span style="color: #21475a;">{{$month}}</span> de 2024 já disponível
 
                             </div>
                         </td>
@@ -267,7 +267,7 @@
 
 
                                         <div style="line-height: 26px;">
-                                            <a href="" style="color: #ffffff; text-decoration: none;">Acessar</a>
+                                            <a href="{{$url}}" style="color: #ffffff; text-decoration: none;">Acessar</a>
                                         </div>
                                     </td>
                                 </tr>

@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Mail\ChecklistCreated;
+use App\Mail\Checklist\Created as ChecklistCreated;
 use Illuminate\Support\Facades\Mail;
 
 class ChecklistNotification extends Notification
@@ -18,11 +18,11 @@ class ChecklistNotification extends Notification
      *
      * @return void
      */
-    public function __construct($data)
+    public function __construct($data, $collaborators)
     {
-        //
-        print_r(111);
-        $this->toMail($data);
+        $this->to = $collaborators;
+        $this->checklist = $data;  
+        $this->toMail($this);
     }
 
     /**
@@ -33,8 +33,11 @@ class ChecklistNotification extends Notification
      */
     public function via($notifiable)
     {
-        print_r(172);
+        // dd($notifiable);
+        $this->toMail($notifiable);
+        dd(12);
         return ['mail'];
+       
     }
 
     /**
@@ -46,8 +49,7 @@ class ChecklistNotification extends Notification
     public function toMail($notifiable)
     {
         try {
-            Mail::to('matheus.scheid@g4f.com.br')->send(new ChecklistCreated($notifiable));
-
+            Mail::to($this->to)->send(new ChecklistCreated($this->checklist));
          
         } catch (\Throwable $th) {
             throw $th;

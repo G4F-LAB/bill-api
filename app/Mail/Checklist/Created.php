@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Checklist;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,8 +11,9 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
 
-class ChecklistCreated extends Mailable
+class Created extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -21,11 +22,13 @@ class ChecklistCreated extends Mailable
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($checklist)
     {
+        $this->id = $checklist->id;
+        $this->month = Carbon::parse($checklist->date_checklist)->translatedFormat('F');
         //
     //    $data =  $this->envelope();
-    //    dd($data);
+   
 
     }
 
@@ -37,7 +40,7 @@ class ChecklistCreated extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Checklist Fevereiro já disponível',
+            subject: "Checklist $this->month já disponível",
         );
     }
 
@@ -49,7 +52,12 @@ class ChecklistCreated extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.welcome',
+            view: 'emails.checklist.created',
+            with: [
+                'month' => $this->month,
+                'id' => $this->id,
+                'url' => 'https://book.hml.g4f.com.br/checklist/create/539/' .$this->id
+            ],
         );
     }
 
