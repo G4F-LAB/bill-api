@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
-
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ChecklistNotification;
 
 
 class ChecklistController extends Controller
@@ -101,6 +102,9 @@ class ChecklistController extends Controller
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
+
+            Notification::sendNow([], new ChecklistNotification( $this->checklist));
+
 
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
