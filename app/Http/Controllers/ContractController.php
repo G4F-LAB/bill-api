@@ -27,13 +27,13 @@ class ContractController extends Controller
                 }
                 ,'operation'
                 ,'operation.executive'
-                ,'collaborators'
+                ,'operation.collaborators'
                 ])
-            ->when($this->user->is_analyst(), function($query) {
-                $query->whereHas('collaborators', function($query2) {
-                    $query2->where('collaborator_id',$this->user->id);
-                });
-            })
+            // ->when($this->user->is_analyst(), function($query) {
+            //     $query->whereHas('collaborators', function($query2) {
+            //         $query2->where('collaborator_id',$this->user->id);
+            //     });
+            // })
             ->when($this->user->is_executive(), function($query) {
                 $query->whereHas('operation.executive', function($query2) {
                     $query2->where('manager_id',$this->user->id);
@@ -71,94 +71,22 @@ class ContractController extends Controller
     }
 
     //Vincular um colaborador a um contrato
-    public function collaboratorContract(Request $request)
-    {
+    // public function collaboratorContract(Request $request)
+    // {
             
-        try {
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+    //     try {
+    //         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
             
-            if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+    //         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
          
-            $contrato = Contract::find($request->contract_id);
+    //         $contrato = Contract::find($request->contract_id);
             
-            $contrato->collaborators()->attach($request->collaborator_id);
-            return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-
-    public function getContractsOfCollab(Request $request)
-    {
-        try {    
-            $collaborator = new Collaborator();
-            $this->auth_user = $collaborator->where('objectguid', Auth::user()->getConvertedGuid())->first();
-            // var_dump($this->auth_user->id);exit;
-            $coll_id = $this->auth_user->id;
-            $colaborador = Collaborator::where('id', $this->auth_user->id)->first();
-            $contracts = null;
-            if ($colaborador->hasPermission(['Analista'])){
-                // var_dump("teste");
-                $contracts = Collaborator::with('contracts')
-                ->where('id','=',$coll_id)
-                ->where([
-                    [function ($query) use ($request) {
-                        if (($s = $request->q)) {
-                            $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
-                                ->get();
-                        }
-                    }]
-                ])->paginate(500); 
-                // var_dump("teste",$contracts);
-            }elseif($colaborador->hasPermission(['Operacao'])){
-                var_dump("teste2");
-                $contracts = Operation::with('contract')
-                ->where('manager_id','=',$coll_id)               
-                ->get()->paginate(500); 
-            }elseif($colaborador->hasPermission(['Executivo'])){    
-                var_dump("teste3");
-                $contracts = Executive::with('contract')
-                    ->where('manager_id','=',$coll_id)
-
-                    ->get()->paginate(500);                                    
-            }else{
-                var_dump("teste5");
-                $contracts = Contract::with('operation.collaborator')            
-                ->where([
-                    ['contractual_situation', '=', true],
-                    [function ($query) use ($request) {
-                        if (($s = $request->q)) {
-                            $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
-                                ->get();
-                        }
-                    }]
-                ])->paginate(500);
-                // var_dump("teste5",response()->json($contracts, 200));
-            }
-            //     var_dump("teste4");
-            // $colaborador = Collaborator::where('id', $request->collaborator_id)->first();
-            // $coll_id = $request->collaborator_id;
-            // $contrato = null;
-            // if ($colaborador->hasPermission(['Analista'])){
-            //     $contrato = Collaborator::with('contracts')
-            //     ->where('id','=',$coll_id)
-            //     ->get();
-            // }elseif($colaborador->hasPermission(['Operacao'])){
-            //     $contrato = Operation::with('contract')
-            //     ->where('manager_id','=',$coll_id)               
-            //     ->get();
-            // }elseif($colaborador->hasPermission(['Executivo'])){
-            //     $contrato = Executive::with('contract')
-            //         ->where('manager_id','=',$coll_id)                                      
-            //         ->get();
-            // }       
-             return response()->json($contracts, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
+    //         $contrato->collaborators()->attach($request->collaborator_id);
+    //         return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 
     //Atualizar os dados de um contrato
     public function update(Request $request)
@@ -212,29 +140,29 @@ class ContractController extends Controller
                     }                
                 }           
             }
-    
+     
             foreach ($contracts_array as $contract) {                
                 foreach($references as $key => $reference){
-                    if((string)$reference == $contract['CD_OBJETO']){                        
+                    if((string)$reference == $contract['CD_OBJETO']){     
                         $contract_find_active = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
-                        $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();          
-                        if (empty($contract_find_active) || $contract_find_active['client_id'] == null) {             
-                            if($contract['SITUACAO'] == "ATIVO"){                              
+                        $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();   
+                        if ((empty($contract_find_active) || $contract_find_active['client_id'] == null) && $contract['DESC_GEREN'] != null ) {             
+                            if($contract['SITUACAO'] == "ATIVO"){  
                                 $new_contract = new Contract();
                                 $new_contract->client_id = $contract['Cd_pcc_reduzid'];
                                 $new_contract->name = $contract['DESC_GEREN'];
                                 $new_contract->contractual_situation = true;
                                 $new_contract->operation_id = $key;
-                                $new_contract->save();                           
+                                $new_contract->save();
                             }
-                        }elseif($contract_closed && $contract['SITUACAO'] == "ATIVO"){                      
+                        }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){     
                             $new_contract = Contract::find($contract_closed['id']);                                 
                             $new_contract->contractual_situation = true;
                             $new_contract->operation_id = $key;
                             $new_contract->save();
                         }
                         if(!empty($contract_find_active)){
-                            if(is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO"){
+                            if((is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
                                 $new_contract = Contract::find($contract_find_active['id']); 
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
@@ -244,7 +172,6 @@ class ContractController extends Controller
                     }
                 }
             }
-
             return response()->json(['message' => 'Contratos atualizados com sucesso!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

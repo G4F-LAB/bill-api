@@ -93,6 +93,28 @@ class SetupNavigationSeeder extends Seeder
                 "created_at"=> now(),
                 "updated_at"=> now(),
             ],
+            [
+                "parent_id"=>null,
+                "name"=> "Admin",
+                "slug"=>NULL,
+                "icon"=> "eos-icons:admin-outlined",
+                "path"=> "/admin",
+                "sort"=> 21,
+                "permission_ids"=> "[1]",
+                "created_at"=> now(),
+                "updated_at"=> now(),
+            ],
+            [
+                "parent_id"=>null,
+                "name"=> "Admin",
+                "slug"=>NULL,
+                "icon"=> NULL,
+                "path"=> NULL,
+                "sort"=> 0,
+                "permission_ids"=> NULL,
+                "created_at"=> now(),
+                "updated_at"=> now(),
+            ],
 
         ]);
     }

@@ -14,10 +14,43 @@ class OperationController extends Controller
     {
         $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if ($request->has('q')) {
-            $operations = Operation::with('contract.collaborators')
+            $operations = Operation::with('contract','collaborators')
                 ->where('manager_id', $collaborator->id)
                 ->get();
             return response()->json($operations, 200);
+        }
+    }
+
+    public function getAllOperations(Request $request)
+    {
+        $operations = Operation::with('executives')->where([
+            [function ($query) use ($request) {
+                if (($s = $request->q)) {
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                        ->get();
+                }
+            }],
+          
+        ])->orderBy('id','ASC')->get();
+        return response()->json($operations, 200);
+    }
+    public function getAllManagerofOperation(Request $request)
+    {            
+        try {
+            $executive = Operation::with('collaborator','executives')
+            ->where([ 
+            [function ($query) use ($request) {
+                if (($s = $request->q)) {
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                        ->get();
+                }
+            }],
+          
+            ])->orderBy('id','ASC')
+            ->get();
+            return response()->json($executive, 200);
+        } catch (\Exception $e) {
+            return response()->json(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -65,11 +98,10 @@ class OperationController extends Controller
         try {
             //code...
             $operation = Operation::find($id);
-            if ($request->has('name')) $operation->name = $request->name;
+            if ($request->name) $operation->name = $request->name;
             if ($request->has('manager_id')) $operation->manager_id = Collaborator::find($request->manager_id)->id;
             if ($request->has('executive_id')) $operation->executive_id = Collaborator::find($request->executive_id)->id;
-            if ($request->has('reference')) $operation->reference = $request->reference;
-
+            if ($request->reference) $operation->reference = $request->reference;
             $operation->save();
             return response()->json([$operation, 'message' => 'Operação atualizada com sucesso!'], 200);
         } catch (\Exception $exception) {
