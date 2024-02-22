@@ -31,6 +31,10 @@ class Executive extends Model
         return $this->hasMany(Operation::class);
     }
 
+    public function operation(){
+        return $this->belongsTo(Collaborator::class,'manager_id', 'id');
+    }
+
     public function manager(){
         return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
     }

@@ -225,27 +225,35 @@ class ItemController extends Controller
                 if(!empty($file_itens)) {
                     
                     foreach($file_itens as $file_item) {
-                        $files[] = File::where('id', $file_item['file_id'])->first()->toArray()['path'];
+                        $item = FileNaming::with('items')
+                        ->whereHas('items', function($query) use($file_item) {
+                            $query->where('id',$file_item['item_id']);
+                        })
+                        ->pluck('group')->toArray();
+                        $files[] = [
+                            'path' => File::where('id', $file_item['file_id'])->first()->toArray()['path'],
+                            'group' => $item[0]
+                        ];
                     }
                 }
             }
-
+            
             $zip = new \ZipArchive();
             $response = new Response();
             $response->headers->set('Content-Type', 'application/zip');
             $response->headers->set('Content-Disposition', 'attachment; filename=itens.zip');
 
             if($zip->open(storage_path('app/itens.zip'), \ZipArchive::CREATE) === TRUE) {
-                foreach($files as $path) {
-                    if(Storage::disk('s3')->exists($path)) {
-                        $tempImage = tempnam(sys_get_temp_dir(), basename($path));
-                        copy(env('AWS_URL').$path, $tempImage);
-                        $zip->addFile($tempImage,basename($path));
+                foreach($files as $file) {
+                    if(Storage::disk('s3')->exists($file['path'])) {
+                        $tempImage = tempnam(sys_get_temp_dir(), basename($file['path']));
+                        copy(env('AWS_URL').$file['path'], $tempImage);
+                        $zip->addFile($tempImage,$file['group'].'/'.basename($file['path']));
                     }
                 }
 
                 $zip->close();
-                return response()->download(storage_path('app/itens.zip'));
+                return response()->download(storage_path('app/itens.zip'))->deleteFileAfterSend(true);
             }
 
         }
