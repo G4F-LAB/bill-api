@@ -12,12 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
+use App\Notifications\ChecklistNotification;
+use Notification;
 
-
+const PERMISSIONS_RH_FIN = [5,6];
 
 class ChecklistController extends Controller
-{
-
+{   
+ 
     public $checklist;
     public function __construct(Checklist $checklist, Collaborator $collaborator)
     {
@@ -79,7 +81,6 @@ class ChecklistController extends Controller
 
     public function store(Request $request)
     {
-        // return response()->json($request->duplicate,200);
 
         try {
             $checklistExists = Checklist::where('contract_id', $request->contract_id)
@@ -101,13 +102,17 @@ class ChecklistController extends Controller
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
-
+            
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
+
+            // Send Notifications
+            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 
