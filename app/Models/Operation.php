@@ -51,8 +51,16 @@ class Operation extends Model
         return $this->belongsTo(Executive::class);
     } 
 
+    public function collaborators() {
+        return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
+    }
+
     public function collaborator() {
-        return $this->belongsTo(Collaborator::class,'manager_id','id');
+        return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
+    }
+
+    public function executives() {
+        return $this->belongsTo(Executive::class,'executive_id','id');
     }
 
 

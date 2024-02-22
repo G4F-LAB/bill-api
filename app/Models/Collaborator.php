@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use LdapRecord\Container;
 
 class Collaborator extends Model
 {
@@ -15,7 +16,7 @@ class Collaborator extends Model
     use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'collaborators';
-    protected $appends = ['name_initials'];
+    protected $appends = ['name_initials', 'email'];
     protected $hidden = ['pivot'];
     protected $fillable = [
         'id',
@@ -58,22 +59,27 @@ class Collaborator extends Model
     }
 
 
-    public function contracts()
-    {
-        return $this->belongsToMany(Contract::class, 'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
-    }
+    // public function contracts()
+    // {
+    //     return $this->belongsToMany(Contract::class, 'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
+    // }
 
     public function manager()
     {
         return $this->hasMany(Contract::class, 'id', 'manager_id');
     }
 
-    public function operation() {
-        return $this->hasMany(Operation::class,'manager_id','id');
+    public function operations()
+    {
+        return $this->belongsToMany(Operation::class, 'collaborator_operations', 'collaborator_id', 'operation_id')->withTimestamps();
     }
 
     public function executive() {
         return $this->hasOne(Executive::class, 'manager_id', 'id');
+    }
+
+    public function executives() {
+        return $this->belongsTo(Executive::class,'manager_id','id');
     }
 
     protected function nameInitials(): Attribute
@@ -86,8 +92,24 @@ class Collaborator extends Model
         );
     }
 
+
+    protected function email(): Attribute
+    {
+        $adUser = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($this->objectguid))->first();
+
+        $email =  array_key_exists('mail', $adUser) ? $adUser['mail'][0] : null;
+
+        return new Attribute(
+            get: fn () => $email,
+        );
+    }
+
+
     public function getAuthUser() {
-        return $this->where('objectguid', Auth::user()->getConvertedGuid())->first();
+        if(Auth::user()){
+            return $this->where('objectguid', Auth::user()->getConvertedGuid())->first();
+        } 
+       
     }
 
     public function getAuthUserPermission() {
@@ -138,5 +160,26 @@ class Collaborator extends Model
             $fin = true;
         }
         return $fin;
+    }
+
+    private function str_to_guid(string $uuidString): string
+    {
+        $uuidString = str_replace('-', '', $uuidString);
+        $pieces = [
+            ltrim(substr($uuidString, 0, 8), '0'),
+            ltrim(substr($uuidString, 8, 4), '0'),
+            ltrim(substr($uuidString, 12, 4), '0'),
+            ltrim(substr($uuidString, 16, 4), '0'),
+            ltrim(substr($uuidString, 20, 4), '0'),
+            ltrim(substr($uuidString, 24, 4), '0'),
+            ltrim(substr($uuidString, 28, 4), '0'),
+        ];
+        $pieces = array_map('hexdec', $pieces);
+        return pack('Vv2n4', ...$pieces);
+    }
+
+    public function routeNotificationFor()
+    {
+        return 'm@ninaut.com'; //You e-mail property here
     }
 }

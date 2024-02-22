@@ -12,12 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
+use App\Notifications\ChecklistNotification;
+use Notification;
 
-
+const PERMISSIONS_RH_FIN = [5,6];
 
 class ChecklistController extends Controller
-{
-
+{   
+ 
     public $checklist;
     public function __construct(Checklist $checklist, Collaborator $collaborator)
     {
@@ -79,18 +81,17 @@ class ChecklistController extends Controller
 
     public function store(Request $request)
     {
-        // return response()->json($request->duplicate,200);
 
         try {
-            // $checklistExists = Checklist::where('contract_id', $request->contract_id)
-            //     ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
-            //     ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-            //     ->where('sector_id', $request->sector_id)
-            //     ->exists();
+            $checklistExists = Checklist::where('contract_id', $request->contract_id)
+                ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
+                ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
+                ->where('sector_id', $request->sector_id)
+                ->exists();
 
-            // if ($checklistExists) {
-            //     return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
-            // };
+            if ($checklistExists) {
+                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
+            };
 
             $this->checklist->contract_id  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
@@ -101,13 +102,17 @@ class ChecklistController extends Controller
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
-
+            
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
+
+            // Send Notifications
+            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 
@@ -121,7 +126,7 @@ class ChecklistController extends Controller
         $data = [
             "file_naming_id" => [],
             "checklist_id" => $checklist,
-            "status" => true,
+            "status" => false,
             "file_competence_id" => 1
         ];
 
@@ -188,6 +193,7 @@ class ChecklistController extends Controller
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
+                //$dataAtual = Carbon::createFromFormat('Y-m-d', '2024-01-31')->startOfMonth();
                 $months = [];
                 $id_contract = $request->id;
                 $current_dates = [];
@@ -195,7 +201,7 @@ class ChecklistController extends Controller
                 for ($i = 2; $i >= 0; $i--) {
                     $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
-                $months[] = $dataAtual->copy()->addMonth()->format('Y-m');
+                $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
 
                 foreach ($months as $month) {
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
@@ -298,16 +304,74 @@ class ChecklistController extends Controller
 
 
 
+        function duplicateall(Request $request)
+        {
 
-
-
+            try {
+                $date = Carbon::now();
+                
+                $ids_contracts = Contract::where('contractual_situation',true)->pluck('id');
+                // $date_atual = '2024-02';
+                // $date_reference = '2024-01';
+                $date_atual = $date->format('Y-m');
+                $date_reference = $date->subMonth()->format('Y-m');
+    
+    
+                foreach ($ids_contracts as $id_contract) {
+    
+                    $checklist = new Checklist();
+                    $id_checklist = null;
+    
+                    $id_checklist_reference = Checklist::where('contract_id', $id_contract)
+                                            ->where('date_checklist', 'LIKE', $date_reference.'%')
+                                            ->first();
+    
+                    if (!empty($id_checklist_reference)) {
+    
+                        $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
+                                                ->pluck('file_naming_id');
+            
+            
+                        $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
+                            ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual.'-01')))
+                            ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual.'-01')))
+                            ->first();
+                            
+                        if (empty($checklist_exists_atual)) {
+                            $checklist->contract_id  = $id_checklist_reference->contract_id;
+                            $checklist->date_checklist  = $date_atual.'-01';
+                            $checklist->object_contract = $id_checklist_reference->object_contract;
+                            $checklist->shipping_method = $id_checklist_reference->shipping_method;
+                            $checklist->sector_id = $id_checklist_reference->sector_id;
+                            $checklist->obs = $id_checklist_reference->obs;
+                            $checklist->accept = $id_checklist_reference->accept;
+                            $checklist->signed_by = $id_checklist_reference->signed_by;
+                            $checklist->save();
+                            $id_checklist = $checklist->id;
+                        } else {
+                            $id_checklist = $checklist_exists_atual->id;
+                        }
+                        
+                        if (!empty($ids_items_duplicate)) {
+                            $data = [
+                                "file_naming_id" => $ids_items_duplicate,
+                                "checklist_id" => $id_checklist,
+                                "status" => false,
+                                "file_competence_id" => 1
+                            ];
+                        
+                            $itemController = new ItemController(null);
+                    
+                            $itemController->addItems($data);
+                        }
+                    }
+                }   
+    
+                return response()->json(['status'=>'ok'],500);
+                
+            }catch(\Exception $e){
+                return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+            }
+        }
 
 }
-
-
-
-
-
-
-
-
