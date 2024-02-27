@@ -90,8 +90,8 @@ class Checklist extends Model
             }
 
             $percentage = floor(($total_complete*100)/$total_itens);
-            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; // checklist saiu de 0%, foi para 'Em progresso'
-            if($checklist->completion < 100 && $percentage == 100) $checklist->status_id = 3; // checklist abaixo de 100% e tem a porcentagem atualizada para 100%
+            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; 
+            if($checklist->completion < 100 && $percentage == 100) $checklist->status_id = 3;
             $checklist->completion = $percentage;
             $checklist->save();
         }
