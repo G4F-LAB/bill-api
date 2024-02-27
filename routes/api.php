@@ -109,7 +109,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->put('/item/competence/{id}', [ItemController::class, 'updateCompetence']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/item/{id}', [ItemController::class, 'destroy']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/itens/export', [ItemController::class,'exportFiles']);
-    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->put('/update/competence/{id}', [ItemController::class,'updateCompetence']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->post('/update/competence/{id}', [ItemController::class,'updateCompetence']);
 
     //Operações
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operacoes', [OperationController::class, 'getAll']);
