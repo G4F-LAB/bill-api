@@ -20,7 +20,7 @@ class Executive extends Model
     ];
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
             'name',
             'manager_id',
@@ -29,6 +29,10 @@ class Executive extends Model
     }
     public function operations(){
         return $this->hasMany(Operation::class);
+    }
+
+    public function operation(){
+        return $this->belongsTo(Collaborator::class,'manager_id', 'id');
     }
 
     public function manager(){

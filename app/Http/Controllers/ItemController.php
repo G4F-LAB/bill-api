@@ -142,6 +142,21 @@ class ItemController extends Controller
         return 'Item(s) adicionado(s) com sucesso';
     }
 
+
+    public function updateCompetence(Request $request, string $id)
+    {
+        try {
+            $this->item = Item::find($id);
+            if ($request->has('file_competence_id')) $this->item->file_competence_id = $request->file_competence_id;
+            $this->item->save();
+
+            return response()->json(['message' => 'Competência atualizada com sucesso'], 200);
+
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -223,9 +238,17 @@ class ItemController extends Controller
             foreach($id_itens as $id_item) {
                 $file_itens = FilesItens::where('item_id',$id_item)->get()->toArray();
                 if(!empty($file_itens)) {
-                    
+
                     foreach($file_itens as $file_item) {
-                        $files[] = File::where('id', $file_item['file_id'])->first()->toArray()['path'];
+                        $item = FileNaming::with('items')
+                        ->whereHas('items', function($query) use($file_item) {
+                            $query->where('id',$file_item['item_id']);
+                        })
+                        ->pluck('group')->toArray();
+                        $files[] = [
+                            'path' => File::where('id', $file_item['file_id'])->first()->toArray()['path'],
+                            'group' => $item[0]
+                        ];
                     }
                 }
             }
@@ -236,16 +259,16 @@ class ItemController extends Controller
             $response->headers->set('Content-Disposition', 'attachment; filename=itens.zip');
 
             if($zip->open(storage_path('app/itens.zip'), \ZipArchive::CREATE) === TRUE) {
-                foreach($files as $path) {
-                    if(Storage::disk('s3')->exists($path)) {
-                        $tempImage = tempnam(sys_get_temp_dir(), basename($path));
-                        copy(env('AWS_URL').$path, $tempImage);
-                        $zip->addFile($tempImage,basename($path));
+                foreach($files as $file) {
+                    if(Storage::disk('s3')->exists($file['path'])) {
+                        $tempImage = tempnam(sys_get_temp_dir(), basename($file['path']));
+                        copy(env('AWS_URL').$file['path'], $tempImage);
+                        $zip->addFile($tempImage,$file['group'].'/'.basename($file['path']));
                     }
                 }
 
                 $zip->close();
-                return response()->download(storage_path('app/itens.zip'));
+                return response()->download(storage_path('app/itens.zip'))->deleteFileAfterSend(true);
             }
 
         }

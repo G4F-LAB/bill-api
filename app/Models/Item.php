@@ -75,6 +75,12 @@ class Item extends Model
         return $this->belongsTo(FileNaming::class);
     }
 
+    public function file_competence()
+    {
+        return $this->belongsTo(FileCompetence::class);
+    }
+
+
     public function files() {
         return $this->belongsToMany(File::class, 'files_itens','item_id','file_id')->withTimestamps();
     }
