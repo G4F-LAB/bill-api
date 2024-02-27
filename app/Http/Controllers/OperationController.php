@@ -26,26 +26,26 @@ class OperationController extends Controller
         $operations = Operation::with('executives')->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
-                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')
                         ->get();
                 }
             }],
-          
+
         ])->orderBy('id','ASC')->get();
         return response()->json($operations, 200);
     }
     public function getAllManagerofOperation(Request $request)
-    {            
+    {
         try {
             $executive = Operation::with('collaborator','executives')
-            ->where([ 
+            ->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
-                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')
                         ->get();
                 }
             }],
-          
+
             ])->orderBy('id','ASC')
             ->get();
             return response()->json($executive, 200);

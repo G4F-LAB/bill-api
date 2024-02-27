@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
 use App\Notifications\ChecklistNotification;
 use Notification;
-
-const PERMISSIONS_RH_FIN = [5,6];
+use App\Models\FileCompetence;const PERMISSIONS_RH_FIN = [5,6];
 
 class ChecklistController extends Controller
-{   
- 
+{
+
     public $checklist;
     public function __construct(Checklist $checklist, Collaborator $collaborator)
     {
@@ -52,6 +51,16 @@ class ChecklistController extends Controller
     }
 
 
+    public function getAllCompetence()
+    {
+        try {
+            $competence = FileCompetence::All();
+            return response()->json($competence, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Não foi possivel acessar as Competências'], 500);
+        }
+
+    }
 
     // public function getById($id)
     // {
@@ -102,7 +111,7 @@ class ChecklistController extends Controller
             $this->checklist->accept = $request->accept;
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
-            
+
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
@@ -143,14 +152,12 @@ class ChecklistController extends Controller
     }
 
 
-    public function update(Request $request, $id)
+    public function updateCompetence(Request $request, $id)
     {
         try {
 
             $this->checklist = $this->checklist->find($id);
-            if (empty($this->checklist)) {
-                return response()->json(['message' => 'Checklist não existe'], 404);
-            }
+
 
             if ($request->method() == 'PATCH') {
                 $dinamicRules = array();
@@ -188,8 +195,7 @@ class ChecklistController extends Controller
 
         function checklistItensCreate(Request $request)
         {
-            // return response()->json('aaaaaaaaaaa bbbbbbbbbbb cccccccccc',200);
-            // exit;
+
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
@@ -220,7 +226,7 @@ class ChecklistController extends Controller
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
 
-                $itens = Item::with('checklist', 'fileNaming')->whereHas('checklist',function($query) use($id,$reference) {
+                $itens = Item::with('checklist', 'fileNaming','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
                     $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
                 })->get();
 
@@ -309,34 +315,34 @@ class ChecklistController extends Controller
 
             try {
                 $date = Carbon::now();
-                
+
                 $ids_contracts = Contract::where('contractual_situation',true)->pluck('id');
                 // $date_atual = '2024-02';
                 // $date_reference = '2024-01';
                 $date_atual = $date->format('Y-m');
                 $date_reference = $date->subMonth()->format('Y-m');
-    
-    
+
+
                 foreach ($ids_contracts as $id_contract) {
-    
+
                     $checklist = new Checklist();
                     $id_checklist = null;
-    
+
                     $id_checklist_reference = Checklist::where('contract_id', $id_contract)
                                             ->where('date_checklist', 'LIKE', $date_reference.'%')
                                             ->first();
-    
+
                     if (!empty($id_checklist_reference)) {
-    
+
                         $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
                                                 ->pluck('file_naming_id');
-            
-            
+
+
                         $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
                             ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual.'-01')))
                             ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual.'-01')))
                             ->first();
-                            
+
                         if (empty($checklist_exists_atual)) {
                             $checklist->contract_id  = $id_checklist_reference->contract_id;
                             $checklist->date_checklist  = $date_atual.'-01';
@@ -351,7 +357,7 @@ class ChecklistController extends Controller
                         } else {
                             $id_checklist = $checklist_exists_atual->id;
                         }
-                        
+
                         if (!empty($ids_items_duplicate)) {
                             $data = [
                                 "file_naming_id" => $ids_items_duplicate,
@@ -359,16 +365,16 @@ class ChecklistController extends Controller
                                 "status" => false,
                                 "file_competence_id" => 1
                             ];
-                        
+
                             $itemController = new ItemController(null);
-                    
+
                             $itemController->addItems($data);
                         }
                     }
-                }   
-    
+                }
+
                 return response()->json(['status'=>'ok'],500);
-                
+
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
             }

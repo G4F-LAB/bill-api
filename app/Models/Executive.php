@@ -20,7 +20,7 @@ class Executive extends Model
     ];
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
             'name',
             'manager_id',

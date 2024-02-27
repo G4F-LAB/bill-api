@@ -142,6 +142,21 @@ class ItemController extends Controller
         return 'Item(s) adicionado(s) com sucesso';
     }
 
+
+    public function updateCompetence(Request $request, string $id)
+    {
+        try {
+            $this->item = Item::find($id);
+            if ($request->has('file_competence_id')) $this->item->file_competence_id = $request->file_competence_id;
+            $this->item->save();
+
+            return response()->json(['message' => 'Competência atualizada com sucesso'], 200);
+
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -223,7 +238,7 @@ class ItemController extends Controller
             foreach($id_itens as $id_item) {
                 $file_itens = FilesItens::where('item_id',$id_item)->get()->toArray();
                 if(!empty($file_itens)) {
-                    
+
                     foreach($file_itens as $file_item) {
                         $item = FileNaming::with('items')
                         ->whereHas('items', function($query) use($file_item) {
