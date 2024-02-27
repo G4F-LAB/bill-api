@@ -15,6 +15,7 @@ class OperationController extends Controller
         $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if ($request->has('q')) {
             $operations = Operation::with('contract','collaborators')
+            $operations = Operation::with('contract','collaborators')
                 ->where('manager_id', $collaborator->id)
                 ->get();
             return response()->json($operations, 200);
@@ -26,26 +27,26 @@ class OperationController extends Controller
         $operations = Operation::with('executives')->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
-                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')
                         ->get();
                 }
             }],
-          
+
         ])->orderBy('id','ASC')->get();
         return response()->json($operations, 200);
     }
     public function getAllManagerofOperation(Request $request)
-    {            
+    {
         try {
             $executive = Operation::with('collaborator','executives')
-            ->where([ 
+            ->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
-                    $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                    $query->orWhere('name', 'LIKE', '%' . $s . '%')
                         ->get();
                 }
             }],
-          
+
             ])->orderBy('id','ASC')
             ->get();
             return response()->json($executive, 200);

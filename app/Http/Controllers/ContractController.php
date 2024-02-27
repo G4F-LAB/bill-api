@@ -28,7 +28,13 @@ class ContractController extends Controller
                 ,'operation'
                 ,'operation.executive'
                 ,'operation.collaborators'
+                ,'operation.collaborators'
                 ])
+            // ->when($this->user->is_analyst(), function($query) {
+            //     $query->whereHas('collaborators', function($query2) {
+            //         $query2->where('collaborator_id',$this->user->id);
+            //     });
+            // })
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
             //         $query2->where('collaborator_id',$this->user->id);
@@ -48,7 +54,7 @@ class ContractController extends Controller
                 ['contractual_situation', '=', true],
                 [function ($query) use ($request) {
                     if (($s = $request->q)) {
-                        $query->orWhere('name', 'LIKE', '%' . $s . '%')                        
+                        $query->orWhere('name', 'LIKE', '%' . $s . '%')
                             ->get();
                     }
                 }],
@@ -66,21 +72,21 @@ class ContractController extends Controller
         //     $contracts = Contract::with('manager')->get();
         //     return response()->json($contracts, 200);
         // }
-        // var_dump(response()->json($contracts, 200));    
+        // var_dump(response()->json($contracts, 200));
         return response()->json($contracts, 200);
     }
 
     //Vincular um colaborador a um contrato
     // public function collaboratorContract(Request $request)
     // {
-            
+
     //     try {
     //         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            
+
     //         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
-         
+
     //         $contrato = Contract::find($request->contract_id);
-            
+
     //         $contrato->collaborators()->attach($request->collaborator_id);
     //         return response()->json(['message' => 'Colaborador vinculado com sucesso!'], 201);
     //     } catch (\Exception $e) {
@@ -127,8 +133,8 @@ class ContractController extends Controller
             $resultAPIViewCentrodeCusto = self::requestAPIViewCentroCusto();
             $contracts_array = [];
             foreach($resultAPIViewContracts as $index => $result){
-                foreach($resultAPIViewCentrodeCusto as $key => $result2){   
-                    if($result['CONTA_GEREN'] == $result2['Pcc_classific_c']) {                   
+                foreach($resultAPIViewCentrodeCusto as $key => $result2){
+                    if($result['CONTA_GEREN'] == $result2['Pcc_classific_c']) {
                         $contracts_array[] = [
                             'Cd_pcc_reduzid' => $result2['Cd_pcc_reduzid'],
                             'Pcc_classific_c' => $result2['Pcc_classific_c'],
@@ -137,37 +143,38 @@ class ContractController extends Controller
                             'CONTA_GEREN' => $result['CONTA_GEREN'],
                             'SITUACAO' => $result['SITUACAO']
                         ];
-                    }                
-                }           
+                    }
+                }
             }
-     
-            foreach ($contracts_array as $contract) {                
+
+            foreach ($contracts_array as $contract) {
                 foreach($references as $key => $reference){
-                    if((string)$reference == $contract['CD_OBJETO']){     
+                    if((string)$reference == $contract['CD_OBJETO']){
                         $contract_find_active = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
-                        $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();   
-                        if ((empty($contract_find_active) || $contract_find_active['client_id'] == null) && $contract['DESC_GEREN'] != null ) {             
-                            if($contract['SITUACAO'] == "ATIVO"){  
+                        $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();
+                        if ((empty($contract_find_active) || $contract_find_active['client_id'] == null) && $contract['DESC_GEREN'] != null ) {
+                            if($contract['SITUACAO'] == "ATIVO"){
                                 $new_contract = new Contract();
                                 $new_contract->client_id = $contract['Cd_pcc_reduzid'];
                                 $new_contract->name = $contract['DESC_GEREN'];
                                 $new_contract->contractual_situation = true;
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
+                                $new_contract->save();
                             }
-                        }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){     
-                            $new_contract = Contract::find($contract_closed['id']);                                 
+                        }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
+                            $new_contract = Contract::find($contract_closed['id']);
                             $new_contract->contractual_situation = true;
                             $new_contract->operation_id = $key;
                             $new_contract->save();
                         }
                         if(!empty($contract_find_active)){
                             if((is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
-                                $new_contract = Contract::find($contract_find_active['id']); 
+                                $new_contract = Contract::find($contract_find_active['id']);
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
                             }
-                    
+
                         }
                     }
                 }
@@ -189,14 +196,14 @@ class ContractController extends Controller
                 $response = Http::withHeaders([
                     'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
                 ])
-                    ->withBody(json_encode([                 
+                    ->withBody(json_encode([
                         "filtros" => [
                             "pagina" => $i
-                        ]            
+                        ]
                     ]), 'application/json')
                     ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CONTRATOS');
                 $jsonData = $response->json();
-                
+
                 foreach ($jsonData['d'] as $key => $contract) {
                     array_push($result, $contract);
                     if($contract['mensagem'] == "Nenhum registro encontrado." ){
@@ -220,14 +227,14 @@ class ContractController extends Controller
                 $response = Http::withHeaders([
                     'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
                 ])
-                    ->withBody(json_encode([                 
+                    ->withBody(json_encode([
                         "filtros" => [
                             "pagina" => $i
-                        ]            
+                        ]
                     ]), 'application/json')
                     ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CENTRO_CUSTO');
                 $jsonData = $response->json();
-                
+
                 foreach ($jsonData['d'] as $key => $contract) {
                     array_push($result, $contract);
                     if($contract['mensagem'] == "Nenhum registro encontrado." ){
@@ -250,7 +257,7 @@ class ContractController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-       
+
     }
 
 }
