@@ -17,5 +17,6 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'Fin']);
         Permission::create(['name' => 'TI']);
         Permission::create(['name' => 'Geral']);
+        Permission::create(['name' => 'Diretoria']);
     }
 }

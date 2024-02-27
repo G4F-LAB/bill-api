@@ -28,7 +28,13 @@ class ContractController extends Controller
                 ,'operation'
                 ,'operation.executive'
                 ,'operation.collaborators'
+                ,'operation.collaborators'
                 ])
+            // ->when($this->user->is_analyst(), function($query) {
+            //     $query->whereHas('collaborators', function($query2) {
+            //         $query2->where('collaborator_id',$this->user->id);
+            //     });
+            // })
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
             //         $query2->where('collaborator_id',$this->user->id);
@@ -153,6 +159,7 @@ class ContractController extends Controller
                                 $new_contract->name = $contract['DESC_GEREN'];
                                 $new_contract->contractual_situation = true;
                                 $new_contract->operation_id = $key;
+                                $new_contract->save();
                                 $new_contract->save();
                             }
                         }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){

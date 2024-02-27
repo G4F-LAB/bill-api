@@ -90,6 +90,7 @@ class ExecutiveController extends Controller
         try {
             $executive = Executive::findOrFail($id);
             $executive->delete();
+            $executive->delete();
             return response()->json(['message' => 'Gerência excluída com sucesso.'], 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => 'Não foi possivel apagar esse registro.'], 500);
@@ -102,9 +103,12 @@ class ExecutiveController extends Controller
             $executive = Executive::findOrFail($id);
             if ($request->name) $executive->name = $request->name;
             if ($request->has('manager_id')) $executive->manager_id = $request->manager_id;
+            if ($request->name) $executive->name = $request->name;
+            if ($request->has('manager_id')) $executive->manager_id = $request->manager_id;
             $executive->save();
             return response()->json($executive, 200);
         } catch (\Exception $e) {
+            var_dump($e);
             var_dump($e);
             return response()->json(['erro' => 'Não foi possivel atualizar esse registro.'], 500);
         }

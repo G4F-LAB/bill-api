@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
-use App\Models\FileCompetence;
+use App\Notifications\ChecklistNotification;
+use Notification;
+use App\Models\FileCompetence;const PERMISSIONS_RH_FIN = [5,6];
 
 class ChecklistController extends Controller
 {
@@ -88,7 +90,6 @@ class ChecklistController extends Controller
 
     public function store(Request $request)
     {
-        // return response()->json($request->duplicate,200);
 
         try {
             $checklistExists = Checklist::where('contract_id', $request->contract_id)
@@ -117,6 +118,10 @@ class ChecklistController extends Controller
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
+
+            // Send Notifications
+            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 
@@ -310,7 +315,7 @@ class ChecklistController extends Controller
 
             try {
                 $date = Carbon::now();
-                
+
                 $ids_contracts = Contract::where('contractual_situation',true)->pluck('id');
                 // $date_atual = '2024-02';
                 // $date_reference = '2024-01';

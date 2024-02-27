@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contract;
 use Illuminate\Http\Request;
 use LdapRecord\Container;
+use Illuminate\Support\Facades\Http;
 
 class TesteController extends Controller
 {
@@ -41,7 +42,84 @@ class TesteController extends Controller
     }
 
     public function novoteste(Request $request) {
-        echo 'chegou aqui';
+        try {
+            $valueTrue = true;
+            $result = array();
+
+            // $response = Http::withHeaders([
+            //     'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+            // ])
+            // ->withBody(json_encode([                 
+            //     "tk" => '140'           
+            // ]), 'application/json')
+            // ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/BuscaRepresentante');
+            // $jsonData = $response->json();
+            // print_r($jsonData);
+
+            for($i = 1;$valueTrue == true ; $i++){
+                $response = Http::withHeaders([
+                    'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+                ])
+                    ->withBody(json_encode([                 
+                        "filtros" => [
+                            "pagina" => $i
+                        ]            
+                    ]), 'application/json')
+                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_PLANO_CONTAS');
+                $jsonData = $response->json();
+                
+                foreach ($jsonData['d'] as $key => $contract) {
+                    array_push($result, $contract);
+                    if($contract['mensagem'] == "Nenhum registro encontrado." ){
+                        $valueTrue = false;
+                    }
+                }
+            }
+            print_r($result);
+            return $result;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function novoteste2(Request $request) {
+        try {
+            $valueTrue = true;
+            $result = array();
+
+            $response = Http::withHeaders([
+                'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+            ])
+            ->withBody(json_encode([                 
+                "tk" => '140'           
+            ]), 'application/json')
+            ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/BuscaRepresentante');
+            $jsonData = $response->json();
+            print_r($jsonData);
+
+            /*for($i = 1;$valueTrue == true ; $i++){
+                $response = Http::withHeaders([
+                    'Authorization' => 'CG46H-JQR3C-2JRHY-XYRKY-GSPVM'
+                ])
+                    ->withBody(json_encode([                 
+                        "filtros" => [
+                            "pagina" => $i
+                        ]            
+                    ]), 'application/json')
+                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CONTA_GERENCIAL');
+                $jsonData = $response->json();
+                
+                foreach ($jsonData['d'] as $key => $contract) {
+                    array_push($result, $contract);
+                    if($contract['mensagem'] == "Nenhum registro encontrado." ){
+                        $valueTrue = false;
+                    }
+                }
+            }*/
+            return $result;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     private function guid_to_str($binary_guid){

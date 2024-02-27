@@ -252,7 +252,7 @@ class ItemController extends Controller
                     }
                 }
             }
-
+            
             $zip = new \ZipArchive();
             $response = new Response();
             $response->headers->set('Content-Type', 'application/zip');
