@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\Operation;
+use App\Models\Executive;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
