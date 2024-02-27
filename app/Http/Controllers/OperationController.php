@@ -100,7 +100,7 @@ class OperationController extends Controller
             $operation = Operation::find($id);
             if ($request->name) $operation->name = $request->name;
             if ($request->has('manager_id')) $operation->manager_id = Collaborator::find($request->manager_id)->id;
-            if ($request->has('executive_id')) $operation->executive_id = Collaborator::find($request->executive_id)->id;
+            if ($request->has('executive_id')) $operation->executive_id = Executive::find($request->executive_id)->id;
             if ($request->reference) $operation->reference = $request->reference;
             $operation->save();
             return response()->json([$operation, 'message' => 'Operação atualizada com sucesso!'], 200);
