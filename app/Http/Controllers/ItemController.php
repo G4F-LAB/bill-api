@@ -212,6 +212,7 @@ class ItemController extends Controller
     {
         try {
             $item = Item::find($id);
+            $checklist = Checklist::where('checklist_id',$item->checklist_id)->first();
             //dd($item);
             if (!$item) {
                 return response()->json([
@@ -222,6 +223,8 @@ class ItemController extends Controller
             $item->id = $id;
             $item->deleted_at = date('Y/m/d H:i');
             $item->save();
+
+            $checklist->sync_itens();
 
             return response()->json(['message' => 'Item deletado com sucesso'], 200);
         } catch (\Exception $e) {
