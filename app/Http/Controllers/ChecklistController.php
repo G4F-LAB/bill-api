@@ -152,7 +152,7 @@ class ChecklistController extends Controller
     }
 
 
-    public function updateCompetence(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
 
