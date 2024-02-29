@@ -62,7 +62,7 @@ class ContractController extends Controller
                         $query->whereNotIn('id',explode(',',$request->ids));
                     }
                 }]
-            ])->orderBy('id','ASC')->get();
+            ])->orderBy('name')->get();
             // ->orderBy('id','ASC')
             // ->paginate(500);
         // }
