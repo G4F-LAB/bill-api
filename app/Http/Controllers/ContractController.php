@@ -28,18 +28,17 @@ class ContractController extends Controller
                 ,'operation'
                 ,'operation.executive'
                 ,'operation.collaborators'
-                ,'operation.collaborators'
                 ])
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
             //         $query2->where('collaborator_id',$this->user->id);
             //     });
             // })
-            // ->when($this->user->is_analyst(), function($query) {
-            //     $query->whereHas('collaborators', function($query2) {
-            //         $query2->where('collaborator_id',$this->user->id);
-            //     });
-            // })
+            ->when($this->user->is_analyst(), function($query) {
+                $query->whereHas('operation.collaborators', function($query2) {
+                    $query2->where('collaborator_id',$this->user->id);
+                });
+            })
             ->when($this->user->is_executive(), function($query) {
                 $query->whereHas('operation.executive', function($query2) {
                     $query2->where('manager_id',$this->user->id);
@@ -63,7 +62,7 @@ class ContractController extends Controller
                         $query->whereNotIn('id',explode(',',$request->ids));
                     }
                 }]
-            ])->orderBy('id','ASC')->get();
+            ])->orderBy('name')->get();
             // ->orderBy('id','ASC')
             // ->paginate(500);
         // }

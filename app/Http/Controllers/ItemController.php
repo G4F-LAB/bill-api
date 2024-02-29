@@ -59,7 +59,7 @@ class ItemController extends Controller
         $data = [
             "file_naming_id" => $request->file_naming_id,
             "checklist_id" => $request->checklist_id,
-            "status" => $request->status,
+            //"status" => $request->status,
             "file_competence_id" => $request->file_competence_id
         ];
 
@@ -69,7 +69,7 @@ class ItemController extends Controller
             return response()->json($addItems, 200);
         }
 
-        return response()->json(['message' => 'Item(s) atualizado(s) com sucesso'], 200);
+        return response()->json(['message' => 'Item(s) adicionado(s) com sucesso'], 200);
     }
 
 
@@ -130,7 +130,7 @@ class ItemController extends Controller
                     $file_found->itens()->attach($this->item->id);
                     $this->item->status = true;
                     $this->item->save();
-                    $checklist->syncItens();
+                    $checklist->sync_itens();
                 }
 
             } catch (\Exception $e) {
@@ -212,6 +212,7 @@ class ItemController extends Controller
     {
         try {
             $item = Item::find($id);
+            $checklist = Checklist::where('checklist_id',$item->checklist_id)->first();
             //dd($item);
             if (!$item) {
                 return response()->json([
@@ -222,6 +223,8 @@ class ItemController extends Controller
             $item->id = $id;
             $item->deleted_at = date('Y/m/d H:i');
             $item->save();
+
+            $checklist->sync_itens();
 
             return response()->json(['message' => 'Item deletado com sucesso'], 200);
         } catch (\Exception $e) {
