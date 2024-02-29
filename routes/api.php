@@ -61,7 +61,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Vincular/desvincular um colaborador a uma operação
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/collaborator/operation', [CollaboratorController::class , 'collaboratorOperation']);
-    Route::middleware('check.permission: Admin, Executivo, Operacao')->delete('/collaborator/operation', [CollaboratorController::class , 'unlinkCollaborator']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/collaborator/oper', [CollaboratorController::class , 'unlinkCollaborator']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/collaborators/typescontracts', [ContractController::class , 'getContractsOfCollab']);
 
 

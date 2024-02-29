@@ -201,7 +201,7 @@ class CollaboratorController extends Controller
                 $collaborator_operation->save();
                 return response()->json(['status' => 'ok','message' => 'Colaborador vinculado com sucesso!'], 201);
             }
-            
+
             $operation->collaborators()->attach($collaborator->id);
             return response()->json(['status' => 'ok','message' => 'Colaborador vinculado com sucesso!'], 201);
         } catch (\Exception $e) {
