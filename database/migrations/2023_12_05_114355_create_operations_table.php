@@ -17,13 +17,21 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->unsignedInteger('manager_id')->nullable();
+            $table->unsignedSmallInteger('executive_id')->nullable();
             $table->unsignedInteger('reference')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
 
+        Schema::create('executives', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->unsignedInteger('manager_id')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::table('operations', function (Blueprint $table) {
-            $table->unsignedSmallInteger('executive_id')->nullable();
             $table->foreign('executive_id')->references('id')->on('executives');
         });
 
@@ -54,5 +62,6 @@ return new class extends Migration
             $table->dropForeign('operations_executive_id_foreign');
         });
         Schema::dropIfExists('operations');
+        Schema::dropIfExists('executives');
     }
 };
