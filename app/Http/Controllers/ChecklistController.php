@@ -266,7 +266,7 @@ class ChecklistController extends Controller
                         });
                     })
                     ->where('checklist_id', $request->id)->get();
-                $this->checklist = Checklist::find($request->id);
+                $this->checklist = Checklist::with('status')->find($request->id);
                 $contract = Contract::find($this->checklist->contract_id);
 
                 $data['checklist'] = $this->checklist;
