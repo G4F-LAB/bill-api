@@ -39,7 +39,6 @@ class ContractController extends Controller
                 $query->whereHas('operation.collaborators', function($query2) {
                     $query2->where('collaborator_id',$this->user->id);
                 });
-                dd($query);
                 
             })
             ->when($this->user->is_executive(), function($query) {
