@@ -61,7 +61,7 @@ class CollaboratorController extends Controller
                 ['name', '!=', Null],
                 [function ($query) use ($request) {
                     if (($s = $request->q)) {
-                        $query->orWhere('name', 'LIKE', '%' . $s . '%')
+                        $query->orWhere('name', 'ILIKE', '%' . $s . '%')
                             // ->orWhere('email', 'LIKE', '%' . $s . '%')
                             ->get();
                     } else if (($id = $request->permission)) {
