@@ -10,6 +10,8 @@ class FileType extends Model
 {
     use HasFactory;
     use LogsActivity;
+
+    protected $table = 'file_types';
     
     protected $fillable = [
         "files_category",

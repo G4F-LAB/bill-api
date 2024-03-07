@@ -20,6 +20,7 @@ class Contract extends Model
         'name',
         'contractual_situation',
         'manager_id',
+        'alias'
     ];
     
 
@@ -29,7 +30,8 @@ class Contract extends Model
             'client_id',
             'name',
             'contractual_situation',
-            'manager_id'
+            'manager_id',
+            'alias'
         ]);
     }
 
