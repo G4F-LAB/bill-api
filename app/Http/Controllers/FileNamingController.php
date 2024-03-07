@@ -16,7 +16,7 @@ class FileNamingController extends Controller
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
             return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-        $file_naming = FileNaming::all();
+        $file_naming = FileNaming::with('type')->get();
 
         return response()->json($file_naming, 200);
     }
