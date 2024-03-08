@@ -26,7 +26,7 @@ class OperationController extends Controller
 
     public function getAllOperations(Request $request)
     {
-        $operations = Operation::with('executives')->where([
+        $operations = Operation::with('executives','collaborator','collaborators')->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
                     $query->orWhere('name', 'LIKE', '%' . $s . '%')
