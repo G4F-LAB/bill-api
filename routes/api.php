@@ -66,8 +66,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Contratos
-    Route::middleware('check.permission: Admin, Executivo, Operacao')->get('/contracts', [ContractController::class, 'getAllContracts']);
-    Route::middleware('check.permission: Admin, Executivo, Operacao')->put('/contracts', [ContractController::class, 'update']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->get('/contracts', [ContractController::class, 'getAllContracts']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->put('/contracts', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/contracts/new', [ContractController::class, 'updateContracts']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/contracts/{id}/checklist', [ContractController::class, 'checklistByContractID']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/default/files', [FileController::class,'uploadDefaultFiles']);
@@ -118,6 +118,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes/{id}', [OperationController::class, 'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations', [OperationController::class, 'getAllOperations']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/managers', [OperationController::class, 'getAllManagerofOperation']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/collab_operacoes', [OperationController::class, 'deleteCollabOperation']);
 
     //Executivo
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);

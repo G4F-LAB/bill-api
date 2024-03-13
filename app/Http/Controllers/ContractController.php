@@ -35,9 +35,11 @@ class ContractController extends Controller
             //     });
             // })
             ->when($this->user->is_analyst(), function($query) {
+                
                 $query->whereHas('operation.collaborators', function($query2) {
                     $query2->where('collaborator_id',$this->user->id);
                 });
+                
             })
             ->when($this->user->is_executive(), function($query) {
                 $query->whereHas('operation.executive', function($query2) {
@@ -96,29 +98,29 @@ class ContractController extends Controller
     //Atualizar os dados de um contrato
     public function update(Request $request)
     {
-        // return response()->json([$request->contrato], 200);
         try {
 
-            //const user = auth.userdispatch(fetchDataContByPerm(user.id))
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
 
-            if (!$colaborador->hasPermission(['Admin', 'Executivo'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::where('client_id',$request->id_contrato)->first();
-
+            $contrato = Contract::where('id',$request->id)->first();
             if ($request->has('contractual_situation')) {
                 $contrato->contractual_situation = $request->contractual_situation;
             }
 
-            if ($request->has('id_gerente')) {
-                $contrato->manager_id = $request->id_gerente;
+            if ($request->has('alias')) {
+                $contrato->alias = $request->alias;
+            }
+
+            if ($request->has('operation_id')) {
+                $contrato->operation_id = $request->operation_id;
             }
 
             $contrato->save();
 
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            // return response()->json(['error' => $e->getMessage()], 500);
             return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
         }
     }
