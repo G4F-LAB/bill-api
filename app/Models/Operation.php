@@ -49,7 +49,7 @@ class Operation extends Model
 
     public function executive() {
         return $this->belongsTo(Executive::class);
-    } 
+    }
 
     public function collaborators() {
         return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
@@ -63,5 +63,10 @@ class Operation extends Model
         return $this->belongsTo(Executive::class,'executive_id','id');
     }
 
+    public function collaborator_operations() {
+        return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')
+                                    
+                                    ->withTimestamps();
+    }
 
 }
