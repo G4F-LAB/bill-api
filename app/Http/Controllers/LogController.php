@@ -35,33 +35,29 @@ class LogController extends Controller
                  
                     foreach($checklist as $key => $value){
                         $endDate = Carbon::now();
-                        
-
-
+  
                         //Filtro de Datas:
                         if ($request->period = 'one_month') {
                             $startDate = Carbon::now()->subMonths(1);
-                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->whereBetween('created_at', [$startDate, $endDate])->get();
+                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->orderByDesc('id')->whereBetween('created_at', [$startDate, $endDate])->get();
 
-                            $logs[0]->properties = json_decode($logs[0]->properties);
-
+                           
                         } else
 
                         if ($request->period = 'three_month') {
                             $startDate = Carbon::now()->subMonths(3);
-                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->whereBetween('created_at', [$startDate, $endDate])->get();
+                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->orderByDesc('id')->whereBetween('created_at', [$startDate, $endDate])->get();
 
                         } else
 
                         if ($request->period = 'six_month') {
                             $startDate = Carbon::now()->subMonths(6);
-                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->whereBetween('created_at', [$startDate, $endDate])->get();
+                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->orderByDesc('id')->whereBetween('created_at', [$startDate, $endDate])->get();
 
                         } else {
 
-                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->get();
-
-
+                            $logs = Log::where('subject_id', $value )->where('log_name',$request->log_name)->orderByDesc('id')->get();
+                            $logs[0]->properties = json_decode($logs[0]->properties);
                         }
                         
                         
@@ -69,6 +65,9 @@ class LogController extends Controller
                             $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->toArray();
                             $logs[$index]->name = $collaborator[0];
 
+
+
+                           
                             
                         }                       
                     }
@@ -88,10 +87,27 @@ class LogController extends Controller
                 $all_logs = [];
 
                 foreach ($items_ids as $key => $value) {
+                    $endDate = Carbon::now();
+
+                    if ($request->period = 'one_month') {
+                        $startDate = Carbon::now()->subMonths(1);
+                        $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name)->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('id')->get();       
+                    } 
+                    
+                    else if ($request->period = 'three_month') {
+                        $startDate = Carbon::now()->subMonths(3);
+                        $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name)->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('id')->get();
+
+                    } else if ($request->period = 'six_month') {
+                        $startDate = Carbon::now()->subMonths(6);
+                        $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name)->whereBetween('created_at', [$startDate, $endDate])->orderByDesc('id')->get();
+
+                    } else {
+                        $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name)->orderByDesc('id')->get();
+                        $logs[0]->properties = json_decode($logs[0]->properties);
+                    
+                    }
                    
-                
-                    $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name)->orderByDesc('id')->get();
-                
                     foreach($logs as $index => $log){
                         $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->first();
                         $log->name = $collaborator;
