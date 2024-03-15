@@ -10,6 +10,7 @@ use App\Models\Operation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class ContractController extends Controller
 {
@@ -250,9 +251,22 @@ class ContractController extends Controller
     }
 
     public function checklistByContractID($id,Request $request) {
+        // try{
+        //     $checklist = Contract::with('checklist.status')->where('id',$id)
+        //     ->first();
+        //     return response()->json($checklist);
+
+        // } catch (\Exception $e) {
+        //     return response()->json(['error' => $e->getMessage()], 500);
+        // }
+
         try{
-            $checklist = Contract::with('checklist.status')->where('id',$id)
-            ->first();
+            $checklist = Contract::with('checklist.status')->where('id', $id)->first();
+
+            foreach ($checklist->checklist as $item) {
+                $item->date_checklist = Carbon::createFromFormat('Y-m-d', $item->date_checklist)->format('m/Y');
+            }
+            
             return response()->json($checklist);
 
         } catch (\Exception $e) {
