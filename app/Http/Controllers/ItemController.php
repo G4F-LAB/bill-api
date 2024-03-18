@@ -212,7 +212,7 @@ class ItemController extends Controller
     {
         try {
             $item = Item::find($id);
-            $checklist = Checklist::where('checklist_id',$item->checklist_id)->first();
+            $checklist = Checklist::where('id',$item->checklist_id)->first();
             //dd($item);
             if (!$item) {
                 return response()->json([
