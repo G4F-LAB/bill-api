@@ -135,7 +135,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //LOG
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/log', [LogController::class, 'show']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log/contract', [LogController::class, 'getLogName']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log/contract', [LogController::class,'getLogName']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log/collaborator', [LogController::class, 'getLogCollaborator']);
 
     //Automação
