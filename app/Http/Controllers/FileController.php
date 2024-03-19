@@ -652,9 +652,10 @@ class FileController extends Controller
             $file->delete();
 
             return response()->json(['message' => 'Arquivo excluído com sucesso'], 200);
+            
         } catch (\Exception $e) {
             return response()->json(['message' => 'O arquivo não foi excluído'], 500);
         }
     }
-    
+
 }
