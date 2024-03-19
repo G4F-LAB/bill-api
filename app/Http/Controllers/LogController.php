@@ -50,7 +50,6 @@ class LogController extends Controller
                         
                         $logs = $logs->orderByDesc('id')->get();
                         
-                        
                         foreach($logs as $index => $log){
                             $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->toArray();
                             $logs[$index]->name = $collaborator[0];
@@ -76,11 +75,8 @@ class LogController extends Controller
                     "three_month"=> 3,
                     "six_month"=> 6
                 ];
-
-                // print_r($request->period);exit;
                 
                 foreach ($items_ids as $key => $value) {
-                    
                     $endDate = Carbon::now();
                     $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name);
                     
@@ -90,16 +86,7 @@ class LogController extends Controller
                     }
                     
                     $logs = $logs->orderByDesc('id')->get();
-                    
-                    // print_r($logs);exit;
-  
-                  
-                  
-                        
-                  
-                    
-
-
+            
                     foreach($logs as $index => $log){
                         $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->first();
                         $log->name = $collaborator;
