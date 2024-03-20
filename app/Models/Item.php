@@ -57,7 +57,7 @@ class Item extends Model
         ];
 
     }
-
+    
     public function checklist() {
         return $this->belongsTo(Checklist::class);
     }

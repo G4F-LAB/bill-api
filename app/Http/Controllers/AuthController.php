@@ -83,7 +83,7 @@ class AuthController extends Controller
                 return response()->json(['error' => $message], $httpCode);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Não foi possível conectar ao servidor, tente novamente mais tarde.'], 500);
+            return response()->json(['error' => $e->getMessage()],401);
         }
     }    
     
