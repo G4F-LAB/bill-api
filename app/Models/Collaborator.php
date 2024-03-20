@@ -59,10 +59,10 @@ class Collaborator extends Model
     }
 
 
-    // public function contracts()
-    // {
-    //     return $this->belongsToMany(Contract::class, 'collaborator_contracts', 'collaborator_id', 'contract_id')->withTimestamps();
-    // }
+    public function contracts()
+    {
+        return $this->belongsTo(Contract::class, 'collaborator_id', 'operation_id')->withTimestamps();
+    }
 
     public function manager()
     {

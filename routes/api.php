@@ -85,6 +85,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/{reference}', [ChecklistController::class,'getDataChecklist']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/competence', [ChecklistController::class,'getAllCompetence']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/check/checklist', [ChecklistController::class,'checkChelistExpired']);
     //automate
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
