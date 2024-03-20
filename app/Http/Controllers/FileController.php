@@ -641,21 +641,21 @@ class FileController extends Controller
         return response()->json(['message' => 'Erros salvos com sucesso'], 201);
     }
 
-    public function deleteFile($id) {
+    public function deleteFile(Request $request, $file_id, $item_id) {
         try {
-            $file = File::find($id);
-
-            if (!$file) {
-                return response()->json(['message' => 'Arquivo não encontrado'], 404);
+            $items_file = FilesItens::where('item_id', $item_id)->where('file_id', $file_id)->first();
+            if (!$items_file) {
+                return response()->json(['message' => ' Arquivo não encontrado!'], 404);
             }
+            $items_file->delete();
 
-            $file->delete();
-
-            return response()->json(['message' => 'Arquivo excluído com sucesso'], 200);
-            
+            return response()->json(['message' => ' Item excluído com sucesso!'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'O arquivo não foi excluído'], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+
+
 
 }
