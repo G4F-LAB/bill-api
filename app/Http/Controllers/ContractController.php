@@ -133,6 +133,7 @@ class ContractController extends Controller
             $references = Operation::pluck('reference','id')->toArray();
             $resultAPIViewContracts = self::requestAPIViewContracts();
             $resultAPIViewCentrodeCusto = self::requestAPIViewCentroCusto();
+          
             $contracts_array = [];
             foreach($resultAPIViewContracts as $index => $result){
                 foreach($resultAPIViewCentrodeCusto as $key => $result2){
@@ -162,14 +163,15 @@ class ContractController extends Controller
                                 $new_contract->contractual_situation = true;
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
-                                $new_contract->save();
                             }
-                        }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
-                            $new_contract = Contract::find($contract_closed['id']);
-                            $new_contract->contractual_situation = true;
-                            $new_contract->operation_id = $key;
-                            $new_contract->save();
                         }
+                        // elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
+                        //     $new_contract = Contract::find($contract_closed['id']);
+                        //     $new_contract->contractual_situation = true;
+                        //     $new_contract->operation_id = $key;
+                        //     $new_contract->save();
+                        // }
+                        
                         if(!empty($contract_find_active)){
                             if((is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
                                 $new_contract = Contract::find($contract_find_active['id']);

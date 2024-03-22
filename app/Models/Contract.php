@@ -35,9 +35,9 @@ class Contract extends Model
         ]);
     }
 
-    // public function collaborators() {
-    //     return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
-    // }
+    public function collaborators() {
+        return $this->belongsToMany(Collaborator::class,'operations','manager_id', 'manager_id')->withTimestamps();
+    }
 
     public function manager() {
         return $this->belongsTo(Operation::class,'manager_id', 'id');
@@ -46,6 +46,7 @@ class Contract extends Model
     public function checklist(){
         return $this->hasMany(Checklist::class);
     }
+
 
     public function operation() {
         return $this->belongsTo(Operation::class);
