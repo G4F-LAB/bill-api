@@ -61,7 +61,12 @@ class LogController extends Controller
                     foreach ($contractLogs as $key => $value) {
                         $contractLogs[$key]->properties = json_decode($value->properties); 
                     }
-                   
+
+                    foreach($contractLogs as $index => $log){
+                        $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->toArray();
+                        $contractLogs[$index]->name = $collaborator[0];
+                        
+                    }
 
                 return response()->json($contractLogs, 200);
               
@@ -127,10 +132,6 @@ class LogController extends Controller
                     
                 }
             }
-
-            // foreach ($logs as $log) {
-            //     $log->properties = json_decode($log->properties);
-            // }
 
            return response()->json($logs, 200);
     

@@ -55,16 +55,21 @@ class ItemController extends Controller
     }
 
     public function store(Request $request)
-    {
+    { 
+
         $data = [
             "file_naming_id" => $request->file_naming_id,
             "checklist_id" => $request->checklist_id,
             //"status" => $request->status,
-            "file_competence_id" => $request->file_competence_id
+            "file_competence_id" => $request->file_competence_id,
+            "mandatory" => true
         ];
 
+        
         $addItems = $this->addItems($data);
-
+        
+        
+        
         if (isset($addItems['error'])) {
             return response()->json($addItems, 200);
         }
@@ -74,10 +79,10 @@ class ItemController extends Controller
 
 
     public function addItems($data)
-    {
+    {    
         $errors = [];
         $errors['status'] = 'Error';
-
+       
         foreach ($data['file_naming_id'] as $file_naming_id) {
 
             $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
@@ -93,7 +98,6 @@ class ItemController extends Controller
 
             try {
                 $this->item = new Item();
-
                 $this->item->status = false;
                 $this->item->status = false;
                 $this->item->file_naming_id = $file_naming_id;
@@ -137,8 +141,8 @@ class ItemController extends Controller
                 return ['error' => $e->getMessage()];
             }
 
-        }
-
+        } 
+   
         return 'Item(s) adicionado(s) com sucesso';
     }
 
@@ -192,6 +196,9 @@ class ItemController extends Controller
                 $this->item->file_competence_id = $request->file_competence_id;
             if ($request->has('checklist_id'))
                 $this->item->checklist_id = $request->checklist_id;
+            if ($request->has('mandatory')){
+                $this->item->mandatory = $request->mandatory;
+                }
             $this->item->save();
 
             // $checklist = Checklist::find($this->item->checklist_id);
@@ -275,5 +282,25 @@ class ItemController extends Controller
             }
 
         }
+
+        
+    }
+
+    public function updateMandatoryStatus(Request $request){
+
+    try {
+        $item = Item::find($request->id);
+
+        if (!$item) {
+            return response()->json(['message' => 'Item não encontrado'], 404);
+        }
+
+        
+
+    } catch (\Exception $e) {
+        return response()->json(['erro' => $e->getMessage()], 500);
+    }
+
+    
     }
 }
