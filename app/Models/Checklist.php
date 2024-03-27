@@ -73,6 +73,10 @@ class Checklist extends Model
         return $this->belongsTo(StatusChecklist::class);
     }
 
+    public function getManager() {
+        return $this->belongsTo(StatusChecklist::class);
+    }
+
     public function sync_itens($id = NULL) {
         if($id == NULL) $id = $this->id;
         $checklist = $this->with('itens')->find($id);

@@ -24,20 +24,21 @@ class AnalyticsController extends Controller {
         $id = $request->input('id');
         $month = now()->format('m');
         $year = now()->format('Y');
-    
+        
+        
+        // return response()->json($request);
         if($this->auth_user->is_executive()) {
-    
+            
             $this->executive = $this->executive->with('manager')->where('manager_id',$this->auth_user->id)->first();
             $operationsQuery = $this->operation->with(['contract.checklist' => function($query) use($month,$year) {
-                                $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$month,$year]);
-                            }])->where('executive_id',$this->executive->id);
-                            
+                $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$month,$year]);
+            }])->where('executive_id',$this->executive->id);
+            
             if($id){
                 $operationsQuery=$operationsQuery->where('id', $id);
             }
             $operations = $operationsQuery->get()->toArray();
-                        
-                    
+                                
             foreach($operations as $index => $operation) {
                 $contracts = $operation['contract'];
     

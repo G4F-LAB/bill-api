@@ -31,6 +31,7 @@ class FileController extends Controller
             $file = $request->file('file');
 
             $items = $this->getChecklistItems($checklist_id);
+     
             $result = array();
             if(is_array($file))
             {
@@ -75,6 +76,7 @@ class FileController extends Controller
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
 
         $fileNames = self::getChecklistFilesName($items);
+
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
         $permission = $this->auth_user->getAuthUserPermission();
@@ -171,7 +173,7 @@ class FileController extends Controller
         }
 
         if(!empty($request_errors['errors'])) return response()->json($request_errors,200);
-        
+
         /*
             array() = [
                 [0] => [
@@ -205,11 +207,11 @@ class FileController extends Controller
 
             //'0' => ['arquivo1','arquivo2','arquivo3']
             foreach($file_array[0] as $archive) {
-                
+
                 $filetype = $archive->getClientOriginalExtension();
                 $filename = substr($archive->getClientOriginalName(), 0, -strlen($filetype) -1);
 
-                // referencia 
+                // referencia
                 // 1 => Mês anterior (Mês atual - 2)
                 // 2 => Mês de prestação de serviço (Mês atual - 1)
                 $sub_months = '';
@@ -228,7 +230,7 @@ class FileController extends Controller
                 }else {
                     $path = "/$this->env/book/default/$ref_date/". $archive->getClientOriginalName();
                 }
-                
+
                 $date_archive = substr($path,strrpos($path, '/')-7,7);
 
                 // se arquivo estiver na lista de arquivos default e não estiver inserido no repositório -> lógica de inserção
@@ -248,7 +250,7 @@ class FileController extends Controller
                                 $sub_months = 1;
                             }
 
-                            // pega a data de vigência do item a partir da data de checklist 
+                            // pega a data de vigência do item a partir da data de checklist
                             $date_item = Carbon::createFromFormat('Y-m-d', $item['checklist']['date_checklist'])->startOfMonth();
                             $date_item = $date_item->subMonths($sub_months)->format('Y-m');
 
@@ -291,8 +293,8 @@ class FileController extends Controller
 
                 /*foreach ($itens as $key => $item) {
                     $file_name = $item['file_naming']['standard_file_naming'];
-    
-                    // verificação apenas do itens dos checklists do mês se possuem algum item DCTFWEB 
+
+                    // verificação apenas do itens dos checklists do mês se possuem algum item DCTFWEB
                     if(
                         (
                             (strpos($filename,'DCTF') !== FALSE && strpos($item['file_naming']['standard_file_naming'],'DCTF') !== FALSE) ||
@@ -320,7 +322,7 @@ class FileController extends Controller
                                         ['item_id' => $item['id'], 'path' => $path, 'complementary_name' => $filenameplus],
                                     );
                                     Item::where('id', $item['id'])->update(['status' => true]);
-        
+
                                     $checklist = Checklist::find($item['checklist_id']);
                                     //$checklist->sync_itens();
                                     $msg = [
@@ -337,7 +339,7 @@ class FileController extends Controller
                                     //echo $th->getMessage()."\n\n";
                                     $msg = ['status' => 'Error', 'message'=> $th->getMessage(),'name' => $filename];
                                 }
-        
+
                             // } else{
                             //     $msg = ['status' => 'Error', 'message'=> 'Error ao subir arquivo','name' => $filename];
                             // }
@@ -415,7 +417,7 @@ class FileController extends Controller
                                 $query->where('contract_id',$exact_result['id'])->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$month,$year]);
                             })
                             ->get()->toArray();
-                
+
                 if(!empty($itens)) {
 
                     // agrupamento dos checklists do contrato exato ($exact_result)
@@ -426,7 +428,7 @@ class FileController extends Controller
                             $exact_result['checklists'][] = $item['checklist'];
                         }
                     }
-                    
+
                     // atribuição dos itens ao checklist
                     /*foreach($exact_result['checklists'] as $checklist_index => $checklist) {
 
@@ -460,7 +462,7 @@ class FileController extends Controller
                             if(isset($occurrences['contracts'][$indexes[0]]['checklists'])){
                                 foreach($occurrences['contracts'][$indexes[0]]['checklists'] as $occ_checklist_index => $occ_checklist) {
                                     foreach($exact_result['checklists'] as $exact_checklist) {
-                                        
+
                                         // se o checklist do resultado exato já estiver no checklist do contrato das $occurrences
                                         if($exact_checklist['id'] == $occ_checklist['id']) {
                                             // se o id do item de checklist do contrato exato não estiver incluso no array de ocorrências
@@ -508,7 +510,7 @@ class FileController extends Controller
         $regex_names = '/\b(?!CTO\b)([^\s_]+)\b(?:\s+([^\s_]+)\b)?(?:\s+(?!CTO\b)([^\s_]+)\b)?/';
 
         $contracts = Contract::where('name','ilike','%CTO%')->orderBy('name')->get()->toArray();
-        
+
         foreach($contracts as $contract) {
             $cto = '';
             $first_name = '';
@@ -558,7 +560,7 @@ class FileController extends Controller
     private function getFileAliasNames($file,$alias_size = 1) {
         $regex_cto = '/CTO\s*([^\s_]+)/';
         $regex_first_name = '/^([^\s_]+)/';
-        
+
         $filetype = $file->getClientOriginalExtension();
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
 
@@ -594,7 +596,7 @@ class FileController extends Controller
 
         // $not_found = false;
         // $occurrences = $this->getOccurrence($request);
-        
+
         $rules = [
             'errors' => 'required|array'
         ];
@@ -640,4 +642,22 @@ class FileController extends Controller
 
         return response()->json(['message' => 'Erros salvos com sucesso'], 201);
     }
+
+    public function deleteFile(Request $request, $file_id, $item_id) {
+        try {
+            $items_file = FilesItens::where('item_id', $item_id)->where('file_id', $file_id)->first();
+            if (!$items_file) {
+                return response()->json(['message' => ' Arquivo não encontrado!'], 404);
+            }
+            $items_file->delete();
+
+            return response()->json(['message' => ' Item excluído com sucesso!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+
 }
