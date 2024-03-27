@@ -133,6 +133,7 @@ class ItemController extends Controller
                 if (!empty($file_found)) {
                     $file_found->itens()->attach($this->item->id);
                     $this->item->status = true;
+                    //Acredito que aqui é so colocar um $this->item->mandatory = true; ai no caso ele so vai contar também os status de true.
                     $this->item->save();
                     $checklist->sync_itens();
                 }
@@ -286,21 +287,4 @@ class ItemController extends Controller
         
     }
 
-    public function updateMandatoryStatus(Request $request){
-
-    try {
-        $item = Item::find($request->id);
-
-        if (!$item) {
-            return response()->json(['message' => 'Item não encontrado'], 404);
-        }
-
-        
-
-    } catch (\Exception $e) {
-        return response()->json(['erro' => $e->getMessage()], 500);
-    }
-
-    
-    }
 }
