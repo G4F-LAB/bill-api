@@ -31,6 +31,7 @@ class FileController extends Controller
             $file = $request->file('file');
 
             $items = $this->getChecklistItems($checklist_id);
+     
             $result = array();
             if(is_array($file))
             {
@@ -75,6 +76,7 @@ class FileController extends Controller
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
 
         $fileNames = self::getChecklistFilesName($items);
+
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
         $permission = $this->auth_user->getAuthUserPermission();
