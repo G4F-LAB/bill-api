@@ -35,8 +35,14 @@ class Operation extends Model
 
     protected function opInitials(): Attribute
     {
-        preg_match('/(?:\w+\. )?(\w+).*?(\w+)(?: \w+\.)?$/', $this->name, $result);
-        $initials =  strtoupper($result[1][0] . $result[1][1] . $result[2][0]);
+        $string = $this->name;
+
+        $numbers = array_filter(str_split($this->name), function ($char) {
+          return is_numeric($char);
+        });
+        
+        $initials = 'OP' . implode("", $numbers);
+        
 
         return new Attribute(
             get: fn () => $initials,
