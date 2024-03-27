@@ -20,6 +20,7 @@ class Contract extends Model
         'name',
         'contractual_situation',
         'manager_id',
+        'status_id',
         'alias'
     ];
     
@@ -31,13 +32,14 @@ class Contract extends Model
             'name',
             'contractual_situation',
             'manager_id',
+            'status_id',
             'alias'
         ]);
     }
 
-    // public function collaborators() {
-    //     return $this->belongsToMany(Collaborator::class,'collaborator_contracts', 'contract_id', 'collaborator_id')->withTimestamps();
-    // }
+    public function collaborators() {
+        return $this->belongsToMany(Collaborator::class,'operations','manager_id', 'manager_id')->withTimestamps();
+    }
 
     public function manager() {
         return $this->belongsTo(Operation::class,'manager_id', 'id');
@@ -47,7 +49,11 @@ class Contract extends Model
         return $this->hasMany(Checklist::class);
     }
 
+
     public function operation() {
         return $this->belongsTo(Operation::class);
+    }
+    public function status() {
+        return $this->belongsTo(StatusContract::class);
     }
 }

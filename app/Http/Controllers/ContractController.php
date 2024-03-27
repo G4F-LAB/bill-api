@@ -21,6 +21,7 @@ class ContractController extends Controller
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
+      
         $permission = Permission::where('name','ilike','')->first();
             $contracts = Contract::with([
                 'checklist' => function($query){
@@ -29,6 +30,7 @@ class ContractController extends Controller
                 ,'operation'
                 ,'operation.executive'
                 ,'operation.collaborators'
+                ,'status'
                 ])
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
@@ -53,7 +55,7 @@ class ContractController extends Controller
                 });
             })
             ->where([
-                ['contractual_situation', '=', true],
+                // ['contractual_situation', '=', true],
                 [function ($query) use ($request) {
                     if (($s = $request->q)) {
                         $query->orWhere('name', 'LIKE', '%' . $s . '%')
@@ -75,7 +77,24 @@ class ContractController extends Controller
         //     return response()->json($contracts, 200);
         // }
         // var_dump(response()->json($contracts, 200));
-        return response()->json($contracts, 200);
+
+              if ($request->checklist == 'true') {
+                // dd($contracts);
+                foreach ($contracts as $key => $value) {
+                    // Check if the 'field' is empty for the current element
+                 
+                    if (count($value['checklist']) === 0) {
+
+                        // If 'field' is empty, remove this element from the array
+                        unset($contracts[$key]);
+                    }
+                }
+              }
+
+              $data = array_values($contracts->toArray());
+        
+
+        return response()->json($data, 200);
     }
 
     //Vincular um colaborador a um contrato
@@ -133,6 +152,7 @@ class ContractController extends Controller
             $references = Operation::pluck('reference','id')->toArray();
             $resultAPIViewContracts = self::requestAPIViewContracts();
             $resultAPIViewCentrodeCusto = self::requestAPIViewCentroCusto();
+          return $resultAPIViewCentrodeCusto;
             $contracts_array = [];
             foreach($resultAPIViewContracts as $index => $result){
                 foreach($resultAPIViewCentrodeCusto as $key => $result2){
@@ -162,14 +182,15 @@ class ContractController extends Controller
                                 $new_contract->contractual_situation = true;
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
-                                $new_contract->save();
                             }
-                        }elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
-                            $new_contract = Contract::find($contract_closed['id']);
-                            $new_contract->contractual_situation = true;
-                            $new_contract->operation_id = $key;
-                            $new_contract->save();
                         }
+                        // elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
+                        //     $new_contract = Contract::find($contract_closed['id']);
+                        //     $new_contract->contractual_situation = true;
+                        //     $new_contract->operation_id = $key;
+                        //     $new_contract->save();
+                        // }
+                        
                         if(!empty($contract_find_active)){
                             if((is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
                                 $new_contract = Contract::find($contract_find_active['id']);
