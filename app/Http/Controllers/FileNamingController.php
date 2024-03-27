@@ -12,11 +12,27 @@ class FileNamingController extends Controller
 {
     public function getAll()
     {
+
+    //   if (request('filter')) {
+    //     return 'a';
+    //   }else{
+    //     return 'b';
+    //   }
+
+
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
             return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-        $file_naming = FileNaming::with('type')->get();
+        
+            $file_naming = FileNaming::with('type');
+
+            if (request('filter')) {
+                $file_naming->whereRaw('LOWER(file_name) LIKE ?', ['%' . strtolower(request('filter')) . '%']);
+            }  
+
+            $file_naming = $file_naming->get();
+
 
         return response()->json($file_naming, 200);
     }
@@ -60,12 +76,16 @@ class FileNamingController extends Controller
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = FileNaming::find($request->id_file_naming);
+            $files_category = FileType::where('file_type_id', $file_naming->id)->first();
 
             if (!$file_naming)
                 return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
 
             $file_naming->file_name = trim($request->file_name);
+            $file_naming->group = trim($request->group);
             $file_naming->standard_file_naming = trim($request->standard_file_naming);
+           
+
             $file_naming->save();
 
             $file_naming = FileNaming::find($request->id_file_naming);
