@@ -21,7 +21,8 @@ class Item extends Model
         'file_type_id',
         'status',
         'file_naming_id',
-        'checklist_id'
+        'checklist_id',
+        'mandatory'
     ];
 
 
@@ -30,7 +31,8 @@ class Item extends Model
         return LogOptions::defaults()->useLogName('item')->logOnly(['file_type_id',
         'status',
         'file_naming_id',
-        'checklist_id']);
+        'checklist_id',
+        'mandatory']);
 
 
     }
@@ -42,7 +44,8 @@ class Item extends Model
             'file_naming_id' => 'required',
             'file_type_id' => 'required',
             'status' => 'required',
-            'competence' => 'required'
+            'competence' => 'required',
+            'mandatory' => true
         ];
     }
 
