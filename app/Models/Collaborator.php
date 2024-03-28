@@ -13,27 +13,37 @@ use LdapRecord\Container;
 class Collaborator extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'collaborators';
-    protected $appends = ['name_initials', 'email'];
+    protected $appends = ['name_initials'];
     protected $hidden = ['pivot'];
     protected $fillable = [
         'id',
         'collaborators',
         'name_initials',
         'pivot',
-    ];
+        'permission_id',
+        'email',
+        'username',
+        'phone',
+        'taxvat',
+        'office',
+        'role'
+            ];
 
-    public function getActivitylogOptions(): LogOptions
-    {        
-        return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'id',
-            'collaborators',
-            'name_initials',
-            'pivot',
-        ]);
-    }
+    // public function getActivitylogOptions(): LogOptions
+    // {        
+    //     return LogOptions::defaults()->useLogName('Contract')->logOnly([
+    //         'id',
+    //         'collaborators',
+    //         'name_initials',
+    //         'pivot',
+    //         'permission_id',
+    //         'email',
+    //         'username',
+    //     ]);
+    // }
 
     public function permission()
     {
@@ -89,18 +99,6 @@ class Collaborator extends Model
 
         return new Attribute(
             get: fn () => $initials,
-        );
-    }
-
-
-    protected function email(): Attribute
-    {
-        $adUser = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($this->objectguid))->first();
-
-        $email =  array_key_exists('mail', $adUser) ? $adUser['mail'][0] : null;
-
-        return new Attribute(
-            get: fn () => $email,
         );
     }
 
@@ -178,8 +176,5 @@ class Collaborator extends Model
         return pack('Vv2n4', ...$pieces);
     }
 
-    public function routeNotificationFor()
-    {
-        return 'm@ninaut.com'; //You e-mail property here
-    }
+    
 }
