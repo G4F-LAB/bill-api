@@ -118,6 +118,13 @@ class ContractController extends Controller
                 $contrato->operation_id = $request->operation_id;
             }
 
+            if ($request->has('name')) {
+                $contrato->name = $request->name;
+            }
+
+            if ($request->has('client_id')) {
+                $contrato->client_id = $request->client_id;
+            }
             $contrato->save();
 
             return response()->json([$contrato], 200);
@@ -127,7 +134,7 @@ class ContractController extends Controller
     }
 
     //Atualizar a lista de contratos
-    public function updateContracts()
+    public function updateListContracts()
     {
         try {
             $references = Operation::pluck('reference','id')->toArray();
@@ -276,5 +283,39 @@ class ContractController extends Controller
         }
 
     }
+
+
+    public function createContract(Request $request)
+    {
+        try {
+            $contract = Contract::where('client_id', $request->client_id)
+            ->first();
+            $contract = new Contract();
+            $contract->client_id = $request->client_id;
+            $contract->name = $request->name;
+            $contract->contractual_situation = $request->contractual_situation;
+            $contract->operation_id = $request->operation_id;
+            $contract->alias = $request->alias;
+            $contract->save();
+            return response()->json([$contract, 'message' => 'Contrato adicionado com sucesso!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function inactiveContract(Request $request)
+    {
+        try {
+            $contract = Contract::where('id', $request->id)
+            ->first();     
+            $contract->contractual_situation = false;           
+            $contract->save();
+            return response()->json([$contract, 'message' => 'Contrato inativado com sucesso!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
+ 
+
 
 }

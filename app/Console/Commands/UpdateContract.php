@@ -3,25 +3,17 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\ChecklistController;
-use App\Models\Checklist;
+use App\Http\Controllers\ContractController;
 use App\Models\Collaborator;
-use App\Models\Contract;
-use App\Notifications\ChecklistNotification;
-use Notification;
-use App\Mail\Checklist\Created as ChecklistCreated;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Mail;
-use App\Notifications\CheckChecklistExpired;
 
-class SendEmail extends Command
+class UpdateContract extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'sendemail:send';
+    protected $signature = 'updatecontract:send';
 
     /**
      * The console command description.
@@ -38,8 +30,8 @@ class SendEmail extends Command
     function handle()
     {
         try{
-            $checkChelistExpired = new ChecklistController(new Checklist,new Collaborator);
-            $checkChelistExpired->checkChelistExpired();
+            $contract= new ContractController(new Collaborator);
+            $contract->updateContracts();
            
         }catch(\Exception $e){
             return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
