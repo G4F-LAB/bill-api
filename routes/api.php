@@ -44,6 +44,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/refresh', [AuthController::class, 'refresh']);
+    Route::put('/update_info', [AuthController::class, 'update_info']);
 
     //Setup
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
@@ -145,7 +146,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Automação
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
 
-    Route::middleware('check.permission: All')->delete('/file/{id}', [FileController::class, 'deleteFile']);
+    Route::middleware('check.permission:All')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
+
 });
 
 

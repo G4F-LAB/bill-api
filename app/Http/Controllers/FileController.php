@@ -31,6 +31,7 @@ class FileController extends Controller
             $file = $request->file('file');
 
             $items = $this->getChecklistItems($checklist_id);
+
             $result = array();
             if(is_array($file))
             {
@@ -75,6 +76,7 @@ class FileController extends Controller
         $filename = substr($file->getClientOriginalName(), 0, -strlen($filetype) -1);
 
         $fileNames = self::getChecklistFilesName($items);
+
         $data = ['status' => 'Error', 'message'=> 'Não é um nome de arquivo válido para este checklist','name' => $filename];
 
         $permission = $this->auth_user->getAuthUserPermission();
@@ -641,21 +643,35 @@ class FileController extends Controller
         return response()->json(['message' => 'Erros salvos com sucesso'], 201);
     }
 
-    public function deleteFile($id) {
+    public function deleteFile(Request $request, $file_id, $item_id) {
         try {
-            $file = File::find($id);
+            $items_file = FilesItens::where('item_id', $item_id)->where('file_id', $file_id)->first();
+            if (!$items_file) {
+                return response()->json(['message' => ' Arquivo não encontrado'], 404);
+            }
+            $items_file->delete();
 
-            if (!$file) {
-                return response()->json(['message' => 'Arquivo não encontrado'], 404);
+            // $file = File::find($file_id);
+            // $file->delete();
+
+            $item_files = FilesItens::where('item_id', $item_id)->first();
+            if($item_files === null){
+                Item::where('id', $item_id)->update(['status' => false]);
+            }else{
+                Item::where('id', $item_id)->update(['status' => true]);
             }
 
-            $file->delete();
+            $checklist_id =  Item::where('id', $item_id)->first()->checklist_id;
+            $checklist = Checklist::find($checklist_id);
+            $checklist->sync_itens();
 
-            return response()->json(['message' => 'Arquivo excluído com sucesso'], 200);
-            
+            return response()->json(['message' => ' Arquivo excluído com sucesso'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'O arquivo não foi excluído'], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+
+
 
 }

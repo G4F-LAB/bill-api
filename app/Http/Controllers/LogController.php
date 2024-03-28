@@ -31,39 +31,45 @@ class LogController extends Controller
         try{
             if($request->contract_id){
                 if($request->log_name == "Checklist"){
-                    $checklist = Checklist::where('contract_id',$request->contract_id)->pluck('id');
+
+                    $ids = Checklist::where('contract_id', $request->contract_id)->pluck('id')->toArray();       
+                    array_push($ids, $request->contract_id );
+
+                    $contractLogs = Log::whereIn('log_name', ['Contract', 'Checklist'])
+                    ->whereNotNull('subject_id')
+                    ->whereIn('subject_id', $ids)
+                    ->orderBy('created_at', 'desc');
                     
-                    $period = [
-                        "one_month"=> 1,
-                        "three_month"=> 3,
-                        "six_month"=> 6
-                    ];
-                    
-                    foreach($checklist as $key => $value){
+                    if ($request->has('period') && in_array($request->period, ['one_month', 'three_month', 'six_month'])) {
+                        $periods = [
+                            "one_month" => 1,
+                            "three_month" => 3,
+                            "six_month" => 6
+                        ];
+
                         $endDate = Carbon::now();
-                        $logs = Log::where('subject_id', $value)->where('log_name', $request->log_name);
-                        
-                        if ($request->has('period') && $request->period != 'all') {
-                            $startDate = Carbon::now()->subMonths($period[$request->period]);
-                            $logs->whereBetween('created_at', [$startDate, $endDate]);
-                        }
-                        
-                        $logs = $logs->orderByDesc('id')->get();
-                        
-                        foreach($logs as $index => $log){
-                            $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->toArray();
-                            $logs[$index]->name = $collaborator[0];
-                        }                       
+                        $startDate = Carbon::now()->subMonths($periods[$request->period]);
+
+                        $contractLogs->whereBetween('created_at', [$startDate, $endDate]);
+                        $period = $request->period;
                     }
-                }
-                
-                else {
-                    $logs = Log::where('subject_id', $request->contract_id )->where('log_name',$request->log_name)->get();
-                    foreach($logs as $index => $log){
+                    
+                    $contractLogs = $contractLogs->get();
+  
+                    }
+
+                    foreach ($contractLogs as $key => $value) {
+                        $contractLogs[$key]->properties = json_decode($value->properties); 
+                    }
+
+                    foreach($contractLogs as $index => $log){
                         $collaborator = Collaborator::where('id',$log->causer_id)->pluck('name')->toArray();
-                        $logs[$index]->name = $collaborator[0];
+                        $contractLogs[$index]->name = $collaborator[0];
+                        
                     }
-                }
+
+                return response()->json($contractLogs, 200);
+              
             }
             
             else if ($request->log_name == "item") {
@@ -126,10 +132,6 @@ class LogController extends Controller
                     
                 }
             }
-
-            // foreach ($logs as $log) {
-            //     $log->properties = json_decode($log->properties);
-            // }
 
            return response()->json($logs, 200);
     

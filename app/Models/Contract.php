@@ -20,6 +20,7 @@ class Contract extends Model
         'name',
         'contractual_situation',
         'manager_id',
+        'status_id',
         'alias'
     ];
     
@@ -31,6 +32,7 @@ class Contract extends Model
             'name',
             'contractual_situation',
             'manager_id',
+            'status_id',
             'alias'
         ]);
     }
@@ -50,5 +52,8 @@ class Contract extends Model
 
     public function operation() {
         return $this->belongsTo(Operation::class);
+    }
+    public function status() {
+        return $this->belongsTo(StatusContract::class);
     }
 }
