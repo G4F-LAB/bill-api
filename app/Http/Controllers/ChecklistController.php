@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ItemController;
 use App\Notifications\ChecklistNotification;
-use App\Notifications\CheckChecklistExpired;
+use App\Notifications\ChecklistExpired;
 
 use Notification;
 use App\Models\FileCompetence;
@@ -385,46 +385,40 @@ class ChecklistController extends Controller
             }
         }
 
+        function setimoDiaUtilDoMes($ano, $mes) {
+            $data = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
+            $diasUteis = 0;
+            while($diasUteis < 7) {
+                // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
+                if($data->isWeekday() ) {
+                    $diasUteis++;
+                }
+                $data->addDay(); // Avança para o próximo dia
+            }
+            
+            return $data->subDay(); // Retorna o sétimo dia útil do mês
+        }
 
         public function checkChelistExpired()
         {
             try{
-                $dataAtual = now();
-                $dataComparacao = $dataAtual->subDays(20);
-                $contract = array();
-                $checklistExpired = Checklist::with('contract')->whereDate('date_checklist', '>=', $dataComparacao)->get()->toArray();
-                // dd($checklistExpired[0]['contract']);\
-                // $collaborator = Operation::with('collaborator')->where('id',$checklistExpired)->first()->toArray();
-                foreach($checklistExpired as $key => $checklist)
+                $data = Carbon::now();   
+                $month = $data->month;
+                $year = $data->year;
+                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
+                $checklists = Checklist::with([             
+                    'contract.operation.collaborator' 
+                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
+                ->where('status_id','!=',5)
+                ->get()->toArray();
+                foreach($checklists as $key => $checklist)
                 {
                     $contract = $checklist['contract'];
-                    echo "<pre>";
-                    print_r($contract['operation_id']);
-                    //$operacion_id = Contract::where("id", $contract_id)->get()->pluck("operation_id");
-                    // $collaborator = Contract::with(['operation','collaborator' => function($query) use ($contract_id){
-                    //     $query->where('id',$contract_id)->first();
-                    // }]);
-                    // $collaborator = Collaborator::with(['operation.contracts' => function($query) use ($contract_id){
-                    //     $query->where('contract_id',$contract_id)->get();
-                    // }]);
-                    // $collaborator = Collaborator::with('contracts')->get()->first();
-                    
-                    $executive[] = Operation::with('collaborator')
-                    ->where('id',$contract['operation_id'])->get()->pluck('email');
-                    
-                    
-                    
-                      
-
-                    
+                    $emailCollab = $contract['operation']['collaborator'];
+                    // echo "<pre>";
+                    // print_r($checklist);
+                    Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
                 }
-
-               
-                // dd($executive);
-                $collaborator = Collaborator::with('contract');   
-                 $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
-                 dd($to_collaborators);
-                // Notification::sendNow( [], new ChecklistNotification($this->checklist, "talis.santaigo@g4f.com.br"));
                 return response()->json("Email enviado com sucesso", 200);
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);

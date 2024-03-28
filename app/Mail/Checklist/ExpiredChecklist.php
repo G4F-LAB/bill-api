@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Checklist;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
-use App\Mail\Checklist\Created as ChecklistCreated;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Support\Facades\Log;
 
-class CheckChecklistExpired extends Mailable
+use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
+
+class ExpiredChecklist extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,11 +22,13 @@ class CheckChecklistExpired extends Mailable
      *
      * @return void
      */
-    public function __construct($data, $collaborators)
+    public function __construct($checklist)
     {
-        $this->to = $collaborators;
-        $this->checklist = $data;  
-        $this->toMail($this);
+        echo "<pre>";
+        // var_dump($checklist['id']);exit;
+        $this->checklist = $checklist;
+        $this->month = Carbon::parse($checklist['date_checklist'])->translatedFormat('F');
+        $this->url = env('APP_URL') ? env('APP_URL') : 'https://book.hml.g4f.com.br';
     }
 
     /**
@@ -35,7 +39,7 @@ class CheckChecklistExpired extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Check Checklist Expired',
+            subject: "Checklist $this->month já disponível",
         );
     }
 
@@ -47,26 +51,12 @@ class CheckChecklistExpired extends Mailable
     public function content()
     {
         return new Content(
-            view: 'view.name',
+            view: 'welcome',
+            with: [
+                'month' => $this->month,
+                'url' => "{$this->url}/contracts/{$this->checklist['contract_id']}/checklist/{$this->checklist['id']}/items"
+            ],
         );
-    }
-
-    public function via($notifiable)
-    {
-        return ['mail'];
-       
-    }
-
-
-    public function toMail($notifiable)
-    {
-        try {
-            Mail::to($this->to)->send(new ChecklistCreated($this->checklist));
-         
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-       
     }
 
     /**

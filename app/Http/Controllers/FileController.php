@@ -31,7 +31,7 @@ class FileController extends Controller
             $file = $request->file('file');
 
             $items = $this->getChecklistItems($checklist_id);
-     
+
             $result = array();
             if(is_array($file))
             {
@@ -647,11 +647,25 @@ class FileController extends Controller
         try {
             $items_file = FilesItens::where('item_id', $item_id)->where('file_id', $file_id)->first();
             if (!$items_file) {
-                return response()->json(['message' => ' Arquivo não encontrado!'], 404);
+                return response()->json(['message' => ' Arquivo não encontrado'], 404);
             }
             $items_file->delete();
 
-            return response()->json(['message' => ' Item excluído com sucesso!'], 200);
+            // $file = File::find($file_id);
+            // $file->delete();
+
+            $item_files = FilesItens::where('item_id', $item_id)->first();
+            if($item_files === null){
+                Item::where('id', $item_id)->update(['status' => false]);
+            }else{
+                Item::where('id', $item_id)->update(['status' => true]);
+            }
+
+            $checklist_id =  Item::where('id', $item_id)->first()->checklist_id;
+            $checklist = Checklist::find($checklist_id);
+            $checklist->sync_itens();
+
+            return response()->json(['message' => ' Arquivo excluído com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

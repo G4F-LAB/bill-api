@@ -98,6 +98,27 @@ class AuthController extends Controller
         }
     }
 
+    public function update_info()
+    {
+        $collaborators = Collaborator::all();
+
+        foreach ($collaborators as $collaborator) {
+
+            $user = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($collaborator->objectguid))->first();
+    
+            $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
+            $collaborator->email = isset($user['mail']) ? $user['mail'][0] : NULL;
+            $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
+            $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
+            $collaborator->office = isset($user['physicaldeliveryofficename']) ? $user['physicaldeliveryofficename'][0] : NULL;
+            $collaborator->role = isset($user['title']) ? $user['title'][0] : NULL;
+            $collaborator->save();
+        }
+
+        return response()->json(['message' => 'Realizado com sucesso!']);
+
+    }
+
     private function checkDatabaseUser()
     {
         $firstLogin = false;
@@ -106,19 +127,29 @@ class AuthController extends Controller
         $permissionResult = $this->checkPermission($user);
         $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
 
+    
+        
         $colaborador = Collaborator::with('permission')->where('objectguid', $user->getConvertedGuid())->first();
         if ($colaborador == NULL) {
 
             $colaborador = new Collaborator();
-            $colaborador->name = $user['displayname'][0];
+            $colaborador->name = isset($user['displayname']) ? $user['displayname'][0] : NULL;
+            $colaborador->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
+            $colaborador->email = isset($user['mail']) ? $user['mail'][0] : NULL;
+            $colaborador->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
+            $colaborador->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
+            $colaborador->office = isset($user['physicaldeliveryofficename']) ? $user['physicaldeliveryofficename'][0] : NULL;
+            $colaborador->role = isset($user['title']) ? $user['title'][0] : NULL;
             $colaborador->objectguid = $user->getConvertedGuid();
             $colaborador->permission_id = $permission;
             $colaborador->save();
 
             $firstLogin = true;
-        }
+        } 
+   
 
         return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+        return response()->json(['message' => 'Realizado com sucesso!']);
     }
 
     public function refresh()
@@ -135,6 +166,7 @@ class AuthController extends Controller
     {
         try {
             $colaborador = Collaborator::with('permission')->where('objectguid', Auth::user()->getConvertedGuid())->first();
+
 
             return response()->json($colaborador);
         } catch (\Exception $e) {
@@ -171,5 +203,20 @@ class AuthController extends Controller
     {
         $id = Permission::where('name', $permission)->first();
         return $id->id;
+    }
+    private function str_to_guid(string $uuidString): string
+    {
+        $uuidString = str_replace('-', '', $uuidString);
+        $pieces = [
+            ltrim(substr($uuidString, 0, 8), '0'),
+            ltrim(substr($uuidString, 8, 4), '0'),
+            ltrim(substr($uuidString, 12, 4), '0'),
+            ltrim(substr($uuidString, 16, 4), '0'),
+            ltrim(substr($uuidString, 20, 4), '0'),
+            ltrim(substr($uuidString, 24, 4), '0'),
+            ltrim(substr($uuidString, 28, 4), '0'),
+        ];
+        $pieces = array_map('hexdec', $pieces);
+        return pack('Vv2n4', ...$pieces);
     }
 }
