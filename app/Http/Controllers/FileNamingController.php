@@ -13,14 +13,6 @@ class FileNamingController extends Controller
 {
     public function getAll()
     {
-
-    //   if (request('filter')) {
-    //     return 'a';
-    //   }else{
-    //     return 'b';
-    //   }
-
-
         $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
         if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
             return response()->json(['error' => 'Acesso não permitido.'], 403);
@@ -77,28 +69,34 @@ class FileNamingController extends Controller
 
     public function update(Request $request)
     {
+      
         try {
-    
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin']))
-                return response()->json(['error' => 'Acesso não permitido.'], 403);
-    
-            $file_naming = FileNaming::find($request->id_file_naming);
-            if (!$file_naming)
+            
+            // $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            // if (!$colaborador->hasPermission(['Admin']))
+            //     return response()->json(['error' => 'Acesso não permitido.'], 403);
+            
+            
+            
+            $file_naming = FileNaming::find($request->id);
+            if (!$file_naming) {
                 return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
-    
-            $file_naming->file_name = trim($request->file_name);
-            $file_naming->group = trim($request->group);
-            $file_naming->standard_file_naming = trim($request->standard_file_naming);
-            $file_naming->files_type_id = trim($request->files_type_id);
-    
-            $file_naming->save();
-    
-            return response()->json($file_naming, 200);
+        
+            } else{
+
+                $file_naming->file_name = trim($request->file_name);
+                $file_naming->group = trim($request->group);
+                $file_naming->standard_file_naming = trim($request->standard_file_naming);
+                $file_naming->file_type_id = trim($request->file_type_id);
+                $file_naming->save();
+                
+            }
+
+            return response()->json(['message' => 'Nomeclatura atualizada com sucesso'], 200);
     
         } catch (\Exception $exception) {
-            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
-            // return response()->json(['error'=> $exception->getMessage()], 500);
+            // return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+            return response()->json(['error'=> $exception->getMessage()], 500);
         }
     }
 
