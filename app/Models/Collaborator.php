@@ -74,6 +74,11 @@ class Collaborator extends Model
         return $this->belongsTo(Contract::class, 'collaborator_id', 'operation_id')->withTimestamps();
     }
 
+    public function contract()
+    {
+        return $this->belongsToMany(Contract::class, 'operations','manager_id', 'id')->withTimestamps();
+    }
+
     public function manager()
     {
         return $this->hasMany(Contract::class, 'id', 'manager_id');
@@ -82,6 +87,11 @@ class Collaborator extends Model
     public function operations()
     {
         return $this->belongsToMany(Operation::class, 'collaborator_operations', 'collaborator_id', 'operation_id')->withTimestamps();
+    }
+
+     public function operation()
+    {
+        return $this->hasMany(Operation::class,'manager_id','id');
     }
 
     public function executive() {
