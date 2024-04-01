@@ -93,12 +93,10 @@ class ItemController extends Controller
                 ];
             }
 
-            if (!empty($errors['errors']))
-                return response()->json($errors, 422);
+            if (!empty($errors['errors'])) continue;
 
             try {
                 $this->item = new Item();
-                $this->item->status = false;
                 $this->item->status = false;
                 $this->item->file_naming_id = $file_naming_id;
                 $this->item->file_competence_id = $data['file_competence_id'];
