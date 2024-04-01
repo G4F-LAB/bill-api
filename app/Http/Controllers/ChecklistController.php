@@ -317,74 +317,80 @@ class ChecklistController extends Controller
 
         function duplicateall(Request $request)
         {
-
+    
             try {
                 $date = Carbon::now();
-
-                $ids_contracts = Contract::where('contractual_situation',true)->pluck('id');
+    
+                $ids_contracts = Contract::where('contractual_situation', true)->pluck('id');
                 // $date_atual = '2024-02';
                 // $date_reference = '2024-01';
                 $date_atual = $date->format('Y-m');
                 $date_reference = $date->subMonth()->format('Y-m');
-
-
+    
+    
                 foreach ($ids_contracts as $id_contract) {
-
-                    $checklist = new Checklist();
-                    $id_checklist = null;
-
-                    $id_checklist_reference = Checklist::where('contract_id', $id_contract)
-                                            ->where('date_checklist', 'LIKE', $date_reference.'%')
-                                            ->first();
-
-                    if (!empty($id_checklist_reference)) {
-
-                        $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
-                                                ->pluck('file_naming_id');
-
-
-                        $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
-                            ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual.'-01')))
-                            ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual.'-01')))
+                    if ($id_contract == 94) {
+                        # code...
+    
+                        $checklist = new Checklist();
+                        $id_checklist = null;
+    
+                        $id_checklist_reference = Checklist::where('contract_id', $id_contract)
+                            ->where('date_checklist', 'LIKE', $date_reference . '%')
                             ->first();
-
-                        if (empty($checklist_exists_atual)) {
-                            $checklist->contract_id  = $id_checklist_reference->contract_id;
-                            $checklist->date_checklist  = $date_atual.'-01';
-                            $checklist->object_contract = $id_checklist_reference->object_contract;
-                            $checklist->shipping_method = $id_checklist_reference->shipping_method;
-                            $checklist->sector_id = $id_checklist_reference->sector_id;
-                            $checklist->obs = $id_checklist_reference->obs;
-                            $checklist->accept = $id_checklist_reference->accept;
-                            $checklist->signed_by = $id_checklist_reference->signed_by;
-                            $checklist->save();
-                            $id_checklist = $checklist->id;
-                        } else {
-                            $id_checklist = $checklist_exists_atual->id;
-                        }
-
-                        if (!empty($ids_items_duplicate)) {
-                            $data = [
-                                "file_naming_id" => $ids_items_duplicate,
-                                "checklist_id" => $id_checklist,
-                                "status" => false,
-                                "file_competence_id" => 1
-                            ];
-
-                            $itemController = new ItemController(null);
-
-                            $itemController->addItems($data);
+    
+    
+                        if (!empty($id_checklist_reference)) {
+    
+                            $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
+                                ->where('mandatory', true)
+                                ->get(['file_competence_id', 'file_naming_id']);
+    
+                            $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
+                                ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual . '-01')))
+                                ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual . '-01')))
+                                ->first();
+    
+                            if ($checklist_exists_atual === null) {
+                                $checklist->contract_id  = $id_checklist_reference->contract_id;
+                                $checklist->date_checklist  = $date_atual . '-01';
+                                $checklist->object_contract = $id_checklist_reference->object_contract;
+                                $checklist->shipping_method = $id_checklist_reference->shipping_method;
+                                $checklist->sector_id = $id_checklist_reference->sector_id;
+                                $checklist->obs = $id_checklist_reference->obs;
+                                $checklist->accept = $id_checklist_reference->accept;
+                                $checklist->signed_by = $id_checklist_reference->signed_by;
+                                $checklist->save();
+                                $id_checklist = $checklist->id;
+                            } else {
+                                $id_checklist = $checklist_exists_atual->id;
+                            }
+    
+                            if (!empty($ids_items_duplicate)) {
+                                foreach ($ids_items_duplicate as $value) {
+                                    // print($value);exit;
+                                    $data = [
+                                        "file_naming_id" => [$value->file_naming_id],
+                                        "checklist_id" => $id_checklist,
+                                        "status" => false,
+                                        "file_competence_id" => $value->file_competence_id
+                                    ];
+    
+                                    $itemController = new ItemController(null);
+    
+                                    $itemController->addItems($data);
+                                }
+                            }
                         }
                     }
                 }
-
-                return response()->json(['status'=>'ok'],500);
-
-            }catch(\Exception $e){
-                return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+                return response()->json(['status' => 'ok'], 200);
+            } catch (\Exception $e) {
+                return response()->json($e->getMessage(), 500);
             }
         }
 
+        
         function setimoDiaUtilDoMes($ano, $mes) {
             $data = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
             $diasUteis = 0;
