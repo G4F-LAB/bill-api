@@ -21,12 +21,13 @@ class AnalyticsController extends Controller {
     }
 
     public function getMyAnalytics(Request $request) {
+
         $id = $request->input('id');
         $month = now()->format('m');
         $year = now()->format('Y');
         
         
-        // return response()->json($request);
+        return response()->json($request);
         if($this->auth_user->is_executive()) {
             
             $this->executive = $this->executive->with('manager')->where('manager_id',$this->auth_user->id)->first();
