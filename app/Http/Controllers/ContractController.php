@@ -16,16 +16,22 @@ class ContractController extends Controller
 {
     public function __construct(Collaborator $collaborator) {
         $this->user = $collaborator->getAuthUser();
+        $this->current_month =  now()->format('m');
+
+        if(now()->format('d') <= 7){
+            $this->current_month = now()->format('m') - 1;
+        }
     }
 
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
-      
+   
         $permission = Permission::where('name','ilike','')->first();
+
             $contracts = Contract::with([
                 'checklist' => function($query){
-                    $query->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[now()->format('m'),now()->format('Y')]);
+                    $query->with('itens.fileNaming')->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$this->current_month ,now()->format('Y')]);
                 }
                 ,'operation'
                 ,'operation.executive'
