@@ -196,12 +196,15 @@ class AnalyticsController extends Controller
         try {
 
             $id_operation = $request->id;
+            $date = date('Y-m', strtotime('-1 month'));
 
-            $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
-            ->select('contracts.id', 'contracts.name', 'checklists.completion')
-            ->where('contracts.status_id', 1)
-            ->where('contracts.operation_id', $id_operation)
-            ->get();
+            $operations = Contract::
+                leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
+                ->select('contracts.id', 'contracts.name', 'checklists.completion')
+                ->where('contracts.status_id', 1)
+                ->where('contracts.operation_id', $id_operation)
+                ->where('date_checklist', 'LIKE', $date . '%')
+                ->get();
 
 
             // $operations = Contract::select('id', 'name')
@@ -219,10 +222,10 @@ class AnalyticsController extends Controller
 
     public function check_complete(Request $request)
     {
-        
-        
+
+
         try {
-            
+
             $operations = $this->getOperationsByUser()->getData();
             $ids_operations = [];
 
