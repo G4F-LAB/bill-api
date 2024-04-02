@@ -197,10 +197,19 @@ class AnalyticsController extends Controller
 
             $id_operation = $request->id;
 
-            $operations = Contract::select('id', 'name')
-                ->where('status_id', 1)
-                ->where('operation_id', $id_operation)
-                ->get();
+            $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
+            ->select('contracts.id', 'contracts.name', 'checklists.completion')
+            ->where('contracts.status_id', 1)
+            ->where('contracts.operation_id', $id_operation)
+            ->get();
+
+
+            // $operations = Contract::select('id', 'name')
+            // ->where('status_id', 1)
+            // ->where('operation_id', $id_operation)
+            // ->get();
+
+
 
             return response()->json(['success' => $operations], 200);
         } catch (\Exception $e) {
