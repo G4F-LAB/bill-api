@@ -154,7 +154,7 @@ class ContractController extends Controller
 
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Não foi possível atualizar o contrato.'], 500);
+            return response()->json(['error' => $e->getMessage() + 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 
@@ -165,7 +165,7 @@ class ContractController extends Controller
             $references = Operation::pluck('reference','id')->toArray();
             $resultAPIViewContracts = self::requestAPIViewContracts();
             $resultAPIViewCentrodeCusto = self::requestAPIViewCentroCusto();
-          return $resultAPIViewCentrodeCusto;
+
             $contracts_array = [];
             foreach($resultAPIViewContracts as $index => $result){
                 foreach($resultAPIViewCentrodeCusto as $key => $result2){
@@ -237,7 +237,7 @@ class ContractController extends Controller
                             "pagina" => $i
                         ]
                     ]), 'application/json')
-                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CONTRATOS');
+                    ->post('http://g4f.begcloud.com:86/rules/WSCIGAMCRM.asmx/VIEW_CONTRATOS');
                 $jsonData = $response->json();
 
                 foreach ($jsonData['d'] as $key => $contract) {
@@ -268,7 +268,7 @@ class ContractController extends Controller
                             "pagina" => $i
                         ]
                     ]), 'application/json')
-                    ->post('http://g4f.begcloud.com:85/rules/WSCIGAMCRM.asmx/VIEW_CENTRO_CUSTO');
+                    ->post('http://g4f.begcloud.com:86/rules/WSCIGAMCRM.asmx/VIEW_CENTRO_CUSTO');
                 $jsonData = $response->json();
 
                 foreach ($jsonData['d'] as $key => $contract) {
@@ -285,15 +285,6 @@ class ContractController extends Controller
     }
 
     public function checklistByContractID($id,Request $request) {
-        // try{
-        //     $checklist = Contract::with('checklist.status')->where('id',$id)
-        //     ->first();
-        //     return response()->json($checklist);
-
-        // } catch (\Exception $e) {
-        //     return response()->json(['error' => $e->getMessage()], 500);
-        // }
-
         try{
             $checklist = Contract::with('checklist.status')->where('id', $id)->first();
 
@@ -327,20 +318,5 @@ class ContractController extends Controller
             return response()->json(['error' => $e->getMessage()]);
         }
     }
-
-    public function inactiveContract(Request $request)
-    {
-        try {
-            $contract = Contract::where('id', $request->id)
-            ->first();     
-            $contract->contractual_situation = false;           
-            $contract->save();
-            return response()->json([$contract, 'message' => 'Contrato inativado com sucesso!'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
-    }
- 
-
 
 }
