@@ -329,7 +329,7 @@ class ChecklistController extends Controller
     
     
                 foreach ($ids_contracts as $id_contract) {
-                    if ($id_contract == 94) {
+                    // if ($id_contract == 94) {
                         # code...
     
                         $checklist = new Checklist();
@@ -382,7 +382,7 @@ class ChecklistController extends Controller
                                 }
                             }
                         }
-                    }
+                    // }
                 }
                 return response()->json(['status' => 'ok'], 200);
             } catch (\Exception $e) {
