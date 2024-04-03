@@ -20,7 +20,10 @@ class DirectoryController extends Controller
     }
 
     public function getAnalyticsDirectory(Request $request)
+
+    
     {
+        return $request; die;
         $month = $request->input('month');
         $year = $request->input('year');
 

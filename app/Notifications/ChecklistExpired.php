@@ -46,6 +46,7 @@ class ChecklistExpired extends Notification
     public function toMail($notifiable)
     {
         try {
+            // var_dump('aqui1123123',$this->checklist);
             Mail::to($this->to)->send(new ChecklistCreated($this->checklist));
          
         } catch (\Throwable $th) {

@@ -76,7 +76,6 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/ocurrences', [FileController::class,'searchOcurrence']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/files', [FileController::class,'uploadContractFiles']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/create', [ContractController::class,'createContract']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/inactive', [ContractController::class,'inactiveContract']);
 
     //CheckList//
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
@@ -94,7 +93,33 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
     //Analytics
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
+    
+    
+    Route::prefix('/analytics')->group(function () {
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getOperationsByUser']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
+        
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);        
+    });
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     Route::middleware('check.permission: Admin')->get('/directory',[DirectoryController::class,'getAnalyticsDirectory']);
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 
