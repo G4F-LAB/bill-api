@@ -72,9 +72,9 @@ class FileNamingController extends Controller
       
         try {
             
-            // $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            // if (!$colaborador->hasPermission(['Admin']))
-            //     return response()->json(['error' => 'Acesso não permitido.'], 403);
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            if (!$colaborador->hasPermission(['Admin']))
+                return response()->json(['error' => 'Acesso não permitido.'], 403);
             
             
             
@@ -95,8 +95,8 @@ class FileNamingController extends Controller
             return response()->json(['message' => 'Nomeclatura atualizada com sucesso'], 200);
     
         } catch (\Exception $exception) {
-            // return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
-            return response()->json(['error'=> $exception->getMessage()], 500);
+            return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
+            // return response()->json(['error'=> $exception->getMessage()], 500);
         }
     }
 
