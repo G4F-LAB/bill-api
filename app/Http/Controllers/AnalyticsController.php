@@ -167,7 +167,6 @@ class AnalyticsController extends Controller
 
 
             if (!$executive->isEmpty()) {
-
                 $operations = Operation::select('operations.id', 'operations.name')
                     ->whereIn('executive_id', $executive)
                     ->get();
@@ -179,9 +178,13 @@ class AnalyticsController extends Controller
                 return response()->json(['success' => $operations], 200);
             } else {
                 $operations = Operation::join('collaborator_operations', 'operations.id', '=', 'collaborator_operations.operation_id')
-                    ->select('operations.id', 'operations.name')
-                    ->where('collaborator_id', $id_user)
-                    ->get();
+                ->select('operations.id', 'operations.name')
+                ->where('collaborator_id', $id_user)
+                ->whereNull('collaborator_operations.deleted_at') // Condição NOT NULL
+                ->get();
+             
+                // print_r($id_user);exit;
+                // return $operations;
 
                 if ($operations->isEmpty()) {
                     return response()->json(['error' => 'Nenhum dado vinculado'], 500);
