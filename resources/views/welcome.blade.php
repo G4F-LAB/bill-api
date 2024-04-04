@@ -244,7 +244,7 @@
 
                                         <div style="line-height: 24px">
 
-                                        Verifique o checklist do mês e conquiste o mundo (ou pelo menos sua lista de tarefas)!
+                                        <!-- Verifique o checklist do mês e conquiste o mundo (ou pelo menos sua lista de tarefas)! {{$date_checklist}} -->
                                         </div>
                                     </td>
                                 </tr>

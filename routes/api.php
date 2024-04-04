@@ -99,6 +99,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getOperationsByUser']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistsstatus',[AnalyticsController::class,'qtdStatusChecklists']);
         
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);        
     });

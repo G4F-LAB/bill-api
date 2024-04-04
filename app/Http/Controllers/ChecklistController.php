@@ -394,7 +394,7 @@ class ChecklistController extends Controller
         function setimoDiaUtilDoMes($ano, $mes) {
             $data = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
             $diasUteis = 0;
-            while($diasUteis < 7) {
+            while($diasUteis < 1) {
                 // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
                 if($data->isWeekday() ) {
                     $diasUteis++;
@@ -411,18 +411,16 @@ class ChecklistController extends Controller
                 $data = Carbon::now();   
                 $month = $data->month;
                 $year = $data->year;
-                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
+                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month)->toArray();
                 $checklists = Checklist::with([             
                     'contract.operation.collaborator' 
-                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
+                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil['formatted'])
                 ->where('status_id','!=',5)
                 ->get()->toArray();
                 foreach($checklists as $key => $checklist)
                 {
                     $contract = $checklist['contract'];
                     $emailCollab = $contract['operation']['collaborator'];
-                    // echo "<pre>";
-                    // print_r($checklist);
                     Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
                 }
                 return response()->json("Email enviado com sucesso", 200);
