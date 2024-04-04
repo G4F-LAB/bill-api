@@ -180,7 +180,7 @@ class AnalyticsController extends Controller
                 $operations = Operation::join('collaborator_operations', 'operations.id', '=', 'collaborator_operations.operation_id')
                 ->select('operations.id', 'operations.name')
                 ->where('collaborator_id', $id_user)
-                ->whereNull('collaborator_operations.deleted_at') // Condição NOT NULL
+                ->whereNull('collaborator_operations.deleted_at')
                 ->get();
              
                 // print_r($id_user);exit;
@@ -238,13 +238,17 @@ class AnalyticsController extends Controller
             }
 
             $ids_contracts = Contract::select('id')->whereIn('operation_id', $ids_operations)->pluck('id');
+            // return count($ids_contracts);
 
             $date = date('Y-m', strtotime('-1 month'));
 
             $complete = Checklist::where('date_checklist', 'LIKE', $date . '%')->whereIn('contract_id', $ids_contracts)->where('completion', 100)->count();
             $incomplete = Checklist::where('date_checklist', 'LIKE', $date . '%')->whereIn('contract_id', $ids_contracts)->where('completion', '!=', 100)->count();
 
-            $data = ['complete' => $complete, 'incomplete' => $incomplete];
+            $data = ['complete' => $complete, 
+                    'incomplete' => $incomplete,
+                    'contracts' => count($ids_contracts)
+                ];
 
             return response()->json(['success' => $data], 200);
         } catch (\Exception $e) {
