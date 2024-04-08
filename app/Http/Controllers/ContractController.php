@@ -98,8 +98,10 @@ class ContractController extends Controller
               }
 
               $data = array_values($contracts->toArray());
-        
-
+              if($data === []){
+                return response()->json($data, 204);
+              }
+              
         return response()->json($data, 200);
     }
 
