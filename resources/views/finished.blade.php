@@ -209,8 +209,8 @@
 
                             <div style="line-height: 35px">
 
-                                Checklist de <span style="color: #21475a;">
-                            </span> de 2024 já disponível
+                                Checklist {{$id}}<span style="color: #21475a;">
+                            </span> foi finalizado
 
                             </div>
                         </td>
@@ -243,8 +243,7 @@
 
 
                                         <div style="line-height: 24px">
-
-                                        <!-- Verifique o checklist do mês e conquiste o mundo (ou pelo menos sua lista de tarefas)! {{$date_checklist}} -->
+                                        O Sistema BOOK informa que o checklist {{$id}} do contrato {{$contract}} foi finalizado com 100% dos documentos previstos.
                                         </div>
                                     </td>
                                 </tr>
@@ -269,8 +268,7 @@
 
 
                                         <div style="line-height: 26px;">
-                                            <a href="
-                                            " style="color: #ffffff; text-decoration: none;">Acessar</a>
+                                            <a href="{{$url}}" style="color: #ffffff; text-decoration: none;">Acessar</a>
                                         </div>
                                     </td>
                                 </tr>
