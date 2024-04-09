@@ -127,7 +127,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Nomenclaturas padrão dos arquivos
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
-    Route::middleware('check.permission: Admin')->post('/filenaming', [FileNamingController::class, 'create']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/filenaming', [FileNamingController::class, 'store']);
     Route::middleware('check.permission: Admin')->put('/filenaming/{id}', [FileNamingController::class, 'update']);
     Route::middleware('check.permission: Admin')->delete('/filenaming', [FileNamingController::class, 'delete']);
     Route::middleware('check.permission: Admin')->get('/filenaming/checklist/{id}', [FileNamingController::class, 'getAllRelCheklist']);
@@ -140,7 +140,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
     Route::middleware('check.permission: Admin')->put('/item/competence/{id}', [ItemController::class, 'updateCompetence']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/item/{id}', [ItemController::class, 'destroy']);
-    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/itens/export', [ItemController::class,'exportFiles']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista,Processos')->get('/itens/export', [ItemController::class,'exportFiles']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->post('/update/competence/{id}', [ItemController::class,'updateCompetence']);
 
     //Operações

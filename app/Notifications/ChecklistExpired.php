@@ -6,7 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Mail\Checklist\ExpiredChecklist as ChecklistCreated;
+use App\Mail\Checklist\UpdateChecklist as UpdateChecklist;
+use App\Mail\Checklist\FinishedChecklist as FinishedChecklist;
 use Illuminate\Support\Facades\Mail;
 
 class ChecklistExpired extends Notification
@@ -21,7 +22,7 @@ class ChecklistExpired extends Notification
     public function __construct($data, $collaborators)
     {
         $this->to = $collaborators;
-        $this->checklist = $data;  
+        $this->checklist = $data[0];
         $this->toMail($this);
     }
 
@@ -46,8 +47,12 @@ class ChecklistExpired extends Notification
     public function toMail($notifiable)
     {
         try {
-            // var_dump('aqui1123123',$this->checklist);
-            Mail::to($this->to)->send(new ChecklistCreated($this->checklist));
+            if($this->checklist['status_id'] == 5){
+                Mail::to($this->to)->send(new FinishedChecklist($this->checklist));
+            }else{
+                Mail::to($this->to)->send(new UpdateChecklist($this->checklist));
+
+            }
          
         } catch (\Throwable $th) {
             throw $th;
