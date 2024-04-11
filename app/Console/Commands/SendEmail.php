@@ -38,8 +38,8 @@ class SendEmail extends Command
     function handle()
     {
         try{
-            $checkChelistExpired = new ChecklistController(new Checklist,new Collaborator);
-            $checkChelistExpired->checkChelistExpired();
+            // $checkChelistExpired = new ChecklistController(new Checklist,new Collaborator);
+            // $checkChelistExpired->checkChelistExpired($id);
            
         }catch(\Exception $e){
             return response()->json(['status'=>'error','message'=>$e->getMessage()],500);

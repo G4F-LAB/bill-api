@@ -52,12 +52,14 @@ class FileNamingController extends Controller
     {
         try {
             $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin']))
+            if (!$colaborador->hasPermission(['Admin,Executivo,Operacao,Analista,Rh,Fin']))
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = new FileNaming();
             $file_naming->file_name = trim($request->file_name);
             $file_naming->standard_file_naming = trim($request->standard_file_naming);
+            $file_naming->group = trim($request->group);
+            $file_naming->file_type_id = trim($request->file_type_id);
             $file_naming->save();
 
             return response()->json($file_naming, 200);
