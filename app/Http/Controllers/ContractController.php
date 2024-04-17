@@ -18,7 +18,7 @@ class ContractController extends Controller
         $this->user = $collaborator->getAuthUser();
         $this->current_month =  now()->format('m');
 
-        if(now()->format('d') <= 7){
+        if(now()->format('d') <= 17){
             $this->current_month = now()->format('m') - 1;
         }
     }
@@ -31,7 +31,7 @@ class ContractController extends Controller
 
             $contracts = Contract::with([
                 'checklist' => function($query){
-                    $query->with('itens.fileNaming')->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$this->current_month ,now()->format('Y')]);
+                    // $query->with('itens.fileNaming')->whereRaw("extract(month from date_checklist) = ? and extract(year from date_checklist) = ?",[$this->current_month ,now()->format('Y')]);
                 }
                 ,'operation'
                 ,'operation.executive'

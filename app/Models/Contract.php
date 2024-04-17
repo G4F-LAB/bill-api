@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -14,6 +16,7 @@ class Contract extends Model
 
     protected $primaryKey = 'id';
     protected $hidden = ['pivot'];
+    protected $appends = ['checklist_current'];
     
     protected $fillable = [
         'client_id',
@@ -56,4 +59,17 @@ class Contract extends Model
     public function status() {
         return $this->belongsTo(StatusContract::class);
     }
+
+    //current checklist
+    protected function checklistCurrent(): Attribute
+    {
+        $initials =  [];
+
+        $current_checklist = Checklist::where('contract_id', $this->id)->with('itens.fileNaming')->latest()->first();
+
+        return new Attribute(
+            get: fn () => $current_checklist,
+        );
+    }
+
 }

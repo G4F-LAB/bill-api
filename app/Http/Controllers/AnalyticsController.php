@@ -159,7 +159,8 @@ class AnalyticsController extends Controller
     {
         try {
 
-            $id_user = $this->auth_user->id;
+            $id_user = 24;
+            // $id_user = $this->auth_user->id;
 
             $executive = Executive::select('id')
                 ->where('manager_id', $id_user)
@@ -304,4 +305,36 @@ class AnalyticsController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
+    public function contractsAll(Request $request)
+    {
+
+        try {
+            $date = date('Y-m', strtotime('-1 month'));
+
+            $operations = $this->getOperationsByUser()->getData();
+            $ids_operations = [];
+
+            foreach ($operations->success as $item) {
+                $ids_operations[] = $item->id;
+            }
+
+            $date = date('Y-m', strtotime('-1 month'));
+
+            $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
+                ->select('contracts.id', 'contracts.name', 'checklists.completion')
+                ->where('contracts.status_id', 1)
+                ->whereIn('contracts.operation_id', $ids_operations)
+                ->where('date_checklist', 'LIKE', $date . '%')
+                ->get();
+
+            return response()->json(['success' => $operations], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Houve um erro interno na aplicação'], 500);
+        }
+    }
+
+
+
 }

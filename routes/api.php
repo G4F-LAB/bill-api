@@ -100,6 +100,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistsstatus',[AnalyticsController::class,'qtdStatusChecklists']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts',[AnalyticsController::class,'contractsAll']);
         
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);        
     });    
@@ -123,7 +124,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->put('/item/{id}', [ItemController::class, 'update']);
     Route::middleware('check.permission: Admin')->put('/item/competence/{id}', [ItemController::class, 'updateCompetence']);
     Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/item/{id}', [ItemController::class, 'destroy']);
-    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/itens/export', [ItemController::class,'exportFiles']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista,Processos')->get('/itens/export', [ItemController::class,'exportFiles']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->post('/update/competence/{id}', [ItemController::class,'updateCompetence']);
 
     //Operações
