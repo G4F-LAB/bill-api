@@ -159,8 +159,7 @@ class AnalyticsController extends Controller
     {
         try {
 
-            $id_user = 24;
-            // $id_user = $this->auth_user->id;
+            $id_user = $this->auth_user->id;
 
             $executive = Executive::select('id')
                 ->where('manager_id', $id_user)
