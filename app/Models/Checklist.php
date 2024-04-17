@@ -79,7 +79,10 @@ class Checklist extends Model
 
     public function sync_itens($id = NULL) {
         if($id == NULL) $id = $this->id;
-        $checklist = $this->with('itens')->where('mandatory', true)->find($id);
+        $checklist = $this->with('itens')
+            ->whereHas('itens', function($query) {
+                $query->where('mandatory', true);
+            })->find($id);
         $total_itens = count($checklist->itens);
         $total_complete = 0;
 

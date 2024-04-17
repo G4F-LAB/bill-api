@@ -22,7 +22,7 @@
             mso-margin-bottom-alt: 0px;
             mso-padding-alt: 0px 0px 0px 0px;
         }
-
+        
         p,
         h1,
         h2,
@@ -33,22 +33,22 @@
             padding-top: 0;
             padding-bottom: 0;
         }
-
+        
         span.preheader {
             display: none;
             font-size: 1px;
         }
-
+        
         html {
             width: 100%;
         }
-
+        
         table {
             font-size: 14px;
             border: 0;
         }
         /* ----------- responsivity ----------- */
-
+        
         @media only screen and (max-width: 640px) {
             /*------ top header ------ */
             .main-header {
@@ -98,7 +98,7 @@
                 height: auto !important;
             }
         }
-
+        
         @media only screen and (max-width: 479px) {
             /*------ top header ------ */
             .main-header {
@@ -143,7 +143,7 @@
         <tr>
             <td>
                 <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
-
+                  
                 </div>
             </td>
         </tr>
@@ -209,13 +209,13 @@
 
                             <div style="line-height: 35px">
 
-                                Checklist de <span style="color: #21475a;">
-                            </span> de 2024 já disponível
+                                Checklist {{$id}}<span style="color: #21475a;">
+                            </span> foi alterado, favor verificar
 
                             </div>
                         </td>
                     </tr>
-
+                    
 
                     <tr>
                         <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
@@ -243,7 +243,7 @@
 
 
                                         <div style="line-height: 24px">
-
+                                        O Sistema BOOK informa que o checklist {{$id}} do contrato {{$contract}} foi alterado, é importante que verifique.
                                         </div>
                                     </td>
                                 </tr>
@@ -268,8 +268,7 @@
 
 
                                         <div style="line-height: 26px;">
-                                            <a href="
-                                            " style="color: #ffffff; text-decoration: none;">Acessar</a>
+                                            <a href="{{$url}}" style="color: #ffffff; text-decoration: none;">Acessar</a>
                                         </div>
                                     </td>
                                 </tr>

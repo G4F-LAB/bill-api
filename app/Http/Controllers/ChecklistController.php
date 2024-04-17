@@ -192,6 +192,9 @@ class ChecklistController extends Controller
             if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 5;
 
             $this->checklist->save();
+            if($this->checklist->getChanges()){
+                $this->checkChelistExpired($this->checklist->getAttributes()["id"]);
+            }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage()], 500);
@@ -390,39 +393,39 @@ class ChecklistController extends Controller
             }
         }
 
-        
+        //rodar no servidor de produção composer require spaanproductions/laravel-carbon-holidays
         function setimoDiaUtilDoMes($ano, $mes) {
-            $data = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
+            $date = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
             $diasUteis = 0;
-            while($diasUteis < 1) {
+            while($diasUteis < 7) {
                 // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
-                if($data->isWeekday() ) {
+                if($date->isWeekday() && !$date->isHoliday() ) {
                     $diasUteis++;
                 }
-                $data->addDay(); // Avança para o próximo dia
+                $date->addDay(); // Avança para o próximo dia
             }
             
-            return $data->subDay(); // Retorna o sétimo dia útil do mês
+            return $date->subDay(); // Retorna o sétimo dia útil do mês
         }
 
-        public function checkChelistExpired()
+        public function checkChelistExpired($id)
         {
             try{
-                $data = Carbon::now();   
-                $month = $data->month;
-                $year = $data->year;
-                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month)->toArray();
-                $checklists = Checklist::with([             
+                $date = Carbon::now();   
+                $month = $date->month;
+                $year = $date->year;
+                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
+
+                $checklist = Checklist::with([             
                     'contract.operation.collaborator' 
-                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil['formatted'])
-                ->where('status_id','!=',5)
+                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
+                // ->where('id',$id)
+                // ->where('status_id','!=',5)
                 ->get()->toArray();
-                foreach($checklists as $key => $checklist)
-                {
-                    $contract = $checklist['contract'];
-                    $emailCollab = $contract['operation']['collaborator'];
-                    Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
-                }
+                $contract = $checklist[0]['contract'];
+                $emailCollab = $contract['operation']['collaborator'];
+                Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                
                 return response()->json("Email enviado com sucesso", 200);
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
