@@ -32,7 +32,6 @@ class AnalyticsController extends Controller
     {
         try {
 
-            // $id_user = 24;
             $id_user = $this->auth_user->id;
 
             $executive = Executive::select('id')
@@ -56,7 +55,7 @@ class AnalyticsController extends Controller
                 ->where('collaborator_id', $id_user)
                 ->whereNull('collaborator_operations.deleted_at')
                 ->get();
-             
+
                 // print_r($id_user);exit;
                 // return $operations;
 
@@ -117,7 +116,7 @@ class AnalyticsController extends Controller
             $complete = Checklist::where('date_checklist', 'LIKE', $date . '%')->whereIn('contract_id', $ids_contracts)->where('completion', 100)->count();
             $incomplete = Checklist::where('date_checklist', 'LIKE', $date . '%')->whereIn('contract_id', $ids_contracts)->where('completion', '!=', 100)->count();
 
-            $data = ['complete' => $complete, 
+            $data = ['complete' => $complete,
                     'incomplete' => $incomplete,
                     'contracts' => count($ids_contracts)
                 ];
@@ -188,7 +187,7 @@ class AnalyticsController extends Controller
             return response()->json(['status'=>'error', 'message' => 'Houve um erro interno na aplicação'], 500);
         }
     }
-    
+
     public function getChecklist()
 {
     try {

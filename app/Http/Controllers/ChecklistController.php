@@ -393,23 +393,39 @@ class ChecklistController extends Controller
             }
         }
 
+        //rodar no servidor de produção composer require spaanproductions/laravel-carbon-holidays
+        function setimoDiaUtilDoMes($ano, $mes) {
+            $date = Carbon::createFromDate($ano, $mes, 1); // Primeiro dia do mês
+            $diasUteis = 0;
+            while($diasUteis < 7) {
+                // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
+                if($date->isWeekday() && !$date->isHoliday() ) {
+                    $diasUteis++;
+                }
+                $date->addDay(); // Avança para o próximo dia
+            }
+            
+            return $date->subDay(); // Retorna o sétimo dia útil do mês
+        }
+
         public function checkChelistExpired($id)
         {
             try{
-                // echo "<pre>";
-               
+                $date = Carbon::now();   
+                $month = $date->month;
+                $year = $date->year;
+                $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
+
                 $checklist = Checklist::with([             
                     'contract.operation.collaborator' 
-                ])
-                ->where('id',$id)
+                ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
+                // ->where('id',$id)
+                // ->where('status_id','!=',5)
                 ->get()->toArray();
                 $contract = $checklist[0]['contract'];
                 $emailCollab = $contract['operation']['collaborator'];
                 Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
                 
-                // foreach($checklists as $key => $checklist)
-                // {
-                // }
                 return response()->json("Email enviado com sucesso", 200);
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);

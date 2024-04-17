@@ -187,9 +187,27 @@ class ContractController extends Controller
             foreach ($contracts_array as $contract) {
                 foreach($references as $key => $reference){
                     if((string)$reference == $contract['CD_OBJETO']){
-                        $contract_find_active = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
+                        switch ($contract['SITUACAO']) {
+                            case $contract['SITUACAO'] == "ATIVO":
+                                $status_id = 1;
+                              break;
+                            case $contract['SITUACAO'] == "ENCERRADO":
+                                $status_id = 2;
+                              break;
+                            case $contract['SITUACAO'] == "PENDENTE":
+                                $status_id = 3;
+                              break;                            
+                          }
+                        $old_contract = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
                         $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();
-                        if ((empty($contract_find_active) || $contract_find_active['client_id'] == null) && $contract['DESC_GEREN'] != null ) {
+                        
+                        //atualiza status do contrato
+                        if($old_contract['status_id'] != $status_id){
+                            $new_contract = Contract::find($old_contract['id']);
+                            $new_contract->status_id = $status_id;
+                            $new_contract->update();
+                        }
+                        if ((empty($old_contract) || $old_contract['client_id'] == null) && $contract['DESC_GEREN'] != null ) {
                             if($contract['SITUACAO'] == "ATIVO"){
                                 $new_contract = new Contract();
                                 $new_contract->client_id = $contract['Cd_pcc_reduzid'];
@@ -199,21 +217,15 @@ class ContractController extends Controller
                                 $new_contract->save();
                             }
                         }
-                        // elseif(($contract_closed && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null ){
-                        //     $new_contract = Contract::find($contract_closed['id']);
-                        //     $new_contract->contractual_situation = true;
-                        //     $new_contract->operation_id = $key;
-                        //     $new_contract->save();
-                        // }
-                        
-                        if(!empty($contract_find_active)){
-                            if((is_null($contract_find_active['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
-                                $new_contract = Contract::find($contract_find_active['id']);
+                        if(!empty($old_contract)){
+                            if((is_null($old_contract['operation_id']) && $contract['SITUACAO'] == "ATIVO") && $contract['DESC_GEREN'] != null){
+                                $new_contract = Contract::find($old_contract['id']);
                                 $new_contract->operation_id = $key;
                                 $new_contract->save();
                             }
 
                         }
+
                     }
                 }
             }

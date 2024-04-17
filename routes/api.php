@@ -108,24 +108,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
         
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);        
-    });
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    });    
 
     Route::middleware('check.permission: Admin')->get('/directory',[DirectoryController::class,'getAnalyticsDirectory']);
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
@@ -170,7 +153,6 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Competencia
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/competencias', [FileCompetenceController::class, 'getAll']);
 
-
     //LOG
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->get('/log', [LogController::class, 'show']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/log/contract', [LogController::class,'getLogName']);
@@ -178,20 +160,13 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Automação
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
-
     Route::middleware('check.permission:All')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
 
 });
 
-
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);
 Route::post('/teste', [TesteController::class, 'novoteste']);
 Route::get('/teste2', [TesteController::class, 'novoteste2']);
-
-
-
-
-
 
 Route::get('/documentation', function () {
     return view('documentation');
