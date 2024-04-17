@@ -22,7 +22,7 @@
             mso-margin-bottom-alt: 0px;
             mso-padding-alt: 0px 0px 0px 0px;
         }
-        
+
         p,
         h1,
         h2,
@@ -33,22 +33,22 @@
             padding-top: 0;
             padding-bottom: 0;
         }
-        
+
         span.preheader {
             display: none;
             font-size: 1px;
         }
-        
+
         html {
             width: 100%;
         }
-        
+
         table {
             font-size: 14px;
             border: 0;
         }
         /* ----------- responsivity ----------- */
-        
+
         @media only screen and (max-width: 640px) {
             /*------ top header ------ */
             .main-header {
@@ -98,7 +98,7 @@
                 height: auto !important;
             }
         }
-        
+
         @media only screen and (max-width: 479px) {
             /*------ top header ------ */
             .main-header {
@@ -143,7 +143,7 @@
         <tr>
             <td>
                 <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
-                  
+
                 </div>
             </td>
         </tr>
@@ -215,7 +215,7 @@
                             </div>
                         </td>
                     </tr>
-                    
+
 
                     <tr>
                         <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
@@ -244,7 +244,6 @@
 
                                         <div style="line-height: 24px">
 
-                                        <!-- Verifique o checklist do mês e conquiste o mundo (ou pelo menos sua lista de tarefas)! {{$date_checklist}} -->
                                         </div>
                                     </td>
                                 </tr>
