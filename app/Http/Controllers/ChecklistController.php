@@ -411,7 +411,6 @@ class ChecklistController extends Controller
         public function checkChelistExpired($id)
         {
             try{
-                echo "<pre>";
                 $date = Carbon::now();   
                 $month = $date->month;
                 $year = $date->year;
