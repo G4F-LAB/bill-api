@@ -106,21 +106,6 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     Route::middleware('check.permission: Admin')->get('/directory',[DirectoryController::class,'getAnalyticsDirectory']);
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 

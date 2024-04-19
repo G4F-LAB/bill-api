@@ -646,6 +646,7 @@ class FileController extends Controller
     public function deleteFile(Request $request, $file_id, $item_id) {
         try {
             $items_file = FilesItens::where('item_id', $item_id)->where('file_id', $file_id)->first();
+            
             if (!$items_file) {
                 return response()->json(['message' => ' Arquivo não encontrado'], 404);
             }
