@@ -97,6 +97,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     Route::prefix('/analytics')->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'operations']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/{id}/contracts',[AnalyticsController::class,'operationsById']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}/collaborators',[AnalyticsController::class,'contractsByCollaborators']);
 
 
 
@@ -104,12 +106,12 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getOperationsByUser']);
-        // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
+         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistsstatus',[AnalyticsController::class,'qtdStatusChecklists']);
-        // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts',[AnalyticsController::class,'contractsAll']);
-        // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators/{id}', [AnalyticsController::class,'getCollaboratorById']);
-        // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
+        //Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts',[AnalyticsController::class,'contractsAll']);
+         //Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators/{id}', [AnalyticsController::class,'getCollaboratorById']);
+         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklist', [AnalyticsController::class,'getChecklist']);
 
 
