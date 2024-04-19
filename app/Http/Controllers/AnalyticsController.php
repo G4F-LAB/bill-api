@@ -48,98 +48,20 @@ class AnalyticsController extends Controller
     }
 
 
+    public function operationsById(Request $request) {
 
+        $operationsById = [];
 
+        $operationsById['id'] = 7;
+        $operationsById['name'] = 'operacao 7';
+        $operationsById['manager'] = ['id'=> 12, 'name' =>'Fulano de tal'];
+         $operationsById['executive'] = ['id'=> 23,'name'=> 'Fulano de tal'];
+         $operationsById['contracts'] = ['id'=> 84,'name'=> 'ABDI - CTO 04/20242'];
 
 
+         return response()->json(['status' => 'ok', 'data' => $operationsById], 200);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 
 
