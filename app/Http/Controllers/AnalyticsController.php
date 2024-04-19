@@ -9,12 +9,9 @@ use App\Models\Contract;
 use App\Models\Checklist;
 use App\Models\Executive;
 use App\Models\Operation;
-use App\Models\CollaboratorsOperations;
 use Illuminate\Support\Facades\DB;
 use App\Models\StatusChecklist;
-use App\Http\Controllers\AnalyticsController;
 use App\Models\ContractChange;
-
 
 class AnalyticsController extends Controller
 {
@@ -28,39 +25,45 @@ class AnalyticsController extends Controller
         $this->operation = $operation;
     }
 
-
-
-
-    public function operations (Request $request){
+    public function operations(Request $request)
+    {
         $data = [];
-
 
         $data['total_contracts'] = 0;
         $data['total_checklists_done'] = 1;
         $data['total_checklists_undone'] = 1;
         $data['total_collaborators'] = 100;
+        $data['checklists_status_progress'] = [['name' => 'Iniciado', 'total' => 0], ['name' => 'Em progresso', 'total' => 0]];
 
-        $data['checklists_status_progress'] = [['name'=>'Iniciado','total'=>0],['name'=>'Em progresso','total'=>0] ];
-
-
-        return response()->json(['status'=>'ok', 'data' => $data], 200);
-
+        return response()->json(['status' => 'ok', 'data' => $data], 200);
     }
 
-
-    public function operationsById(Request $request) {
-
+    public function operationsById(Request $request)
+    {
         $operationsById = [];
 
         $operationsById['id'] = 7;
         $operationsById['name'] = 'operacao 7';
-        $operationsById['manager'] = ['id'=> 12, 'name' =>'Fulano de tal'];
-         $operationsById['executive'] = ['id'=> 23,'name'=> 'Fulano de tal'];
-         $operationsById['contracts'] = ['id'=> 84,'name'=> 'ABDI - CTO 04/20242'];
+        $operationsById['manager'] = ['id' => 12, 'name' => 'Fulano de tal'];
+        $operationsById['executive'] = ['id' => 23, 'name' => 'Fulano de tal'];
+        $operationsById['contracts'] = ['id' => 84, 'name' => 'ABDI - CTO 04/20242'];
+
+        return response()->json(['status' => 'ok', 'data' => $operationsById], 200);
+    }
+
+    public function contractsByCollaborators(Request $request)
+    {
+        $contractsByCollaborators = [];
+
+        $contractsByCollaborators['id'] = 7;
+        $contractsByCollaborators['name'] = 'operacao 7';
+        $contractsByCollaborators['manager'] = ['id' => 12, 'name' => 'Fulano de tal'];
+        $contractsByCollaborators['executive'] = ['id' => 23, 'name' => 'Fulano de tal'];
+        $contractsByCollaborators['collaborators'] = [['id' => 2, 'name' => 'Vitor Campos'], ['id' => 7, 'name' => 'Rafael Barroso'], ['id' => 5, 'name' => 'Matheus'], ['id' => 6, 'name' => 'Wesley Carlos Severiano']];
 
 
-         return response()->json(['status' => 'ok', 'data' => $operationsById], 200);
 
+        return response()->json(['status' => 'ok', 'data' => $contractsByCollaborators], 200);
     }
 
 
@@ -93,8 +96,8 @@ class AnalyticsController extends Controller
 //                 ->whereNull('collaborator_operations.deleted_at')
 //                 ->get();
 
-//                 // print_r($id_user);exit;
-//                 // return $operations;
+//  /               // print_r($id_user);exit;
+//  /               // return $operations;
 
 //                 if ($operations->isEmpty()) {
 //                     return response()->json(['error' => 'Nenhum dado vinculado'], 500);
@@ -122,10 +125,10 @@ class AnalyticsController extends Controller
 //                 ->get();
 
 
-//             // $operations = Contract::select('id', 'name')
-//             // ->where('status_id', 1)
-//             // ->where('operation_id', $id_operation)
-//             // ->get();
+//              $operations = Contract::select('id', 'name')
+//             ->where('status_id', 1)
+//          ->where('operation_id', $id_operation)
+//              ->get();
 
 //             return response()->json(['success' => $operations], 200);
 //         } catch (\Exception $e) {
@@ -146,7 +149,7 @@ class AnalyticsController extends Controller
 //             }
 
 //             $ids_contracts = Contract::select('id')->whereIn('operation_id', $ids_operations)->pluck('id');
-//             // return count($ids_contracts);
+//              return count($ids_contracts);
 
 //             $date = date('Y-m', strtotime('-1 month'));
 
@@ -173,7 +176,7 @@ class AnalyticsController extends Controller
 //             foreach ($query_status_checklist as $value) {
 //                 $status_checklist[] = ['name' => $value->name, 'total' => 0];
 //             }
-//             // return $status_checklist;
+//              return $status_checklist;
 
 //             $date = date('Y-m', strtotime('-1 month'));
 
@@ -185,7 +188,7 @@ class AnalyticsController extends Controller
 //             }
 
 //             $ids_contracts = Contract::select('id')->whereIn('operation_id', $ids_operations)->pluck('id');
-//             // return $ids_contracts;
+//              return $ids_contracts;
 
 //             $checklistCounts = Checklist::select('status_checklist.name', DB::raw('count(status_checklist.name) as total'))
 //                 ->leftJoin('status_checklist', 'status_checklist.id', '=', 'checklists.status_id')
@@ -193,7 +196,7 @@ class AnalyticsController extends Controller
 //                 ->where('date_checklist', 'LIKE', $date . '%')
 //                 ->groupBy('status_checklist.name')
 //                 ->get();
-//                 // return $checklistCounts;
+//                  return $checklistCounts;
 
 //             foreach ($status_checklist as $key1 => $status1) {
 //                 foreach ($checklistCounts as $key2 => $status2) {
@@ -213,19 +216,19 @@ class AnalyticsController extends Controller
 //         }
 //     }
 
-//     public function getAllCollaborators()
+ //public function getAllCollaborators()
 //     {
-//         try {
-//             $collaborators = Collaborator::select('id', 'name', 'permission_id', 'phone', 'office', 'email')
-//                 ->get();
+ //     try {
+ //          $collaborators = Collaborator::select('id', 'name', 'permission_id', 'phone', 'office', 'email')
+//                ->get();
+//
+//            return response()->json(['status'=>'ok','data' => $collaborators], 200);
+//        } catch (\Exception $e) {
+//            return response()->json(['status'=>'error', 'message' => 'Houve um erro interno na aplicação'], 500);
+//        }
+//    }
 
-//             return response()->json(['status'=>'ok','data' => $collaborators], 200);
-//         } catch (\Exception $e) {
-//             return response()->json(['status'=>'error', 'message' => 'Houve um erro interno na aplicação'], 500);
-//         }
-//     }
-
-//     public function getChecklist()
+//    public function getChecklist()
 // {
 //     try {
 //         $checklists = Checklist::select('id', 'contract_id', 'completion', 'date_checklist')
@@ -235,7 +238,7 @@ class AnalyticsController extends Controller
 //     } catch (\Exception $e) {
 //         return response()->json(['status' => 'error', 'message' => 'Houve um erro interno na aplicação'], 500);
 //     }
-// }
+
 
 //     public function getCollaboratorById($id)
 // {
@@ -253,27 +256,27 @@ class AnalyticsController extends Controller
 //     }
 // }
 
-// // Dentro do método que atualiza o contrato
+//  Dentro do método que atualiza o contrato
 // public function updateContract(Request $request, $id)
 // {
 //     try {
 //         $contract = Contract::findOrFail($id);
 
-//         // Dados originais do contrato antes da atualização
+//          Dados originais do contrato antes da atualização
 //         $originalData = $contract->toArray();
 
-//         // Atualizar o contrato com os dados recebidos na requisição
+//          Atualizar o contrato com os dados recebidos na requisição
 //         $contract->update($request->all());
 
-//         // Comparar dados originais com dados atualizados para identificar alterações
+//          Comparar dados originais com dados atualizados para identificar alterações
 //         $changes = array_diff_assoc($request->all(), $originalData);
 
-//         // Verificar se houve realmente alterações
+//          Verificar se houve realmente alterações
 //         if (!empty($changes)) {
-//             // Formatar detalhes da alteração para registro no histórico
+//              Formatar detalhes da alteração para registro no histórico
 //             $changeDetails = "Contrato atualizado - Alterações: " . json_encode($changes);
 
-//             // Criar um registro no histórico de alterações do contrato
+//              Criar um registro no histórico de alterações do contrato
 //             ContractChange::create([
 //                 'contract_id' => $contract->id,
 //                 'user_id' => auth()->id(), // ID do usuário autenticado
