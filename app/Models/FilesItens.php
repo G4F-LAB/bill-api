@@ -4,10 +4,33 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 
 class FilesItens extends Model
 {
+    use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'files_itens';
+    protected $fillable = [
+        'item_id',
+        'file_id',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
     use HasFactory;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->useLogName('file_item')->logOnly([
+            'item_id',
+            'file_id',
+            'created_at',
+            'updated_at',
+            'deleted_at']);
+    }
+
+    
 }

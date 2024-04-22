@@ -101,6 +101,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklistsstatus',[AnalyticsController::class,'qtdStatusChecklists']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts',[AnalyticsController::class,'contractsAll']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators/{id}', [AnalyticsController::class,'getCollaboratorById']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklist', [AnalyticsController::class,'getChecklist']);
+
+
 
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
     });
