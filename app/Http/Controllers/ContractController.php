@@ -26,7 +26,7 @@ class ContractController extends Controller
     //Obter todos os contratos
     public function getAllContracts(Request $request)
     {
-   
+
         $permission = Permission::where('name','ilike','')->first();
 
             $contracts = Contract::with([
@@ -44,11 +44,11 @@ class ContractController extends Controller
             //     });
             // })
             ->when($this->user->is_analyst(), function($query) {
-                
+
                 $query->whereHas('operation.collaborators', function($query2) {
                     $query2->where('collaborator_id',$this->user->id);
                 });
-                
+
             })
             ->when($this->user->is_executive(), function($query) {
                 $query->whereHas('operation.executive', function($query2) {
@@ -88,7 +88,7 @@ class ContractController extends Controller
                 // dd($contracts);
                 foreach ($contracts as $key => $value) {
                     // Check if the 'field' is empty for the current element
-                 
+
                     if (count($value['checklist']) === 0) {
 
                         // If 'field' is empty, remove this element from the array
@@ -101,7 +101,7 @@ class ContractController extends Controller
               if($data === []){
                 return response()->json($data, 204);
               }
-              
+
         return response()->json($data, 200);
     }
 
@@ -196,11 +196,11 @@ class ContractController extends Controller
                               break;
                             case $contract['SITUACAO'] == "PENDENTE":
                                 $status_id = 3;
-                              break;                            
+                              break;
                           }
                         $old_contract = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
                         $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();
-                        
+
                         //atualiza status do contrato
                         if($old_contract['status_id'] != $status_id){
                             $new_contract = Contract::find($old_contract['id']);
@@ -305,7 +305,7 @@ class ContractController extends Controller
             foreach ($checklist->checklist as $item) {
                 $item->date_checklist = Carbon::createFromFormat('Y-m-d', $item->date_checklist)->format('m/Y');
             }
-            
+
             return response()->json($checklist);
 
         } catch (\Exception $e) {
