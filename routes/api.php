@@ -67,7 +67,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Contratos
-    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->get('/contracts', [ContractController::class, 'getAllContracts']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->get('/contracts', [ContractController::class, 'index']);
     Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->put('/contracts', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->post('/contracts/update', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/contracts/new', [ContractController::class, 'updateListContracts']);
@@ -78,9 +78,10 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist',[ChecklistController::class, 'store']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->put('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);

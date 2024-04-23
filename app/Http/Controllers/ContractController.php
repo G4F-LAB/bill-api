@@ -15,18 +15,23 @@ use Carbon\Carbon;
 class ContractController extends Controller
 {
     public function __construct(Collaborator $collaborator) {
-        $this->user = $collaborator->getAuthUser();
-        $this->current_month =  now()->format('m');
+        // $this->user = $collaborator->getAuthUser();
+        // $this->current_month =  now()->format('m');
 
-        if(now()->format('d') <= 17){
-            $this->current_month = now()->format('m') - 1;
-        }
+        // if(now()->format('d') <= 17){
+        //     $this->current_month = now()->format('m') - 1;
+        // }
     }
 
     //Obter todos os contratos
+    public function index(Request $request){
+        $contracts = Contract::with(['operation', 'checklists'])->get();
+
+        return response()->json($contracts, 200);
+    }   
     public function getAllContracts(Request $request)
     {
-   
+
         $permission = Permission::where('name','ilike','')->first();
 
             $contracts = Contract::with([
@@ -35,20 +40,19 @@ class ContractController extends Controller
                 }
                 ,'operation'
                 ,'operation.executive'
-                ,'operation.collaborators'
-                ,'status'
-                ])
+                ,'operation.collaborators'              
+                  ])
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
             //         $query2->where('collaborator_id',$this->user->id);
             //     });
             // })
             ->when($this->user->is_analyst(), function($query) {
-                
+
                 $query->whereHas('operation.collaborators', function($query2) {
                     $query2->where('collaborator_id',$this->user->id);
                 });
-                
+
             })
             ->when($this->user->is_executive(), function($query) {
                 $query->whereHas('operation.executive', function($query2) {
@@ -88,7 +92,7 @@ class ContractController extends Controller
                 // dd($contracts);
                 foreach ($contracts as $key => $value) {
                     // Check if the 'field' is empty for the current element
-                 
+
                     if (count($value['checklist']) === 0) {
 
                         // If 'field' is empty, remove this element from the array
@@ -101,7 +105,7 @@ class ContractController extends Controller
               if($data === []){
                 return response()->json($data, 204);
               }
-              
+
         return response()->json($data, 200);
     }
 
@@ -196,11 +200,11 @@ class ContractController extends Controller
                               break;
                             case $contract['SITUACAO'] == "PENDENTE":
                                 $status_id = 3;
-                              break;                            
+                              break;
                           }
                         $old_contract = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->first();
                         $contract_closed = Contract::where('client_id',$contract['Cd_pcc_reduzid'])->where('contractual_situation',false)->first();
-                        
+
                         //atualiza status do contrato
                         if($old_contract['status_id'] != $status_id){
                             $new_contract = Contract::find($old_contract['id']);
@@ -305,7 +309,7 @@ class ContractController extends Controller
             foreach ($checklist->checklist as $item) {
                 $item->date_checklist = Carbon::createFromFormat('Y-m-d', $item->date_checklist)->format('m/Y');
             }
-            
+
             return response()->json($checklist);
 
         } catch (\Exception $e) {

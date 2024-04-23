@@ -8,6 +8,7 @@ use App\Models\Contract;
 use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\FileNaming;
+use App\Models\FileItens;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 

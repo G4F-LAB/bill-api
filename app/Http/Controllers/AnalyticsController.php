@@ -404,12 +404,18 @@ class AnalyticsController extends Controller
             $id_operation = $request->id;
             $date = date('Y-m', strtotime('-1 month'));
 
+            // $mes = $request->input('mes', date('m'));
+            // $ano = $request->input('ano', date('Y'));
+
             $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
                 ->select('contracts.id', 'contracts.name', 'checklists.completion')
                 ->where('contracts.status_id', 1)
                 ->where('contracts.operation_id', $id_operation)
                 ->where('date_checklist', 'LIKE', $date . '%')
                 ->get();
+
+            // if ($request->has('date_checklist') && in_array($request->date_checklist, [$ano, $mes])) {
+            // }
 
 
             // $operations = Contract::select('id', 'name')
