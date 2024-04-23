@@ -22,7 +22,6 @@ class Contract extends Model
     protected $hidden = ['pivot'];
 
 
-    protected $appends = ['checklist_current'];
     
     protected $fillable = [
         'client_id',
@@ -64,27 +63,11 @@ class Contract extends Model
     // }
     
 
-    //current checklist
-    protected function checklistCurrent(): Attribute
+
+    public function checklist()
     {
-        $initials =  [];
-
-   
-
-        if (!Str::isUuid($this->id)) {
-            $current_checklist = [];
-             
-        }else{
-            $current_checklist = Checklist::where('contract_uuid', $this->id)->with('itens.fileNaming')->latest()->first();
-        }
-
-
-        return new Attribute(
-            get: fn () => $current_checklist,
-        );
+        return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->latest();
     }
-
-    
     public function checklists(){
 
         return $this->hasMany(Checklist::class, 'contract_uuid', 'id');

@@ -14,6 +14,7 @@ class Item extends Model
     use SoftDeletes;
     use LogsActivity;
 
+    protected $connection =  'book';
     protected $table = 'itens';
     protected $primaryKey = 'id';
     protected $hidden = ['pivot'];

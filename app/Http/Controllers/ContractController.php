@@ -25,7 +25,7 @@ class ContractController extends Controller
 
     //Obter todos os contratos
     public function index(Request $request){
-        $contracts = Contract::with(['operation', 'checklists'])->get();
+        $contracts = Contract::with(['operation','checklist', 'checklists'])->get();
 
         return response()->json($contracts, 200);
     }   

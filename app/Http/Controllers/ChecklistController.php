@@ -69,12 +69,17 @@ class ChecklistController extends Controller
             //         ->get();
 
     // verificar query para casos de não ter contrato com gerente e consistencia de dados.
-            $checklist = Checklist::join('contracts', 'checklists.contract_id', '=', 'contracts.id')
-                ->join('operations', 'contracts.operation_id', '=', 'operations.id')
-                ->join('collaborators', 'collaborators.id', '=', 'operations.manager_id')
-                ->select(['checklists.id', 'contracts.name as contrato', 'checklists.date_checklist', 'operations.manager_id', 'collaborators.name'])
-                ->get();
-            return response()->json($checklist, 200);
+            // $checklist = Checklist::join('contracts', 'checklists.contract_uuid', '=', 'contracts.id')
+            //     ->join('operations', 'contracts.operation_id', '=', 'operations.id')
+            //     ->join('collaborators', 'collaborators.id', '=', 'operations.manager_id')
+            //     ->select(['checklists.id', 'contracts.name as contrato', 'checklists.date_checklist', 'operations.manager_id', 'collaborators.name'])
+            //     ->get();
+
+            $checklists = Checklist::whereNotNull('contract_uuid')
+            ->with(['contract.operationContractUsers.user'])->get();
+        
+                
+            return response()->json($checklists, 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json(['error' => 'Não foi possivel acessar a checklist'], 500);
