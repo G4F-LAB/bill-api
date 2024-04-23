@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\File;
 use App\Models\Notification;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function registerNotification(Request $request)
+    public function registerNotification()
     {
         try {
             $notification = new Notification();
-            $notification->notification_type = $request->notification_type;
-            $notification->operation_id = $request->operation_id;
-            $notification->notification_cat_id = $request->notification_cat_id;
+            $notification->desc_id = 2;
+            $notification->notification_cat_id = 1;
+            $notification->contract_id = 4;
+            $notification->date = date("Y-m-d H:i:s");
+            $notification->notification_viewed_id = 2;
+            $notification->notification_type_id = 2;
             $notification->save();
+
             return response()->json([$notification, 'message' => 'Notificação adicionado com sucesso!'], 200);
         } catch (\Exception $e) {
+            var_dump($e->getMessage());exit;
             return response()->json(['error' => $e->getMessage()]);
         }
 

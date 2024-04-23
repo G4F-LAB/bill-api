@@ -7,24 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-class Notification extends Model
+class NotificationViewed extends Model
 {
     use HasFactory;
     use LogsActivity;
 
-    protected $table = 'notifications';
-    protected $primaryKey = 'id';
+    protected $table = 'notification_viewed';
+
     protected $fillable = [
-        "desc_id",
-        "notification_cat_id",
-        "notification_type_id",
-        "notification_viewed_id",
+        "notification_viewed",
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->useLogName('Notification')->logOnly([
-        'notifications'
+        return LogOptions::defaults()->useLogName('NotificationViewed')->logOnly([
+        'notification_viewed'
         ]);
     }
 }
