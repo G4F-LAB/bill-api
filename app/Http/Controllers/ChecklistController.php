@@ -82,8 +82,8 @@ class ChecklistController extends Controller
             }, 'contract.operationContractUsers.user'])
             ->get();
         
-        return $checklists;
-        
+
+        return response()->json($checklists, 200);
                 
             return response()->json($checklists, 200);
         } catch (\Exception $e) {
