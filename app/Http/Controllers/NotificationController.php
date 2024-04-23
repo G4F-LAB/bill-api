@@ -6,16 +6,15 @@ use App\Models\Notification;
 
 class NotificationController extends Controller
 {
-    public function registerNotification()
+    public function registerNotification(Object $data_notification)
     {
         try {
             $notification = new Notification();
-            $notification->desc_id = 2;
-            $notification->notification_cat_id = 1;
-            $notification->contract_id = 4;
+            $notification->desc_id = $data_notification->desc_id;
+            $notification->notification_cat_id = $data_notification->notification_cat_id;
+            $notification->contract_id = $data_notification->contract_id;
             $notification->date = date("Y-m-d H:i:s");
-            $notification->notification_viewed_id = 2;
-            $notification->notification_type_id = 2;
+            $notification->notification_type_id = $data_notification->notification_type_id;
             $notification->save();
 
             return response()->json([$notification, 'message' => 'Notificação adicionado com sucesso!'], 200);

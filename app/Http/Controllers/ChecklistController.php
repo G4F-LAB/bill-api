@@ -43,18 +43,18 @@ class ChecklistController extends Controller
 
         foreach ($checklists as $checklist) {
             $contractId = $contract_ids->firstWhere('id', $checklist->contract_id);
-            
+
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
-            
-    
+
+
             if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
-            
+
 
             $checklist->save();
         }
-        
+
         return response()->json($checklists, 200);
     }
 
@@ -219,13 +219,11 @@ class ChecklistController extends Controller
             $this->checklist->update();
 
             if($this->checklist->status_id = 5 && $this->checklist->getChanges()){
-                // $data_notification->desc_id = 2;
-                // $data_notification->notification_cat_id = 1;
-                // $data_notification->contract_id = $this->checklist->contract_id;
-                // //$data_notification->date = date("Y-m-d H:i:s");
-                // $data_notification->notification_viewed_id = 2;
-                // $data_notification->notification_type_id = 2;
-                $notification->registerNotification();
+                $data_notification->desc_id = 2;
+                $data_notification->notification_cat_id = 1;
+                $data_notification->contract_id = $this->checklist->contract_uuid;
+                $data_notification->notification_type_id = 2;
+                $notification->registerNotification($data_notification);
             }
 
             if($this->checklist->getChanges()){
