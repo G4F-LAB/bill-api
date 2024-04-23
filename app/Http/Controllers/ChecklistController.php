@@ -77,7 +77,12 @@ class ChecklistController extends Controller
             //     ->get();
 
             $checklists = Checklist::whereNotNull('contract_uuid')
-            ->with(['contract.operationContractUsers.user'])->get();
+            ->with(['contract' => function ($query) {
+                $query->where('status', 'ATIVO');
+            }, 'contract.operationContractUsers.user'])
+            ->get();
+        
+        return $checklists;
         
                 
             return response()->json($checklists, 200);

@@ -24,24 +24,30 @@ class Contract extends Model
 
     
     protected $fillable = [
-        'client_id',
+        'operation_id',
         'name',
-        'contractual_situation',
-        'manager_id',
-        'status_id',
-        'alias'
+        'alias',
+        'uuid',
+        'status',
+        'start_date',
+        'end_date',
+        'renew_date',
+        'renew_limit_date',
     ];
 
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'client_id',
+            'operation_id',
             'name',
-            'contractual_situation',
-            'manager_id',
-            'status_id',
-            'alias'
+            'alias',
+            'uuid',
+            'status',
+            'start_date',
+            'end_date',
+            'renew_date',
+            'renew_limit_date',
         ]);
     }
 
@@ -52,17 +58,6 @@ class Contract extends Model
     // public function manager() {
     //     return $this->belongsTo(Operation::class,'manager_id', 'id');
     // }
-
-    // public function checklist(){
-    //     return $this->hasMany(Checklist::class);
-    // }
-
-
-    // public function operation() {
-    //     return $this->belongsTo(Operation::class);
-    // }
-    
-
 
     public function checklist()
     {
