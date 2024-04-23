@@ -17,6 +17,8 @@ class File extends Model
     protected $fillable = [
         'item_id',
         'complementary_name',
+        'created_at',
+        'updated_at',
         'path'
     ];
 
@@ -25,6 +27,8 @@ class File extends Model
         return LogOptions::defaults()->useLogName('File')->logOnly([
             'item_id',
             'complementary_name',
+            'created_at',
+            'updated_at',
             'path'
         ]);
     }
