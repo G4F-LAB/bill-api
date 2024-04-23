@@ -17,9 +17,21 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
+
+
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+        protected $fillable = [
         'name',
+        'username',
         'email',
+        'email_corporate',
+        'taxvat',
+        'phone',
+        'status',
+        'type',
         'password',
     ];
     public function getActivitylogOptions(): LogOptions
@@ -48,4 +60,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function operationContractUsers()
+    {
+        return $this->hasMany(OperationContractUser::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = Str::uuid();
+            }
+        });
+    }
 }

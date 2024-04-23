@@ -10,7 +10,10 @@ use Spatie\Activitylog\LogOptions;
 class Checklist extends Model
 
 {
+   
     use LogsActivity;
+
+    protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $fillable = [
         'contract_id',
@@ -62,7 +65,7 @@ class Checklist extends Model
     }
 
     public function contract(){
-        return $this->belongsTo(Contract::class);
+        return $this->belongsTo(Contract::class, 'contract_uuid', 'id');
     }
 
     public function itens() {
