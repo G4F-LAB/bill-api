@@ -19,6 +19,7 @@ use Notification;
 use App\Models\FileCompetence;
 use App\Models\Notification as ModelsNotification;
 use App\Models\Operation;
+use DateTime;
 
 const PERMISSIONS_RH_FIN = [5,6];
 
@@ -42,18 +43,18 @@ class ChecklistController extends Controller
 
         foreach ($checklists as $checklist) {
             $contractId = $contract_ids->firstWhere('id', $checklist->contract_id);
-            
+
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
-            
-    
+
+
             if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
-            
+
 
             $checklist->save();
         }
-        
+
         return response()->json($checklists, 200);
     }
 
@@ -194,7 +195,7 @@ class ChecklistController extends Controller
             $notification = new NotificationController();
             $data_notification = new ModelsNotification();
             $this->checklist = $this->checklist->find($id);
-            dd($this->checklist);
+            // dd($this->checklist);
             if ($request->method() == 'PATCH') {
                 $dinamicRules = array();
 
@@ -215,24 +216,27 @@ class ChecklistController extends Controller
             if ($request->has('obs')) $this->checklist->obs = $request->obs;
             if ($request->has('accept')) $this->checklist->accept = $request->accept;
             if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
-
             // validação pendente
             if(!empty($this->checklist->signed_by) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
-
             // finalizado
-            if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100){
-                $this->checklist->status_id = 5;
-                $data_notification->notification_type = 2;
-                $data_notification->contract_id = $request->contract_id;
-                $data_notification->notification_cat_id = 2;
-                $notification->registerNotification($request);
+            if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100)$this->checklist->status_id = 5;
+
+            $this->checklist->update();
+
+            if($this->checklist->status_id = 5 && $this->checklist->getChanges()){
+                $data_notification->desc_id = 2;
+                $data_notification->notification_cat_id = 1;
+                $data_notification->contract_id = $this->checklist->contract_uuid;
+                $data_notification->notification_type_id = 2;
+                $notification->registerNotification($data_notification);
             }
-            $this->checklist->save();
+
             if($this->checklist->getChanges()){
                 $this->checkChelistExpired($this->checklist->getAttributes()["id"]);
             }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json(['erro' => $e->getMessage()], 500);
         }
     }

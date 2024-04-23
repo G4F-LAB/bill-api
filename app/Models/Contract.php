@@ -31,10 +31,10 @@ class Contract extends Model
         'status_id',
         'alias'
     ];
-    
+
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
             'client_id',
             'name',
