@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed109844d14c6097ab89232558f3b69a",
+    "content-hash": "2be10ceaaab448e7c6ba20db7943f5a8",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3762,6 +3762,66 @@
                 }
             ],
             "time": "2023-11-08T05:53:05+00:00"
+        },
+        {
+            "name": "spaanproductions/laravel-carbon-holidays",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spaanproductions/laravel-carbon-holidays.git",
+                "reference": "be39b0ba912acbaa14f273a464b4274f17cefbfb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spaanproductions/laravel-carbon-holidays/zipball/be39b0ba912acbaa14f273a464b4274f17cefbfb",
+                "reference": "be39b0ba912acbaa14f273a464b4274f17cefbfb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-calendar": "*",
+                "illuminate/support": "^9.0",
+                "nesbot/carbon": "^2.0",
+                "php": "^8.0|^8.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "SpaanProductions\\LaravelCarbonHolidays\\LaravelCarbonHolidaysServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SpaanProductions\\LaravelCarbonHolidays\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Spaan Productions",
+                    "email": "info@spaanproductions.nl",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Add Dutch Holidays Check to Carbon in Laravel",
+            "homepage": "https://github.com/spaanproductions/laravel-carbon-holidays",
+            "keywords": [
+                "laravel-carbon-holidays",
+                "spaanproductions"
+            ],
+            "support": {
+                "issues": "https://github.com/spaanproductions/laravel-carbon-holidays/issues",
+                "source": "https://github.com/spaanproductions/laravel-carbon-holidays/tree/2.0.1"
+            },
+            "time": "2022-07-21T07:14:49+00:00"
         },
         {
             "name": "spatie/laravel-activitylog",
@@ -9144,5 +9204,5 @@
         "php": "^8.0.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }
