@@ -17,7 +17,7 @@ class Contract extends Model
     protected $primaryKey = 'id';
     protected $hidden = ['pivot'];
     protected $appends = ['checklist_current'];
-    
+
     protected $fillable = [
         'client_id',
         'name',
@@ -26,10 +26,10 @@ class Contract extends Model
         'status_id',
         'alias'
     ];
-    
+
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
             'client_id',
             'name',
