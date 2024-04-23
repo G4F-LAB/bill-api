@@ -13,13 +13,23 @@ class Operation extends Model
 {
     use HasFactory;
     use LogsActivity;
-    use SoftDeletes;
-    protected $fillables = [
-        'name',
-        'manager_id',
+    // use SoftDeletes;
+
+    protected $connection =  'data_G4F';
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
         'reference',
-        'executive_id'
+        'name',
     ];
+    // protected $fillables = [
+    //     'name',
+    //     'manager_id',
+    //     'reference',
+    //     'executive_id'
+    // ];
     protected $appends = ['op_initials'];
 
 
@@ -49,30 +59,42 @@ class Operation extends Model
         );
     }
 
-    public function contract() {
-        return $this->hasMany(Contract::class,'operation_id','id');
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
     }
 
-    public function executive() {
-        return $this->belongsTo(Executive::class);
+    public function operationContractUsers()
+    {
+        return $this->hasMany(OperationContractUser::class);
     }
 
-    public function collaborators() {
-        return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
-    }
 
-    public function collaborator() {
-        return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
-    }
+    // public function contract() {
+    //     return $this->hasMany(Contract::class,'operation_id','id');
+    // }
 
-    public function executives() {
-        return $this->belongsTo(Executive::class,'executive_id','id');
-    }
+    // public function executive() {
+    //     return $this->belongsTo(Executive::class);
+    // }
 
-    public function collaborator_operations() {
-        return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')
+    // public function collaborators() {
+    //     return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
+    // }
+
+    // public function collaborator() {
+    //     return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
+    // }
+
+    // public function executives() {
+    //     return $this->belongsTo(Executive::class,'executive_id','id');
+    // }
+
+    // public function collaborator_operations() {
+    //     return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')
                                     
-                                    ->withTimestamps();
-    }
+    //                                 ->withTimestamps();
+    // }
 
 }

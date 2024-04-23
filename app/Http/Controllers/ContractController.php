@@ -15,15 +15,20 @@ use Carbon\Carbon;
 class ContractController extends Controller
 {
     public function __construct(Collaborator $collaborator) {
-        $this->user = $collaborator->getAuthUser();
-        $this->current_month =  now()->format('m');
+        // $this->user = $collaborator->getAuthUser();
+        // $this->current_month =  now()->format('m');
 
-        if(now()->format('d') <= 17){
-            $this->current_month = now()->format('m') - 1;
-        }
+        // if(now()->format('d') <= 17){
+        //     $this->current_month = now()->format('m') - 1;
+        // }
     }
 
     //Obter todos os contratos
+    public function index(Request $request){
+        $contracts = Contract::with(['operation', 'checklists'])->get();
+
+        return response()->json($contracts, 200);
+    }   
     public function getAllContracts(Request $request)
     {
 
@@ -35,9 +40,8 @@ class ContractController extends Controller
                 }
                 ,'operation'
                 ,'operation.executive'
-                ,'operation.collaborators'
-                ,'status'
-                ])
+                ,'operation.collaborators'              
+                  ])
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
             //         $query2->where('collaborator_id',$this->user->id);

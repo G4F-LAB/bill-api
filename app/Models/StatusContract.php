@@ -11,7 +11,7 @@ class StatusContract extends Model
 
     protected $table = 'status_contract';
 
-    public function contract() {
-        return $this->hasMany(Contract::class);
-    }
+    // public function contract() {
+    //     return $this->hasMany(Contract::class);
+    // }
 }

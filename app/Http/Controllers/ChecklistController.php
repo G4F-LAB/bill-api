@@ -33,6 +33,31 @@ class ChecklistController extends Controller
     }
 
 
+    public function updateContactIds(){
+        $contract_ids = Contract::on('book')->get();
+
+        $contract_uiids = Contract::on('data_G4F')->get();
+
+        $checklists = Checklist::all();
+
+        foreach ($checklists as $checklist) {
+            $contractId = $contract_ids->firstWhere('id', $checklist->contract_id);
+            
+            $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
+            
+    
+            if ($checklist->contract_uuid ===  NULL) {
+                $checklist->contract_uuid = $contractUuid->id;
+            }
+            
+
+            $checklist->save();
+        }
+        
+        return response()->json($checklists, 200);
+    }
+
+
     public function getAll()
     {
         try {
