@@ -46,7 +46,7 @@ class ChecklistController extends Controller
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
             
     
-            if ($checklist->contract_uuid ===  NULL) {
+            if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
             
