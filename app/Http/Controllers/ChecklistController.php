@@ -62,24 +62,9 @@ class ChecklistController extends Controller
     public function getAll()
     {
         try {
-
-            // $checklist = DB::table('checklists')
-            //         ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
-            //         ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
-            //         ->select('*')
-            //         ->get();
-
-    // verificar query para casos de não ter contrato com gerente e consistencia de dados.
-            // $checklist = Checklist::join('contracts', 'checklists.contract_uuid', '=', 'contracts.id')
-            //     ->join('operations', 'contracts.operation_id', '=', 'operations.id')
-            //     ->join('collaborators', 'collaborators.id', '=', 'operations.manager_id')
-            //     ->select(['checklists.id', 'contracts.name as contrato', 'checklists.date_checklist', 'operations.manager_id', 'collaborators.name'])
-            //     ->get();
-
             $checklists = Checklist::whereNotNull('contract_uuid')
             ->with(['contract.operationContractUsers.user'])->get();
-        
-                
+
             return response()->json($checklists, 200);
         } catch (\Exception $e) {
             dd($e);
@@ -129,7 +114,9 @@ class ChecklistController extends Controller
     {
 
         try {
-            $checklistExists = Checklist::where('contract_id', $request->contract_id)
+            $notification = new NotificationController();
+            $data_notification = new ModelsNotification();
+            $checklistExists = Checklist::where('contract_id', $request->contract_uuid)
                 ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
                 ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
                 ->where('sector_id', $request->sector_id)
@@ -139,7 +126,7 @@ class ChecklistController extends Controller
                 return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
             };
 
-            $this->checklist->contract_id  = $request->contract_id;
+            $this->checklist->contract_uuid  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
@@ -149,6 +136,12 @@ class ChecklistController extends Controller
             $this->checklist->signed_by = $request->signed_by;
             $this->checklist->save();
 
+
+            $data_notification->desc_id = 2;
+            $data_notification->notification_cat_id = 2;
+            $data_notification->contract_uuid = $this->checklist->contract_uuid;
+            $data_notification->notification_type_id = 1;
+            $notification->registerNotification($data_notification);
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
@@ -224,10 +217,10 @@ class ChecklistController extends Controller
             $this->checklist->update();
 
             if($this->checklist->status_id = 5 && $this->checklist->getChanges()){
-                $data_notification->desc_id = 2;
-                $data_notification->notification_cat_id = 1;
+                $data_notification->desc_id = 4;
+                $data_notification->notification_cat_id = 2;
                 $data_notification->contract_id = $this->checklist->contract_uuid;
-                $data_notification->notification_type_id = 2;
+                $data_notification->notification_type_id = 1;
                 $notification->registerNotification($data_notification);
             }
 
@@ -236,7 +229,6 @@ class ChecklistController extends Controller
             }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
-            dd($e);
             return response()->json(['erro' => $e->getMessage()], 500);
         }
     }
@@ -439,7 +431,9 @@ class ChecklistController extends Controller
             $diasUteis = 0;
             while($diasUteis < 7) {
                 // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
-                if($date->isWeekday() && !$date->isHoliday() ) {
+                if($date->isWeekday()
+                // && !$date->isHoliday()
+                ) {
                     $diasUteis++;
                 }
                 $date->addDay(); // Avança para o próximo dia
