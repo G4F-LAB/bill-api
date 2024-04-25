@@ -47,7 +47,7 @@ class ChecklistController extends Controller
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
 
 
-            if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
+            if ( isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
 
@@ -78,7 +78,7 @@ class ChecklistController extends Controller
 
             $checklists = Checklist::whereNotNull('contract_uuid')
             ->with(['contract' => function ($query) {
-                $query->where('status', 'ATIVO');
+                $query->where('status', 'Ativo');
             }, 'contract.operationContractUsers.user'])
             ->get();
         

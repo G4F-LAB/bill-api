@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sharepoint' => [
+        'client_id' => env('SHAREPOINT_CLIENT_ID'),
+        'client_secret' => env('SHAREPOINT_CLIENT_SECRET'),
+        'tenant_id' => env('SHAREPOINT_TENANT_ID'),
+        'site_url' => env('SHAREPOINT_SITE'),
+    ],
+
 ];

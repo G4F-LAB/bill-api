@@ -15,14 +15,86 @@ use App\Models\Contract;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
+use App\Services\SharePointService;
 
 class FileController extends Controller
 {
-    public function __construct(Collaborator $collaborator) {
-        $this->env = env('APP_ENV') ? env('APP_ENV') : 'developer';
-        $this->auth_user = $collaborator->getAuthUser();
+    // public function __construct(Collaborator $collaborator) {
+    //     $this->env = env('APP_ENV') ? env('APP_ENV') : 'developer';
+    //     $this->auth_user = $collaborator->getAuthUser();
+    // }
+
+
+    public function __construct(SharePointService $sharePointService)
+    {
+        $this->sharePointService = $sharePointService;
     }
 
+    public function importRH(Request $request){
+     
+
+        try {
+            // Storage::disk('sharepoint')->put('test.txt', 'testContentN7');
+            $files = Storage::disk('sharepoint')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+
+
+            
+            
+            // // Output directories
+            // foreach ($files as $file) {
+            //     echo $file . "\n";
+            // }
+            return $files;
+            
+            
+        } catch (\Exception $exception) {
+            dd($exception);
+        }
+        return 'error';
+
+        $clientId = config('services.sharepoint.client_id');
+        $clientSecret = config('services.sharepoint.client_secret');
+        $tenantId = config('services.sharepoint.tenant_id');
+        $siteUrl = config('services.sharepoint.site_url');
+        $siteId = 'g4fcombr.sharepoint.com,b0e923d7-1544-4e3b-8011-1f959cbbba2e,62824dcd-426d-4ece-8494-8909f6ce2de2';
+        $driveId = 'b!1yPpsEQVO06AER-VnLu6Ls1NgmJtQs5OhJSJCfbOLeL30pMUsZWITZ7q9sYfinO1';
+        $folderPath = 'your-folder-path';
+
+        $accessToken = $this->sharePointService->generateAccessToken($clientId, $clientSecret, $tenantId);
+
+        // Verificando se o access token foi gerado com sucesso
+        if (!$accessToken) {
+            return response()->json(['message' => 'Falha ao gerar o token de acesso'], 500);
+        }
+
+        // Obtendo os IDs do site e do drive
+        // $siteAndDriveIds = $this->sharePointService->getSiteAndDriveIds($accessToken, $siteUrl);
+        $siteAndDriveIds = $this->sharePointService->searchSites($accessToken);
+
+// dd($siteAndDriveIds);
+        // Verificando se os IDs do site e do drive foram obtidos com sucesso
+        if (!$siteAndDriveIds) {
+            return response()->json(['message' => 'Falha ao obter os IDs do site e do drive'], 500);
+        }
+
+        // // $siteId = $siteAndDriveIds['siteId'];
+        // // $driveId = $siteAndDriveIds['driveId'];
+        // $folderPath = '/'; // Substitua pelo caminho da pasta desejada
+
+        // // Listando os arquivos na pasta especificada
+        // $files = $this->sharePointService->listFiles($accessToken, $siteId, $driveId, $folderPath);
+
+        // // Verificando se os arquivos foram listados com sucesso
+        // if (!$files) {
+        //     return response()->json(['message' => 'Falha ao listar os arquivos'], 500);
+        // }
+
+        return response()->json($siteAndDriveIds);
+    }
+
+
+
+    
     public function uploadChecklistFiles(Request $request) {
 
         $checklist_id = (int)$request->id;
