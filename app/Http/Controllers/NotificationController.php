@@ -33,8 +33,6 @@ class NotificationController extends Controller
 
             return response()->json([$notification, 'message' => 'Notificação adicionado com sucesso!'], 200);
         } catch (\Exception $e) {
-            var_dump($e->getMessage());
-            exit;
             return response()->json(['error' => $e->getMessage()]);
         }
     }
@@ -60,7 +58,7 @@ class NotificationController extends Controller
                 ->limit(10)
                 ->orderBy('notifications.id', 'DESC')
                 ->get();
-                
+
                 return Contract::get();
 
 
