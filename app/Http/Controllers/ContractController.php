@@ -35,16 +35,20 @@ class ContractController extends Controller
         $contracts = Contract::with(['operation'])
             // ->whereNotNull('operation_id')
             ->whereHas('operation', function ($query) {
-                $query->whereNotNull('reference'); // Operations with non-null reference
+                $query->whereNotNull('reference'); 
             })
             ->where(function ($query) use ($searchTerm) {
-                $searchTermLower = mb_strtolower($searchTerm); // Convert search term to lowercase
+                $searchTermLower = mb_strtolower($searchTerm); 
                 $query->whereHas('operation', function ($query) use ($searchTermLower) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); // Case-insensitive search
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
                 })
-                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); // Case-insensitive search
+                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
             })
             ->where('status', $status)
+            // ->whereHas('operation', function ($query) use ($user) {
+            //     // Filter contracts based on the user's operations
+            //     $query->whereIn('id', $user->operations()->pluck('id'));
+            // })
             ->get();
     
         return response()->json($contracts, 200);
