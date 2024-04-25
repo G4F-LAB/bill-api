@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Database\Eloquent\Builder;
 
 use App\Models\Collaborator;
 use App\Models\Permission;
@@ -24,11 +25,32 @@ class ContractController extends Controller
     }
 
     //Obter todos os contratos
-    public function index(Request $request){
-        $contracts = Contract::with(['operation','checklist', 'checklists'])->get();
 
+    public function index(Request $request)
+    {
+        // Parameters
+        $status = $request->input('status', 'Ativo');
+        $searchTerm = $request->input('q');
+    
+        $contracts = Contract::with(['operation'])
+            // ->whereNotNull('operation_id')
+            ->whereHas('operation', function ($query) {
+                $query->whereNotNull('reference'); // Operations with non-null reference
+            })
+            ->where(function ($query) use ($searchTerm) {
+                $searchTermLower = mb_strtolower($searchTerm); // Convert search term to lowercase
+                $query->whereHas('operation', function ($query) use ($searchTermLower) {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); // Case-insensitive search
+                })
+                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); // Case-insensitive search
+            })
+            ->where('status', $status)
+            ->get();
+    
         return response()->json($contracts, 200);
-    }   
+    }
+
+
     public function getAllContracts(Request $request)
     {
 
