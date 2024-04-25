@@ -8,68 +8,92 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Str;
 
 class Contract extends Model
 {
     use HasFactory;
     use LogsActivity;
 
+    protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $hidden = ['pivot'];
-    protected $appends = ['checklist_current'];
+
+
     
     protected $fillable = [
-        'client_id',
+        'operation_id',
         'name',
-        'contractual_situation',
-        'manager_id',
-        'status_id',
-        'alias'
+        'alias',
+        'uuid',
+        'status',
+        'start_date',
+        'end_date',
+        'renew_date',
+        'renew_limit_date',
     ];
-    
+
 
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'client_id',
+            'operation_id',
             'name',
-            'contractual_situation',
-            'manager_id',
-            'status_id',
-            'alias'
+            'alias',
+            'uuid',
+            'status',
+            'start_date',
+            'end_date',
+            'renew_date',
+            'renew_limit_date',
         ]);
     }
 
-    public function collaborators() {
-        return $this->belongsToMany(Collaborator::class,'operations','manager_id', 'manager_id')->withTimestamps();
-    }
+    // public function collaborators() {
+    //     return $this->belongsToMany(Collaborator::class,'operations','manager_id', 'manager_id')->withTimestamps();
+    // }
 
-    public function manager() {
-        return $this->belongsTo(Operation::class,'manager_id', 'id');
-    }
+    // public function manager() {
+    //     return $this->belongsTo(Operation::class,'manager_id', 'id');
+    // }
 
-    public function checklist(){
-        return $this->hasMany(Checklist::class);
-    }
-
-
-    public function operation() {
-        return $this->belongsTo(Operation::class);
-    }
-    public function status() {
-        return $this->belongsTo(StatusContract::class);
-    }
-
-    //current checklist
-    protected function checklistCurrent(): Attribute
+    public function checklist()
     {
-        $initials =  [];
+        return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->latest();
+    }
+    public function checklists(){
 
-        $current_checklist = Checklist::where('contract_id', $this->id)->with('itens.fileNaming')->latest()->first();
+        return $this->hasMany(Checklist::class, 'contract_uuid', 'id');
+    }
 
-        return new Attribute(
-            get: fn () => $current_checklist,
-        );
+
+     // Define relationships
+     public function operation()
+     {
+         return $this->belongsTo(Operation::class);
+     }
+
+    public function contractUsers()
+    {
+        return $this->hasMany(ContractUser::class);
+    }
+
+    public function operationContractUsers()
+    {
+        return $this->hasMany(OperationContractUser::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = Str::uuid(); // Generate UUID if not already set
+            }
+        });
     }
 
 }

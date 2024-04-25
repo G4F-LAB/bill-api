@@ -18,6 +18,7 @@ use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\ExecutiveController;
 use App\Http\Controllers\FileCompetenceController;
 use App\Http\Controllers\OperationController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +68,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Contratos
-    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->get('/contracts', [ContractController::class, 'getAllContracts']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->get('/contracts', [ContractController::class, 'index']);
     Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->put('/contracts', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao, Analista')->post('/contracts/update', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/contracts/new', [ContractController::class, 'updateListContracts']);
@@ -78,6 +79,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
+    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist',[ChecklistController::class, 'store']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista')->post('/checklist/{id}', [ChecklistController::class,'update']);
@@ -161,6 +163,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //Automação
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
     Route::middleware('check.permission:All')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
+
+    //notifications
+    Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
+    Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
+
 
 });
 

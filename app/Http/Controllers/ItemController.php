@@ -55,8 +55,7 @@ class ItemController extends Controller
     }
 
     public function store(Request $request)
-    { 
-
+    {
         $data = [
             "file_naming_id" => $request->file_naming_id,
             "checklist_id" => $request->checklist_id,
@@ -65,24 +64,19 @@ class ItemController extends Controller
             "mandatory" => true
         ];
 
-        
         $addItems = $this->addItems($data);
-        
-        
-        
         if (isset($addItems['error'])) {
             return response()->json($addItems, 200);
         }
-
         return response()->json(['message' => 'Item(s) adicionado(s) com sucesso'], 200);
     }
 
 
     public function addItems($data)
-    {    
+    {
         $errors = [];
         $errors['status'] = 'Error';
-       
+
         foreach ($data['file_naming_id'] as $file_naming_id) {
 
             $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
@@ -140,8 +134,8 @@ class ItemController extends Controller
                 return ['error' => $e->getMessage()];
             }
 
-        } 
-   
+        }
+
         return 'Item(s) adicionado(s) com sucesso';
     }
 
@@ -219,7 +213,6 @@ class ItemController extends Controller
         try {
             $item = Item::find($id);
             $checklist = Checklist::where('id',$item->checklist_id)->first();
-            //dd($item);
             if (!$item) {
                 return response()->json([
                     'error' => 'Not Found'
@@ -261,7 +254,7 @@ class ItemController extends Controller
                     }
                 }
             }
-            
+
             $zip = new \ZipArchive();
             $response = new Response();
             $response->headers->set('Content-Type', 'application/zip');
@@ -282,7 +275,7 @@ class ItemController extends Controller
 
         }
 
-        
+
     }
 
 }
