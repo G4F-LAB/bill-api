@@ -14,7 +14,7 @@ use App\Models\Operation;
 class Contract extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';

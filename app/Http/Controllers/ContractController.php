@@ -163,14 +163,11 @@ class ContractController extends Controller
     {
         try {
 
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            // $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
 
-            if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::where('id',$request->id)->first();
-            if ($request->has('contractual_situation')) {
-                $contrato->contractual_situation = $request->contractual_situation;
-            }
+            $contrato = Contract::where('id', $request->id)->first();
 
             if ($request->has('alias')) {
                 $contrato->alias = $request->alias;
@@ -191,7 +188,7 @@ class ContractController extends Controller
 
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage() + 'Não foi possível atualizar o contrato.'], 500);
+            return response()->json(['error' => $e->getMessage() . 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 
