@@ -130,7 +130,7 @@ class AuthController extends Controller
         $collaborator->email_corporate = isset($user['mail']) ? $user['mail'][0] : NULL;
         $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
         $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-        $collaborator->type = $permission;
+        // $collaborator->type = $permission;
         $collaborator->save();
         
         $firstLogin = !$collaborator->exists;
