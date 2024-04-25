@@ -29,10 +29,10 @@ class ContractController extends Controller
     public function index(Request $request)
     {
         // Parameters
-        $status = $request->input('status', 'Ativo');
+        $status = $request->input('status');
         $searchTerm = $request->input('q');
     
-        $contracts = Contract::with(['operation'])
+        $query = Contract::with(['operation'])
             // ->whereNotNull('operation_id')
             ->whereHas('operation', function ($query) {
                 $query->whereNotNull('reference'); 
@@ -44,13 +44,17 @@ class ContractController extends Controller
                 })
                 ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
             })
-            ->where('status', $status)
             // ->whereHas('operation', function ($query) use ($user) {
             //     // Filter contracts based on the user's operations
             //     $query->whereIn('id', $user->operations()->pluck('id'));
             // })
-            ->get();
+          ;
+
+            if ($status !== null) {
+                $query->where('status', $status);
+            }
     
+        $contracts = $query->get();
         return response()->json($contracts, 200);
     }
 
