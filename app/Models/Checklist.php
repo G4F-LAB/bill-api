@@ -22,8 +22,7 @@ class Checklist extends Model
         'shipping_method',
         'obs',
         'accept',
-        'sector',
-        'signed_by'
+        'user_id'
     ];
 
     public function rules(){
@@ -35,7 +34,7 @@ class Checklist extends Model
         'obs' => 'string',
         'accept' => 'boolean',
         'sector' => 'required|string',
-        'signed_by' => 'string'
+        'user_id' => 'string'
 
         ];
     }
@@ -51,7 +50,7 @@ class Checklist extends Model
         'obs',
         'accept',
         'sector',
-        'signed_by']);
+        'user_id']);
     }
 
     public function feedback() {
@@ -110,11 +109,11 @@ class Checklist extends Model
 
     public function update_status() {
         $ok = false;
-        if(!empty($this->signed_by) && $this->completion == 100){
+        if(!empty($this->user_id) && $this->completion == 100){
             $this->status_id = 4;
             $ok = true;
         }
-        if(!empty($this->signed_by) && $accept && $this->completion == 100){
+        if(!empty($this->user_id) && $accept && $this->completion == 100){
             $this->status_id = 5;
             $ok = true;
         }

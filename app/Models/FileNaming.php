@@ -17,6 +17,9 @@ class FileNaming extends Model
     protected $fillable = [
         'file_name',
         'standard_file_naming',
+        'automate',
+        'automate_path',
+        'automate_fullpath'
     ];
 
     public function rules()
