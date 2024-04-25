@@ -26,15 +26,13 @@ class NotificationController extends Controller
             $notification = new Notification();
             $notification->desc_id = $data_notification->desc_id;
             $notification->notification_cat_id = $data_notification->notification_cat_id;
-            $notification->contract_id = $data_notification->contract_uuid;
+            $notification->contract_id = $data_notification->contract_id;
             $notification->date = date("Y-m-d H:i:s");
             $notification->notification_type_id = $data_notification->notification_type_id;
             $notification->save();
 
             return response()->json([$notification, 'message' => 'Notificação adicionado com sucesso!'], 200);
         } catch (\Exception $e) {
-            var_dump($e->getMessage());
-            exit;
             return response()->json(['error' => $e->getMessage()]);
         }
     }
@@ -60,7 +58,7 @@ class NotificationController extends Controller
                 ->limit(10)
                 ->orderBy('notifications.id', 'DESC')
                 ->get();
-                
+
                 return Contract::get();
 
 

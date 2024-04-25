@@ -8,6 +8,7 @@ use App\Models\Checklist;
 use App\Models\File;
 use App\Models\FileNaming;
 use App\Models\FilesItens;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -68,75 +69,87 @@ class ItemController extends Controller
         if (isset($addItems['error'])) {
             return response()->json($addItems, 200);
         }
+
         return response()->json(['message' => 'Item(s) adicionado(s) com sucesso'], 200);
     }
 
 
     public function addItems($data)
     {
-        $errors = [];
-        $errors['status'] = 'Error';
+        try{
+            $errors = [];
+            $errors['status'] = 'Error';
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            $notification = new NotificationController($colaborador);
+            $data_notification = new Notification();
+            foreach ($data['file_naming_id'] as $file_naming_id) {
+                $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
+                if (!empty($item)) {
+                    $errors['errors'][] = [
+                        'message' => 'O item com o nome escolhido já existe para esse checklist!',
+                        'Item' => $item
+                    ];
+                }
 
-        foreach ($data['file_naming_id'] as $file_naming_id) {
+                if (!empty($errors['errors'])) continue;
 
-            $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
-            if (!empty($item)) {
-                $errors['errors'][] = [
-                    'message' => 'O item com o nome escolhido já existe para esse checklist!',
-                    'Item' => $item
-                ];
+                try {
+                    $this->item = new Item();
+                    $this->item->status = false;
+                    $this->item->file_naming_id = $file_naming_id;
+                    $this->item->file_competence_id = $data['file_competence_id'];
+                    $this->item->checklist_id = $data['checklist_id'];
+                    $this->item->save();
+
+                    $checklist = Checklist::where('id', $this->item->checklist_id)->first();
+                    $data_notification->desc_id = 1;
+                    $data_notification->notification_cat_id = 3;
+                    $data_notification->contract_id = $checklist['contract_uuid'];
+                    $data_notification->notification_type_id = 1;
+                    $notification->registerNotification($data_notification);
+
+                    $sub_months = NULL;
+
+                    if ($this->item->file_competence_id == 1) {
+                        $sub_months = 2;
+                    } elseif ($this->item->file_competence_id == 2) {
+                        $sub_months = 1;
+                    }
+
+                    $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth();
+                    $date = $date->subMonths($sub_months)->format('Y-m');
+
+                    $files = File::where('path', 'ilike', "%$date%")->get()->toArray();
+                    $item_name = FileNaming::where('id', $this->item->file_naming_id)->first();
+
+                    $file_found = null;
+
+                    foreach ($files as $file) {
+                        $file_name = substr($file['path'], strrpos($file['path'], '/') + 1);
+                        if (strpos($file_name, $item_name->standard_file_naming) !== FALSE) {
+                            $file_found = File::find($file['id']);
+                            break;
+                        }
+                    }
+
+                    if (!empty($file_found)) {
+                        $file_found->itens()->attach($this->item->id);
+                        $this->item->status = true;
+                        //Acredito que aqui é so colocar um $this->item->mandatory = true; ai no caso ele so vai contar também os status de true.
+                        $this->item->save();
+                        $checklist->sync_itens();
+
+                    }
+                    return 'Item(s) adicionado(s) com sucesso';
+                } catch (\Exception $e) {
+                    return ['error' => $e->getMessage()];
+                }
             }
 
-            if (!empty($errors['errors'])) continue;
-
-            try {
-                $this->item = new Item();
-                $this->item->status = false;
-                $this->item->file_naming_id = $file_naming_id;
-                $this->item->file_competence_id = $data['file_competence_id'];
-                $this->item->checklist_id = $data['checklist_id'];
-                $this->item->save();
-
-                $checklist = Checklist::where('id', $this->item->checklist_id)->first();
-                $sub_months = NULL;
-
-                if ($this->item->file_competence_id == 1) {
-                    $sub_months = 2;
-                } elseif ($this->item->file_competence_id == 2) {
-                    $sub_months = 1;
-                }
-
-                $date = Carbon::createFromFormat('Y-m-d', $checklist->date_checklist)->startOfMonth();
-                $date = $date->subMonths($sub_months)->format('Y-m');
-
-                $files = File::where('path', 'ilike', "%$date%")->get()->toArray();
-                $item_name = FileNaming::where('id', $this->item->file_naming_id)->first();
-
-                $file_found = null;
-
-                foreach ($files as $file) {
-                    $file_name = substr($file['path'], strrpos($file['path'], '/') + 1);
-                    if (strpos($file_name, $item_name->standard_file_naming) !== FALSE) {
-                        $file_found = File::find($file['id']);
-                        break;
-                    }
-                }
-
-                if (!empty($file_found)) {
-                    $file_found->itens()->attach($this->item->id);
-                    $this->item->status = true;
-                    //Acredito que aqui é so colocar um $this->item->mandatory = true; ai no caso ele so vai contar também os status de true.
-                    $this->item->save();
-                    $checklist->sync_itens();
-                }
-
-            } catch (\Exception $e) {
+        }catch (\Exception $e) {
                 return ['error' => $e->getMessage()];
             }
 
-        }
-
-        return 'Item(s) adicionado(s) com sucesso';
     }
 
 
@@ -160,23 +173,16 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            $notification = new NotificationController($colaborador);
+            $data_notification = new Notification();
             $this->item = Item::find($id);
-
-            // print_r($this->item);exit;
 
             if (!$this->item) {
                 return response()->json([
                     'error' => 'Item não encontrado'
                 ], Response::HTTP_NOT_FOUND);
             }
-
-            // if($this->item->isEmpty()){
-            //     return response()->json([
-            //         'error' => 'Item não encontrado'
-            //     ], Response::HTTP_NOT_FOUND);
-            // }
-
             if ($request->has('id'))
                 $this->item->id = $request->id;
             if ($request->has('status'))
@@ -194,8 +200,13 @@ class ItemController extends Controller
                 }
             $this->item->save();
 
-            // $checklist = Checklist::find($this->item->checklist_id);
+            $checklist = Checklist::find($this->item->checklist_id);
             // $checklist->sync_itens();
+            $data_notification->desc_id = 2;
+            $data_notification->notification_cat_id = 3;
+            $data_notification->contract_id = $checklist->contract_uuid;
+            $data_notification->notification_type_id = 1;
+            $notification->registerNotification($data_notification);
 
             return response()->json(['message' => 'Item atualizado com sucesso'], 200);
 
@@ -211,6 +222,9 @@ class ItemController extends Controller
     public function destroy(string $id)
     {
         try {
+            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            $notification = new NotificationController($colaborador);
+            $data_notification = new Notification();
             $item = Item::find($id);
             $checklist = Checklist::where('id',$item->checklist_id)->first();
             if (!$item) {
@@ -218,13 +232,15 @@ class ItemController extends Controller
                     'error' => 'Not Found'
                 ], Response::HTTP_NOT_FOUND);
             }
-
             $item->id = $id;
             $item->deleted_at = date('Y/m/d H:i');
             $item->save();
-
             $checklist->sync_itens();
-
+            $data_notification->desc_id = 3;
+            $data_notification->notification_cat_id = 3;
+            $data_notification->contract_id = $checklist['contract_uuid'];
+            $data_notification->notification_type_id = 1;
+            $notification->registerNotification($data_notification);
             return response()->json(['message' => 'Item deletado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage()], 500);
