@@ -41,9 +41,6 @@ class NotificationController extends Controller
 
     public function notifications()
     {
-
-
-
         try {
 
             $id_user = $this->auth_user->id;
@@ -61,31 +58,6 @@ class NotificationController extends Controller
                 ->orderBy('notifications.id', 'DESC')
                 ->get();
                 
-                return Contract::get();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             $id_notifications_viewer = Notification_viewer::where('collaborator_id', $id_user)->pluck('notification_id')->toArray();
 
             foreach ($notifications as $indice => $value) {

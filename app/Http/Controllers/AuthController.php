@@ -29,8 +29,8 @@ class AuthController extends Controller
             'password.required' => 'Preencha o campo de senha!',
             'username.required' => 'Preencha o campo de login!'
         ];
-      //validação dos campos da requisição
-      $request->validate($rules, $feedback);
+        //validação dos campos da requisição
+        $request->validate($rules, $feedback);
 
         try {
             $dispatcher = Container::getEventDispatcher();
@@ -41,7 +41,7 @@ class AuthController extends Controller
             //Evento listener que espera alguma falha de acesso
             $dispatcher->listen(Failed::class, function (Failed $event) use (&$message, &$httpCode) {
                 $ldap = $event->getConnection();
-         
+
                 //Recupera o erro retornado
                 $error = $ldap->getDiagnosticMessage();
 
@@ -72,8 +72,8 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
-                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
-                return response()->json(['token' => $token, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
+                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
+                return response()->json(['token' => $token, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
             } else {
                 if (empty($message)) {
                     $message = 'Usuário ou senha inválidos!';
@@ -82,10 +82,10 @@ class AuthController extends Controller
                 return response()->json(['error' => $message], $httpCode);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()],401);
+            return response()->json(['error' => $e->getMessage()], 401);
         }
-    }    
-    
+    }
+
 
 
     public function logout()
@@ -105,7 +105,7 @@ class AuthController extends Controller
         foreach ($collaborators as $collaborator) {
 
             $user = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($collaborator->objectguid))->first();
-    
+
             $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
             $collaborator->email = isset($user['mail']) ? $user['mail'][0] : NULL;
             $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
@@ -116,39 +116,26 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Realizado com sucesso!']);
-
     }
 
     private function checkDatabaseUser()
     {
         $firstLogin = false;
         $user = Auth::user();
-
-        $permissionResult = $this->checkPermission($user);
-        $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
-
-    
         
-        $colaborador = Collaborator::with('permission')->where('objectguid', $user->getConvertedGuid())->first();
-        if ($colaborador == NULL) {
+        $permission = $this->checkPermission($user) ?? $this->permissionID('Geral');
 
-            $colaborador = new Collaborator();
-            $colaborador->name = isset($user['displayname']) ? $user['displayname'][0] : NULL;
-            $colaborador->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
-            $colaborador->email = isset($user['mail']) ? $user['mail'][0] : NULL;
-            $colaborador->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
-            $colaborador->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-            $colaborador->office = isset($user['physicaldeliveryofficename']) ? $user['physicaldeliveryofficename'][0] : NULL;
-            $colaborador->role = isset($user['title']) ? $user['title'][0] : NULL;
-            $colaborador->objectguid = $user->getConvertedGuid();
-            $colaborador->permission_id = $permission;
-            $colaborador->save();
+        $collaborator = Collaborator::firstOrNew(['taxvat' => $user['employeeid']]);
+        $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
+        $collaborator->email_corporate = isset($user['mail']) ? $user['mail'][0] : NULL;
+        $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
+        $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
+        $collaborator->type = $permission;
+        $collaborator->save();
+        
+        $firstLogin = !$collaborator->exists;
 
-            $firstLogin = true;
-        } 
-   
-
-        return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+        return ['firstLogin' => $firstLogin, 'user' => $collaborator];
         return response()->json(['message' => 'Realizado com sucesso!']);
     }
 
@@ -165,9 +152,7 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            $colaborador = Collaborator::with('permission')->where('objectguid', Auth::user()->getConvertedGuid())->first();
-
-
+            $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
             return response()->json($colaborador);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
@@ -178,14 +163,14 @@ class AuthController extends Controller
     {
         $group = $user['memberof'];
         $arr_permission = [
-            "trainee_w"             => $this->permissionID('Admin'),
-            "gerencia_executiva1_w" => $this->permissionID('Executivo'),
-            "gerencia_executiva2_w" => $this->permissionID('Executivo'),
-            "Gerentes_Operacoes"    => $this->permissionID('Operacao'),
-            "rh_checklist_w"        => $this->permissionID('Rh'),
-            "rh_book_w"             => $this->permissionID('Rh'),
-            "financeiro_book_w"     => $this->permissionID('Fin'),
-            "g_TI"                  => $this->permissionID('TI'),
+            "trainee_w"             => 'Admin',
+            "gerencia_executiva1_w" => 'Executivo',
+            "gerencia_executiva2_w" => 'Executivo',
+            "Gerentes_Operacoes"    => 'Operacao',
+            "rh_checklist_w"        => 'Rh',
+            "rh_book_w"             => 'Rh',
+            "financeiro_book_w"     => 'Fin',
+            "g_TI"                  => 'TI'
         ];
 
         if (!$group)
