@@ -43,18 +43,18 @@ class ChecklistController extends Controller
 
         foreach ($checklists as $checklist) {
             $contractId = $contract_ids->firstWhere('id', $checklist->contract_id);
-            
+
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
-            
-    
-            if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
+
+
+            if ( isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
-            
+
 
             $checklist->save();
         }
-        
+
         return response()->json($checklists, 200);
     }
 
@@ -62,20 +62,16 @@ class ChecklistController extends Controller
     public function getAll()
     {
         try {
+            $checklists = Checklist::whereNotNull('contract_uuid')
+            ->with(['contract' => function ($query) {
+                $query->where('status', 'Ativo');
+            }, 'contract.operation'])
+            ->get();
 
-            // $checklist = DB::table('checklists')
-            //         ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
-            //         ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
-            //         ->select('*')
-            //         ->get();
 
-    // verificar query para casos de não ter contrato com gerente e consistencia de dados.
-            $checklist = Checklist::join('contracts', 'checklists.contract_id', '=', 'contracts.id')
-                ->join('operations', 'contracts.operation_id', '=', 'operations.id')
-                ->join('collaborators', 'collaborators.id', '=', 'operations.manager_id')
-                ->select(['checklists.id', 'contracts.name as contrato', 'checklists.date_checklist', 'operations.manager_id', 'collaborators.name'])
-                ->get();
-            return response()->json($checklist, 200);
+        return response()->json($checklists, 200);
+
+            return response()->json($checklists, 200);
         } catch (\Exception $e) {
             dd($e);
             return response()->json(['error' => 'Não foi possivel acessar a checklist'], 500);
@@ -124,25 +120,34 @@ class ChecklistController extends Controller
     {
 
         try {
-            $checklistExists = Checklist::where('contract_id', $request->contract_id)
+            $notification = new NotificationController();
+            $data_notification = new ModelsNotification();
+            $checklistExists = Checklist::where('contract_id', $request->contract_uuid)
                 ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
                 ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-                ->where('sector_id', $request->sector_id)
                 ->exists();
 
             if ($checklistExists) {
                 return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
             };
 
-            $this->checklist->contract_id  = $request->contract_id;
+            $this->checklist->contract_uuid  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
+            $this->checklist->month_reference = date('m', strtotime($$request->date_checklist));
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
-            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
-            $this->checklist->signed_by = $request->signed_by;
+            $this->checklist->user_id = $request->signed_by;
+          
             $this->checklist->save();
+
+            //Notification
+            $data_notification->desc_id = 2;
+            $data_notification->notification_cat_id = 2;
+            $data_notification->contract_uuid = $this->checklist->contract_uuid;
+            $data_notification->notification_type_id = 1;
+            $notification->registerNotification($data_notification);
 
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
@@ -210,30 +215,28 @@ class ChecklistController extends Controller
             if ($request->has('shipping_method')) $this->checklist->shipping_method = $request->shipping_method;
             if ($request->has('obs')) $this->checklist->obs = $request->obs;
             if ($request->has('accept')) $this->checklist->accept = $request->accept;
-            if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
+            if ($request->has('signed_by')) $this->checklist->user_id = $request->signed_by;
             // validação pendente
-            if(!empty($this->checklist->signed_by) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
+            if(!empty($this->checklist->user_id) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
             // finalizado
-            if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100)$this->checklist->status_id = 5;
+            if(!empty($this->checklist->user_id) && $this->checklist->accept && $this->checklist->completion == 100)$this->checklist->status_id = 5;
 
             $this->checklist->update();
 
+            //Notification
             if($this->checklist->status_id = 5 && $this->checklist->getChanges()){
-                // $data_notification->desc_id = 2;
-                // $data_notification->notification_cat_id = 1;
-                // $data_notification->contract_id = $this->checklist->contract_id;
-                // //$data_notification->date = date("Y-m-d H:i:s");
-                // $data_notification->notification_viewed_id = 2;
-                // $data_notification->notification_type_id = 2;
-                $notification->registerNotification();
+                $data_notification->desc_id = 4;
+                $data_notification->notification_cat_id = 2;
+                $data_notification->contract_id = $this->checklist->contract_uuid;
+                $data_notification->notification_type_id = 1;
+                $notification->registerNotification($data_notification);
             }
 
             if($this->checklist->getChanges()){
-                $this->checkChelistExpired($this->checklist->getAttributes()["id"]);
+                $this->checkChecklistExpired($this->checklist->getAttributes()["id"]);
             }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
-            dd($e);
             return response()->json(['erro' => $e->getMessage()], 500);
         }
     }
@@ -312,7 +315,7 @@ class ChecklistController extends Controller
                     })
                     ->where('checklist_id', $request->id)->get();
                 $this->checklist = Checklist::with('status')->find($request->id);
-                $contract = Contract::find($this->checklist->contract_id);
+                $contract = Contract::where('contract_uuid', $this->checklist->contract_uuid);
 
                 $data['checklist'] = $this->checklist;
                 $data['contract'] = $contract;
@@ -436,7 +439,9 @@ class ChecklistController extends Controller
             $diasUteis = 0;
             while($diasUteis < 7) {
                 // Verifica se é dia útil (segunda a sexta-feira, excluindo feriados)
-                if($date->isWeekday() && !$date->isHoliday() ) {
+                if($date->isWeekday()
+                // && !$date->isHoliday()
+                ) {
                     $diasUteis++;
                 }
                 $date->addDay(); // Avança para o próximo dia
@@ -445,7 +450,7 @@ class ChecklistController extends Controller
             return $date->subDay(); // Retorna o sétimo dia útil do mês
         }
 
-        public function checkChelistExpired($id)
+        public function checkChecklistExpired($id = null)
         {
             try{
                 $date = Carbon::now();
@@ -453,17 +458,25 @@ class ChecklistController extends Controller
                 $year = $date->year;
                 $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
 
-                $checklist = Checklist::with([
-                    'contract.operation.collaborator'
+                $checklists = Checklist::with([
+                    'contract.operationContractUsers.user'
                 ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
                 // ->where('id',$id)
-                // ->where('status_id','!=',5)
+                ->where('status_id','!=',5)
                 ->get()->toArray();
-                $contract = $checklist[0]['contract'];
-                $emailCollab = $contract['operation']['collaborator'];
-                Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                echo "<pre>";
+                foreach($checklists as $key => $checklist)
+                print_r($checklist);
+                {
+                    if($checklist['contract']){
+                        $contract = $checklist['contract'];
+                        $emailCollab = $contract['operation_contract_users'];
+                    }
+                    // echo "<pre>";
+                    // Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                    Notification::sendNow( [], new ChecklistExpired($checklist, "talis.santiago@g4f.com.br"));
+                }
 
-                return response()->json("Email enviado com sucesso", 200);
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
             }

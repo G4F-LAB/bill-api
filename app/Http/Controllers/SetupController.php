@@ -12,17 +12,18 @@ use Illuminate\Support\Facades\Auth;
 
 class SetupController extends Controller
 {
-    public function __construct() {
+    public function __construct(Collaborator $collaborator) {
         $this->env = env('APP_ENV') ? env('APP_ENV') : 'developer';
+        $this->auth_user = $collaborator->getAuthUser();
+
     }
 
     // Menus
     function navigation(Request $request) {
-        // Get the currently authenticated user...
-        $user = Auth::user();
-        $colaborador = Collaborator::where('objectguid', $user->getConvertedGuid())->first();
+        
+        $colaborador = $this->auth_user;
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->permission_id])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->type])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
         $data = array();
         foreach ($menu as $index => $item) {
 

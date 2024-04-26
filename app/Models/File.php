@@ -12,6 +12,7 @@ class File extends Model
     use LogsActivity;
     protected $table = 'files';
     protected $primaryKey = 'id';
+    protected $connection =  'book';
     protected $hidden = ['pivot'];
 
     protected $fillable = [

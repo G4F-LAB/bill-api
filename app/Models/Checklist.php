@@ -10,9 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class Checklist extends Model
 
 {
-   
     use LogsActivity;
-
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $fillable = [
@@ -22,8 +20,7 @@ class Checklist extends Model
         'shipping_method',
         'obs',
         'accept',
-        'sector',
-        'signed_by'
+        'user_id'
     ];
 
     public function rules(){
@@ -35,7 +32,7 @@ class Checklist extends Model
         'obs' => 'string',
         'accept' => 'boolean',
         'sector' => 'required|string',
-        'signed_by' => 'string'
+        'user_id' => 'string'
 
         ];
     }
@@ -51,7 +48,7 @@ class Checklist extends Model
         'obs',
         'accept',
         'sector',
-        'signed_by']);
+        'user_id']);
     }
 
     public function feedback() {
@@ -100,7 +97,7 @@ class Checklist extends Model
             }
 
             $percentage = floor(($total_complete*100)/$total_itens);
-            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; 
+            if($checklist->completion == 0 && $progress) $checklist->status_id = 2;
             if($checklist->completion < 100 && $percentage == 100) $checklist->status_id = 3;
             $checklist->completion = $percentage;
             $checklist->save();
@@ -110,11 +107,11 @@ class Checklist extends Model
 
     public function update_status() {
         $ok = false;
-        if(!empty($this->signed_by) && $this->completion == 100){
+        if(!empty($this->user_id) && $this->completion == 100){
             $this->status_id = 4;
             $ok = true;
         }
-        if(!empty($this->signed_by) && $accept && $this->completion == 100){
+        if(!empty($this->user_id) && $accept && $this->completion == 100){
             $this->status_id = 5;
             $ok = true;
         }

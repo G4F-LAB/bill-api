@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable;
     /**
      * The attributes that are mass assignable.
      *
@@ -23,7 +24,7 @@ class User extends Authenticatable
     protected $keyType = 'string';
     public $incrementing = false;
 
-        protected $fillable = [
+    protected $fillable = [
         'name',
         'username',
         'email',
@@ -34,14 +35,20 @@ class User extends Authenticatable
         'type',
         'password',
     ];
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'name',
-            'email',
-            'password',
-        ]);
-    }
+
+    
+    // public function getActivitylogOptions(): LogOptions
+    // {
+    //     return LogOptions::defaults()->useLogName('User')->logOnly([
+    //         'name',
+    //         'email',
+    //         'username',
+    //     ]);
+    // }
+
+
+
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -61,16 +68,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-     // Define relationships
-     public function files()
-     {
-         return $this->hasMany(UserFile::class);
-     }
+    // Define relationships
+    public function files()
+    {
+        return $this->hasMany(UserFile::class);
+    }
 
-     public function integrationIds()
-     {
-         return $this->hasMany(UserIntegrationId::class);
-     }
+    public function integrationIds()
+    {
+        return $this->hasMany(UserIntegrationId::class);
+    }
 
     public function operationContractUsers()
     {

@@ -12,10 +12,14 @@ class FileNaming extends Model
     use HasFactory;
     use LogsActivity;
     protected $table = 'file_naming';
+    protected $connection =  'book';
 
     protected $fillable = [
         'file_name',
         'standard_file_naming',
+        'automate',
+        'automate_path',
+        'automate_fullpath'
     ];
 
     public function rules()

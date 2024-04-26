@@ -50,9 +50,9 @@ class Operation extends Model
         $numbers = array_filter(str_split($this->name), function ($char) {
           return is_numeric($char);
         });
-        
+
         $initials = 'OP' . implode("", $numbers);
-        
+
 
         return new Attribute(
             get: fn () => $initials,
@@ -83,9 +83,9 @@ class Operation extends Model
     //     return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
     // }
 
-    // public function collaborator() {
-    //     return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
-    // }
+    public function collaborator() {
+        return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
+    }
 
     // public function executives() {
     //     return $this->belongsTo(Executive::class,'executive_id','id');
@@ -93,7 +93,7 @@ class Operation extends Model
 
     // public function collaborator_operations() {
     //     return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')
-                                    
+
     //                                 ->withTimestamps();
     // }
 
