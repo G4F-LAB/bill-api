@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\Permission;
 use LdapRecord\Container;
 use LdapRecord\Auth\Events\Failed;
@@ -121,21 +122,20 @@ class AuthController extends Controller
     private function checkDatabaseUser()
     {
         $firstLogin = false;
-        $user = Auth::user();
+        $user_auth = Auth::user();
         
-        $permission = $this->checkPermission($user) ?? $this->permissionID('Geral');
+        // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
 
-        $collaborator = Collaborator::firstOrNew(['taxvat' => $user['employeeid']]);
-        $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
-        $collaborator->email_corporate = isset($user['mail']) ? $user['mail'][0] : NULL;
-        $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
-        $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-        // $collaborator->type = $permission;
-        $collaborator->save();
+        $user = User::firstOrNew(['taxvat' => $user_auth['employeeid']]);
+        $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : NULL;
+        $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : NULL;
+        $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
+        $user->taxvat = isset($user_auth['employeeid']) ? $user_auth['employeeid'][0] : NULL;
+        $user->save();
         
-        $firstLogin = !$collaborator->exists;
+        $firstLogin = !$user->exists;
 
-        return ['firstLogin' => $firstLogin, 'user' => $collaborator];
+        return ['firstLogin' => $firstLogin, 'user' => $user];
         return response()->json(['message' => 'Realizado com sucesso!']);
     }
 
@@ -152,7 +152,29 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
+            // $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
+
+            $colaborador = [
+                "id" => 6,
+                "name" => "Wesley Carlos Severiano",
+                "objectguid" => "0facb771-7861-44f7-8ea4-72a6da3202d8",
+                "permission_id" => 5,
+                "created_at" => "2024-02-27T20:19:14.000000Z",
+                "updated_at" => "2024-03-28T15:32:37.000000Z",
+                "email" => "wesley.severiano@g4f.com.br",
+                "phone" => "(61)984837763",
+                "taxvat" => "03880023107",
+                "office" => "SEDE - TI DESENVOLVIMENTO",
+                "role" => "Analista De Desenvolvimento Junior",
+                "username" => "wesley.severiano",
+                "name_initials" => "WS",
+                "permission" => [
+                    "id" => 5,
+                    "name" => "Rh"
+                ]
+            ];
+            
+
             return response()->json($colaborador);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
