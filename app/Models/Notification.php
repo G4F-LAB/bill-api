@@ -18,7 +18,6 @@ class Notification extends Model
         "desc_id",
         "notification_cat_id",
         "notification_type_id",
-        "notification_viewed_id",
     ];
 
     public function getActivitylogOptions(): LogOptions

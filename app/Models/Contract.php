@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Str;
+use App\Models\Operation;
 
 class Contract extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
@@ -22,27 +23,32 @@ class Contract extends Model
     protected $hidden = ['pivot'];
 
 
-    protected $appends = ['checklist_current'];
 
     protected $fillable = [
-        'client_id',
+        'operation_id',
         'name',
-        'contractual_situation',
-        'manager_id',
-        'status_id',
-        'alias'
+        'alias',
+        'uuid',
+        'status',
+        'start_date',
+        'end_date',
+        'renew_date',
+        'renew_limit_date',
     ];
 
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'client_id',
+            'operation_id',
             'name',
-            'contractual_situation',
-            'manager_id',
-            'status_id',
-            'alias'
+            'alias',
+            'uuid',
+            'status',
+            'start_date',
+            'end_date',
+            'renew_date',
+            'renew_limit_date',
         ]);
     }
 
@@ -54,37 +60,10 @@ class Contract extends Model
     //     return $this->belongsTo(Operation::class,'manager_id', 'id');
     // }
 
-    // public function checklist(){
-    //     return $this->hasMany(Checklist::class);
-    // }
-
-
-    // public function operation() {
-    //     return $this->belongsTo(Operation::class);
-    // }
-    
-
-    //current checklist
-    protected function checklistCurrent(): Attribute
+    public function checklist()
     {
-        $initials =  [];
-
-   
-
-        if (!Str::isUuid($this->id)) {
-            $current_checklist = [];
-             
-        }else{
-            $current_checklist = Checklist::where('contract_uuid', $this->id)->with('itens.fileNaming')->latest()->first();
-        }
-
-
-        return new Attribute(
-            get: fn () => $current_checklist,
-        );
+        return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->latest();
     }
-
-    
     public function checklists(){
 
         return $this->hasMany(Checklist::class, 'contract_uuid', 'id');
