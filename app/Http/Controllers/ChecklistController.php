@@ -21,7 +21,7 @@ use App\Models\Notification as ModelsNotification;
 use App\Models\Operation;
 use DateTime;
 
-const PERMISSIONS_RH_FIN = [5,6];
+const PERMISSIONS_RH_FIN = ['RH', 'Financeiro'];
 
 class ChecklistController extends Controller
 {
@@ -156,7 +156,7 @@ class ChecklistController extends Controller
             }
 
             // Send Notifications
-            $to_collaborators = Collaborator::whereIn('permission_id', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            $to_collaborators = User::whereIn('type', PERMISSIONS_RH_FIN)->get()->pluck('email');
             Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);

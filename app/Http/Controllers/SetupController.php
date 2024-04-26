@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SetupNavigation;
-use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,18 +12,17 @@ use Illuminate\Support\Facades\Auth;
 
 class SetupController extends Controller
 {
-    public function __construct(Collaborator $collaborator) {
+    public function __construct(User $user) {
         $this->env = env('APP_ENV') ? env('APP_ENV') : 'developer';
-        $this->auth_user = $collaborator->getAuthUser();
-
+        $this->auth_user = $user->getAuthUser();
     }
 
     // Menus
     function navigation(Request $request) {
         
-        $colaborador = $this->auth_user;
+        $user = $this->auth_user;
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->type])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$user->type])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
         $data = array();
         foreach ($menu as $index => $item) {
 
@@ -38,7 +37,7 @@ class SetupController extends Controller
                 "description" => $item->description
             ];
 
-            $childrens = SetupNavigation::where('parent_id', $item->id)->whereJsonContains('permission_ids', [$colaborador->permission_id])->orderBy('sort', 'asc')->get();
+            $childrens = SetupNavigation::where('parent_id', $item->id)->whereJsonContains('permission_ids', [$user->type])->orderBy('sort', 'asc')->get();
             if(isset($childrens) && count($childrens) > 0  ){
                 $c_data = array("children" => $childrens);
                 $form_data = array_merge($form_data, $c_data);
@@ -119,8 +118,7 @@ class SetupController extends Controller
     {
         try {
 
-            $permissions = Permission::orderBy('id', 'asc')->get();
-
+            $permissions = ['Admin', 'Diretoria', 'Superintendência', 'Executivo', 'Gerente', 'Operação', 'RH', 'Financeiro', 'Processos', 'TI', 'Colaborador', 'Geral'];
             if (!$permissions)
                 return response()->json(['error' => 'Menu não encontrado'], 404);
 
