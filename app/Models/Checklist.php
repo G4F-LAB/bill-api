@@ -10,9 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class Checklist extends Model
 
 {
-   
     use LogsActivity;
-
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $fillable = [
@@ -100,7 +98,7 @@ class Checklist extends Model
             }
 
             $percentage = floor(($total_complete*100)/$total_itens);
-            if($checklist->completion == 0 && $progress) $checklist->status_id = 2; 
+            if($checklist->completion == 0 && $progress) $checklist->status_id = 2;
             if($checklist->completion < 100 && $percentage == 100) $checklist->status_id = 3;
             $checklist->completion = $percentage;
             $checklist->save();

@@ -22,7 +22,7 @@ class Contract extends Model
     protected $hidden = ['pivot'];
 
 
-    
+
     protected $fillable = [
         'operation_id',
         'name',
