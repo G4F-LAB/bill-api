@@ -56,6 +56,15 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
             'throw' => false  
         ],
+        
+        'sharepoint' => [
+            'driver' => 'sharepoint',
+            'tenantId' => env('SHAREPOINT_TENANT_ID'),
+            'clientId' => env('SHAREPOINT_CLIENT_ID'),
+            'clientSecret' => env('SHAREPOINT_CLIENT_SECRET'),
+            'sharepointSite' => env('SHAREPOINT_SITE'),
+            'prefix' => env('SHAREPOINT_PREFIX'),
+        ]
 
     ],
 

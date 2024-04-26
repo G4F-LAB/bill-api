@@ -47,7 +47,7 @@ class ChecklistController extends Controller
             $contractUuid = $contract_uiids->firstWhere('name', $contractId->name);
 
 
-            if ($checklist->contract_uuid ===  NULL && isset($contractUuid->id)) {
+            if ( isset($contractUuid->id)) {
                 $checklist->contract_uuid = $contractUuid->id;
             }
 
@@ -64,8 +64,8 @@ class ChecklistController extends Controller
         try {
             $checklists = Checklist::whereNotNull('contract_uuid')
             ->with(['contract' => function ($query) {
-                $query->where('status', 'ATIVO');
-            }, 'contract.operationContractUsers.user'])
+                $query->where('status', 'Ativo');
+            }, 'contract.operation'])
             ->get();
 
 
@@ -125,7 +125,6 @@ class ChecklistController extends Controller
             $checklistExists = Checklist::where('contract_id', $request->contract_uuid)
                 ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
                 ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-                ->where('sector_id', $request->sector_id)
                 ->exists();
 
             if ($checklistExists) {
@@ -134,12 +133,13 @@ class ChecklistController extends Controller
 
             $this->checklist->contract_uuid  = $request->contract_id;
             $this->checklist->date_checklist  = $request->date_checklist;
+            $this->checklist->month_reference = date('m', strtotime($$request->date_checklist));
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
-            $this->checklist->sector_id = $request->sector_id;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
-            $this->checklist->signed_by = $request->signed_by;
+            $this->checklist->user_id = $request->signed_by;
+          
             $this->checklist->save();
 
             //Notification
@@ -215,11 +215,11 @@ class ChecklistController extends Controller
             if ($request->has('shipping_method')) $this->checklist->shipping_method = $request->shipping_method;
             if ($request->has('obs')) $this->checklist->obs = $request->obs;
             if ($request->has('accept')) $this->checklist->accept = $request->accept;
-            if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
+            if ($request->has('signed_by')) $this->checklist->user_id = $request->signed_by;
             // validação pendente
-            if(!empty($this->checklist->signed_by) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
+            if(!empty($this->checklist->user_id) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
             // finalizado
-            if(!empty($this->checklist->signed_by) && $this->checklist->accept && $this->checklist->completion == 100)$this->checklist->status_id = 5;
+            if(!empty($this->checklist->user_id) && $this->checklist->accept && $this->checklist->completion == 100)$this->checklist->status_id = 5;
 
             $this->checklist->update();
 
@@ -315,7 +315,7 @@ class ChecklistController extends Controller
                     })
                     ->where('checklist_id', $request->id)->get();
                 $this->checklist = Checklist::with('status')->find($request->id);
-                $contract = Contract::find($this->checklist->contract_id);
+                $contract = Contract::where('contract_uuid', $this->checklist->contract_uuid);
 
                 $data['checklist'] = $this->checklist;
                 $data['contract'] = $contract;

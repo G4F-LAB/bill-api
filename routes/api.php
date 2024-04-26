@@ -164,6 +164,9 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
 
 
+
+    //Arquivos 
+    Route::post('/files/importRH', [FileController::class, 'importRH']);
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);

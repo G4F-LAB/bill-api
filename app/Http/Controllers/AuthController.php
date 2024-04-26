@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\Permission;
 use LdapRecord\Container;
 use LdapRecord\Auth\Events\Failed;
@@ -29,7 +30,6 @@ class AuthController extends Controller
             'password.required' => 'Preencha o campo de senha!',
             'username.required' => 'Preencha o campo de login!'
         ];
-
         //validação dos campos da requisição
         $request->validate($rules, $feedback);
 
@@ -59,7 +59,7 @@ class AuthController extends Controller
                     $message = 'Limite de tentativas de acesso atingidas. Tente novamente mais tarde.';
                     $httpCode = 401;
                 } else {
-                    $message = 'Usuário ou senha inválidos!';
+                    $message = $error;
                     $httpCode = 401;
                 }
             });
@@ -73,8 +73,8 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
-                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
-                return response()->json(['token' => $token, 'userData'=> $this->checkDatabaseUser()['user']], $httpCode);
+                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
+                return response()->json(['token' => $token, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
             } else {
                 if (empty($message)) {
                     $message = 'Usuário ou senha inválidos!';
@@ -83,10 +83,10 @@ class AuthController extends Controller
                 return response()->json(['error' => $message], $httpCode);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()],401);
+            return response()->json(['error' => $e->getMessage()], 401);
         }
-    }    
-    
+    }
+
 
 
     public function logout()
@@ -106,7 +106,7 @@ class AuthController extends Controller
         foreach ($collaborators as $collaborator) {
 
             $user = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($collaborator->objectguid))->first();
-    
+
             $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
             $collaborator->email = isset($user['mail']) ? $user['mail'][0] : NULL;
             $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
@@ -117,39 +117,25 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Realizado com sucesso!']);
-
     }
 
     private function checkDatabaseUser()
     {
         $firstLogin = false;
-        $user = Auth::user();
-
-        $permissionResult = $this->checkPermission($user);
-        $permission = ($permissionResult === null) ? $this->permissionID('Geral') : $permissionResult;
-
-    
+        $user_auth = Auth::user();
         
-        $colaborador = Collaborator::with('permission')->where('objectguid', $user->getConvertedGuid())->first();
-        if ($colaborador == NULL) {
+        // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
 
-            $colaborador = new Collaborator();
-            $colaborador->name = isset($user['displayname']) ? $user['displayname'][0] : NULL;
-            $colaborador->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
-            $colaborador->email = isset($user['mail']) ? $user['mail'][0] : NULL;
-            $colaborador->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
-            $colaborador->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-            $colaborador->office = isset($user['physicaldeliveryofficename']) ? $user['physicaldeliveryofficename'][0] : NULL;
-            $colaborador->role = isset($user['title']) ? $user['title'][0] : NULL;
-            $colaborador->objectguid = $user->getConvertedGuid();
-            $colaborador->permission_id = $permission;
-            $colaborador->save();
+        $user = User::firstOrNew(['taxvat' => $user_auth['employeeid']]);
+        $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : NULL;
+        $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : NULL;
+        $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
+        $user->taxvat = isset($user_auth['employeeid']) ? $user_auth['employeeid'][0] : NULL;
+        $user->save();
+        
+        $firstLogin = !$user->exists;
 
-            $firstLogin = true;
-        } 
-   
-
-        return ['firstLogin'=>$firstLogin, 'user'=>$colaborador];
+        return ['firstLogin' => $firstLogin, 'user' => $user];
         return response()->json(['message' => 'Realizado com sucesso!']);
     }
 
@@ -166,8 +152,28 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            $colaborador = Collaborator::with('permission')->where('objectguid', Auth::user()->getConvertedGuid())->first();
+            $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
 
+            // $colaborador = [
+            //     "id" => 6,
+            //     "name" => "Wesley Carlos Severiano",
+            //     "objectguid" => "0facb771-7861-44f7-8ea4-72a6da3202d8",
+            //     "permission_id" => 5,
+            //     "created_at" => "2024-02-27T20:19:14.000000Z",
+            //     "updated_at" => "2024-03-28T15:32:37.000000Z",
+            //     "email" => "wesley.severiano@g4f.com.br",
+            //     "phone" => "(61)984837763",
+            //     "taxvat" => "03880023107",
+            //     "office" => "SEDE - TI DESENVOLVIMENTO",
+            //     "role" => "Analista De Desenvolvimento Junior",
+            //     "username" => "wesley.severiano",
+            //     "name_initials" => "WS",
+            //     "permission" => [
+            //         "id" => 5,
+            //         "name" => "Rh"
+            //     ]
+            // ];
+            
 
             return response()->json($colaborador);
         } catch (\Exception $e) {
@@ -179,14 +185,14 @@ class AuthController extends Controller
     {
         $group = $user['memberof'];
         $arr_permission = [
-            "trainee_w"             => $this->permissionID('Admin'),
-            "gerencia_executiva1_w" => $this->permissionID('Executivo'),
-            "gerencia_executiva2_w" => $this->permissionID('Executivo'),
-            "Gerentes_Operacoes"    => $this->permissionID('Operacao'),
-            "rh_checklist_w"        => $this->permissionID('Rh'),
-            "rh_book_w"             => $this->permissionID('Rh'),
-            "financeiro_book_w"     => $this->permissionID('Fin'),
-            "g_TI"                  => $this->permissionID('TI'),
+            "trainee_w"             => 'Admin',
+            "gerencia_executiva1_w" => 'Executivo',
+            "gerencia_executiva2_w" => 'Executivo',
+            "Gerentes_Operacoes"    => 'Operacao',
+            "rh_checklist_w"        => 'Rh',
+            "rh_book_w"             => 'Rh',
+            "financeiro_book_w"     => 'Fin',
+            "g_TI"                  => 'TI'
         ];
 
         if (!$group)

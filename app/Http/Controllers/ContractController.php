@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Database\Eloquent\Builder;
 
 use App\Models\Collaborator;
 use App\Models\Permission;
@@ -24,11 +25,41 @@ class ContractController extends Controller
     }
 
     //Obter todos os contratos
-    public function index(Request $request){
-        $contracts = Contract::with(['operation','checklist', 'checklists'])->get();
+
+    public function index(Request $request)
+    {
+        // Parameters
+        $status = $request->input('status');
+        $searchTerm = $request->input('q');
+    
+        $query = Contract::with(['operation'])
+            // ->whereNotNull('operation_id')
+            ->whereHas('operation', function ($query) {
+                $query->whereNotNull('reference'); 
+            })
+            ->where(function ($query) use ($searchTerm) {
+                $searchTermLower = mb_strtolower($searchTerm); 
+                $query->whereHas('operation', function ($query) use ($searchTermLower) {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
+                })
+                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
+            })
+            // ->whereHas('operation', function ($query) use ($user) {
+            //     // Filter contracts based on the user's operations
+            //     $query->whereIn('id', $user->operations()->pluck('id'));
+            // })
+          ;
+
+            if ($status !== null) {
+                $query->where('status', $status);
+            }
+    
+            $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->get();
 
         return response()->json($contracts, 200);
-    }   
+    }
+
+
     public function getAllContracts(Request $request)
     {
 
@@ -132,14 +163,11 @@ class ContractController extends Controller
     {
         try {
 
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
+            // $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
 
-            if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-            $contrato = Contract::where('id',$request->id)->first();
-            if ($request->has('contractual_situation')) {
-                $contrato->contractual_situation = $request->contractual_situation;
-            }
+            $contrato = Contract::where('id', $request->id)->first();
 
             if ($request->has('alias')) {
                 $contrato->alias = $request->alias;
@@ -160,7 +188,7 @@ class ContractController extends Controller
 
             return response()->json([$contrato], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage() + 'Não foi possível atualizar o contrato.'], 500);
+            return response()->json(['error' => $e->getMessage() . 'Não foi possível atualizar o contrato.'], 500);
         }
     }
 

@@ -33,7 +33,8 @@ class CheckPermission
             $validPermissions = Permission::whereNotIn('name', $permissions)->pluck('name')->toArray();
         }
         
-        $colaborador = Collaborator::where('objectguid',Auth::user()->getConvertedGuid())->first();
+        $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
+        
         CauserResolver::setCauser($colaborador);
         
         if($colaborador->hasPermission($validPermissions)) return $next($request);
