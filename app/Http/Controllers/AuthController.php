@@ -152,27 +152,27 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            // $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
+            $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
 
-            $colaborador = [
-                "id" => 6,
-                "name" => "Wesley Carlos Severiano",
-                "objectguid" => "0facb771-7861-44f7-8ea4-72a6da3202d8",
-                "permission_id" => 5,
-                "created_at" => "2024-02-27T20:19:14.000000Z",
-                "updated_at" => "2024-03-28T15:32:37.000000Z",
-                "email" => "wesley.severiano@g4f.com.br",
-                "phone" => "(61)984837763",
-                "taxvat" => "03880023107",
-                "office" => "SEDE - TI DESENVOLVIMENTO",
-                "role" => "Analista De Desenvolvimento Junior",
-                "username" => "wesley.severiano",
-                "name_initials" => "WS",
-                "permission" => [
-                    "id" => 5,
-                    "name" => "Rh"
-                ]
-            ];
+            // $colaborador = [
+            //     "id" => 6,
+            //     "name" => "Wesley Carlos Severiano",
+            //     "objectguid" => "0facb771-7861-44f7-8ea4-72a6da3202d8",
+            //     "permission_id" => 5,
+            //     "created_at" => "2024-02-27T20:19:14.000000Z",
+            //     "updated_at" => "2024-03-28T15:32:37.000000Z",
+            //     "email" => "wesley.severiano@g4f.com.br",
+            //     "phone" => "(61)984837763",
+            //     "taxvat" => "03880023107",
+            //     "office" => "SEDE - TI DESENVOLVIMENTO",
+            //     "role" => "Analista De Desenvolvimento Junior",
+            //     "username" => "wesley.severiano",
+            //     "name_initials" => "WS",
+            //     "permission" => [
+            //         "id" => 5,
+            //         "name" => "Rh"
+            //     ]
+            // ];
             
 
             return response()->json($colaborador);
