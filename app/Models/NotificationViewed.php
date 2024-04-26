@@ -15,7 +15,8 @@ class NotificationViewed extends Model
     protected $table = 'notification_viewed';
 
     protected $fillable = [
-        "notification_viewed",
+        "notification_viewed",,
+        "user_id"
     ];
 
     public function getActivitylogOptions(): LogOptions

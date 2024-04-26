@@ -96,13 +96,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/checklist/{id}/{reference}', [ChecklistController::class,'getDataChecklist']);
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/competence', [ChecklistController::class,'getAllCompetence']);
-    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/check/checklist', [ChecklistController::class,'checkChelistExpired']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/check/checklist', [ChecklistController::class,'checkChecklistExpired']);
     //automate
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
     //Analytics
-
-
     Route::prefix('/analytics')->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getOperationsByUser']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
@@ -112,9 +110,6 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators/{id}', [AnalyticsController::class,'getCollaboratorById']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/checklist', [AnalyticsController::class,'getChecklist']);
-
-
-
         // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
     });
 

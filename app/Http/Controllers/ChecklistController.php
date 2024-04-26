@@ -142,12 +142,13 @@ class ChecklistController extends Controller
           
             $this->checklist->save();
 
-
+            //Notification
             $data_notification->desc_id = 2;
             $data_notification->notification_cat_id = 2;
             $data_notification->contract_uuid = $this->checklist->contract_uuid;
             $data_notification->notification_type_id = 1;
             $notification->registerNotification($data_notification);
+
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
                 if (isset($duplicated['error'])) {
@@ -222,6 +223,7 @@ class ChecklistController extends Controller
 
             $this->checklist->update();
 
+            //Notification
             if($this->checklist->status_id = 5 && $this->checklist->getChanges()){
                 $data_notification->desc_id = 4;
                 $data_notification->notification_cat_id = 2;
@@ -231,7 +233,7 @@ class ChecklistController extends Controller
             }
 
             if($this->checklist->getChanges()){
-                $this->checkChelistExpired($this->checklist->getAttributes()["id"]);
+                $this->checkChecklistExpired($this->checklist->getAttributes()["id"]);
             }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
@@ -448,7 +450,7 @@ class ChecklistController extends Controller
             return $date->subDay(); // Retorna o sétimo dia útil do mês
         }
 
-        public function checkChelistExpired($id)
+        public function checkChecklistExpired($id = null)
         {
             try{
                 $date = Carbon::now();
@@ -456,17 +458,25 @@ class ChecklistController extends Controller
                 $year = $date->year;
                 $dataSetimoDiaUtil = $this->setimoDiaUtilDoMes($year, $month);
 
-                $checklist = Checklist::with([
-                    'contract.operation.collaborator'
+                $checklists = Checklist::with([
+                    'contract.operationContractUsers.user'
                 ])->whereDate('date_checklist', '>=', $dataSetimoDiaUtil)
                 // ->where('id',$id)
-                // ->where('status_id','!=',5)
+                ->where('status_id','!=',5)
                 ->get()->toArray();
-                $contract = $checklist[0]['contract'];
-                $emailCollab = $contract['operation']['collaborator'];
-                Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                echo "<pre>";
+                foreach($checklists as $key => $checklist)
+                print_r($checklist);
+                {
+                    if($checklist['contract']){
+                        $contract = $checklist['contract'];
+                        $emailCollab = $contract['operation_contract_users'];
+                    }
+                    // echo "<pre>";
+                    // Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                    Notification::sendNow( [], new ChecklistExpired($checklist, "talis.santiago@g4f.com.br"));
+                }
 
-                return response()->json("Email enviado com sucesso", 200);
             }catch(\Exception $e){
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
             }

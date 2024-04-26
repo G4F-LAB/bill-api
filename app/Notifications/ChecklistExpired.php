@@ -22,7 +22,7 @@ class ChecklistExpired extends Notification
     public function __construct($data, $collaborators)
     {
         $this->to = $collaborators;
-        $this->checklist = $data[0];
+        $this->checklist = $data;
         $this->toMail($this);
     }
 
@@ -35,7 +35,7 @@ class ChecklistExpired extends Notification
     public function via($notifiable)
     {
         return ['mail'];
-       
+
     }
 
     /**
@@ -53,11 +53,11 @@ class ChecklistExpired extends Notification
                 Mail::to($this->to)->send(new UpdateChecklist($this->checklist));
 
             }
-         
+
         } catch (\Throwable $th) {
             throw $th;
         }
-       
+
     }
 
     /**
