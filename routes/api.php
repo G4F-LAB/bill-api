@@ -97,11 +97,15 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     Route::prefix('/analytics')->group(function () {
-        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getContractsByOperation']);
-        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/{id}/contracts',[AnalyticsController::class,'operationsById']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/{id}/contracts',[AnalyticsController::class,'getOperationsAnalytics']);
         Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}/collaborators',[AnalyticsController::class,'contractsByCollaborators']);
        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations',[AnalyticsController::class,'getContractsByOperation']);
        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
+
+
+       Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations', [AnalyticsController::class,'total_checklist']);
+       Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/{id}/contracts', [AnalyticsController::class,'operation_contract']);
+       Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations', [AnalyticsController::class,'operation_contract']);
 
 
 

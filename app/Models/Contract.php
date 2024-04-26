@@ -62,18 +62,18 @@ class Contract extends Model
     // public function operation() {
     //     return $this->belongsTo(Operation::class);
     // }
-    
+
 
     //current checklist
     protected function checklistCurrent(): Attribute
     {
         $initials =  [];
 
-   
+
 
         if (!Str::isUuid($this->id)) {
             $current_checklist = [];
-             
+
         }else{
             $current_checklist = Checklist::where('contract_uuid', $this->id)->with('itens.fileNaming')->latest()->first();
         }
@@ -84,7 +84,7 @@ class Contract extends Model
         );
     }
 
-    
+
     public function checklists(){
 
         return $this->hasMany(Checklist::class, 'contract_uuid', 'id');

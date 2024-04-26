@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
 
-
+    protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;
@@ -35,11 +35,11 @@ class User extends Authenticatable
         'password',
     ];
     public function getActivitylogOptions(): LogOptions
-    {        
+    {
         return LogOptions::defaults()->useLogName('Contract')->logOnly([
             'name',
             'email',
-            'password',           
+            'password',
         ]);
     }
     /**
@@ -60,6 +60,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+     // Define relationships
+     public function files()
+     {
+         return $this->hasMany(UserFile::class);
+     }
+
+     public function integrationIds()
+     {
+         return $this->hasMany(UserIntegrationId::class);
+     }
 
     public function operationContractUsers()
     {

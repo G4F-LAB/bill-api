@@ -66,50 +66,84 @@ class AnalyticsController extends Controller
         return response()->json(['status' => 'ok', 'data' => $contractsByCollaborators], 200);
     }
 
-
-
-    public function getOperationsByUser()
+    public function operation_contract(Request $request)
     {
-        try {
+        $userId = $this->auth_user->id;
+        $data = [];
 
-            $id_user = $this->auth_user->id;
+        // Consulta utilizando Eloquent para obter os contratos associados ao usuário
+        $contracts = Contract::query()
+            ->leftJoin('operation_contract_users', 'contracts.id', '=', 'operation_contract_users.contract_id')
+            ->leftJoin('operations', 'operation_contract_users.operation_id', '=', 'operations.id')
+            ->leftJoin('users', 'operation_contract_users.user_id', '=', 'users.id')
+            // ->where('users.id', $userId)
+            ->select(
+                'contracts.id as contract_id',
+                'contracts.operation_id',
+                'contracts.name',
+                'contracts.status',
+                'users.id as user_id',
+                'users.username',
+                'users.status'
+            )
+            ->get(); // <- Remova a função count() daqui
 
-            $executive = Executive::select('id')
-                ->where('manager_id', $id_user)
-                ->pluck('id');
+        // Contar o total de contratos ativos
+        $totalContracts = $contracts->count();
+
+        // Adicionar o total de contratos ao array de dados
+        $data['total_contracts'] = $totalContracts;
+
+        return response()->json([$data]);
 
 
-            if (!$executive->isEmpty()) {
-                $operations = Operation::select('operations.id', 'operations.name')
-                    ->whereIn('executive_id', $executive)
-                    ->get();
 
-                if ($operations->isEmpty()) {
-                    return response()->json(['error' => 'Nenhum dado vinculado'], 500);
-                }
 
-                return response()->json(['success' => $operations], 200);
-            } else {
-                $operations = Operation::join('collaborator_operations', 'operations.id', '=', 'collaborator_operations.operation_id')
-                ->select('operations.id', 'operations.name')
-                ->where('collaborator_id', $id_user)
-                ->whereNull('collaborator_operations.deleted_at')
-                ->get();
 
-              // print_r($id_user);exit;
-           // return $operations;
 
-                if ($operations->isEmpty()) {
-                    return response()->json(['error' => 'Nenhum dado vinculado'], 500);
-                }
 
-                return response()->json(['success' => $operations], 200);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+    // public function getOperationsByUser()
+    // {
+    //     try {
+
+    //         $id_user = $this->auth_user->id;
+
+    //         $executive = Executive::select('id')
+    //             ->where('manager_id', $id_user)
+    //             ->pluck('id');
+
+
+    //         if (!$executive->isEmpty()) {
+    //             $operations = Operation::select('operations.id', 'operations.name')
+    //                 ->whereIn('executive_id', $executive)
+    //                 ->get();
+
+    //             if ($operations->isEmpty()) {
+    //                 return response()->json(['error' => 'Nenhum dado vinculado'], 500);
+    //             }
+
+    //             return response()->json(['success' => $operations], 200);
+    //         } else {
+    //             $operations = Operation::join('collaborator_operations', 'operations.id', '=', 'collaborator_operations.operation_id')
+    //             ->select('operations.id', 'operations.name')
+    //             ->where('collaborator_id', $id_user)
+    //             ->whereNull('collaborator_operations.deleted_at')
+    //             ->get();
+
+    //           // print_r($id_user);exit;
+    //        // return $operations;
+
+    //             if ($operations->isEmpty()) {
+    //                 return response()->json(['error' => 'Nenhum dado vinculado'], 500);
+    //             }
+
+    //             return response()->json(['success' => $operations], 200);
+    //         }
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
     }
-
     public function getContractsByOperation(Request $request)
     {
         try {
@@ -397,39 +431,39 @@ class AnalyticsController extends Controller
         }
     }
 
-    public function getContractsByOperation(Request $request)
-    {
-        try {
+    // public function getContractsByOperation(Request $request)
+    // {
+    //     try {
 
-            $id_operation = $request->id;
-            $date = date('Y-m', strtotime('-1 month'));
+    //         $id_operation = $request->id;
+    //         $date = date('Y-m', strtotime('-1 month'));
 
-            // $mes = $request->input('mes', date('m'));
-            // $ano = $request->input('ano', date('Y'));
+    //         // $mes = $request->input('mes', date('m'));
+    //         // $ano = $request->input('ano', date('Y'));
 
-            $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
-                ->select('contracts.id', 'contracts.name', 'checklists.completion')
-                ->where('contracts.status_id', 1)
-                ->where('contracts.operation_id', $id_operation)
-                ->where('date_checklist', 'LIKE', $date . '%')
-                ->get();
+    //         $operations = Contract::leftJoin('checklists', 'contracts.id', '=', 'checklists.contract_id')
+    //             ->select('contracts.id', 'contracts.name', 'checklists.completion')
+    //             ->where('contracts.status_id', 1)
+    //             ->where('contracts.operation_id', $id_operation)
+    //             ->where('date_checklist', 'LIKE', $date . '%')
+    //             ->get();
 
-            // if ($request->has('date_checklist') && in_array($request->date_checklist, [$ano, $mes])) {
-            // }
-
-
-            // $operations = Contract::select('id', 'name')
-            // ->where('status_id', 1)
-            // ->where('operation_id', $id_operation)
-            // ->get();
+    //         // if ($request->has('date_checklist') && in_array($request->date_checklist, [$ano, $mes])) {
+    //         // }
 
 
+    //         // $operations = Contract::select('id', 'name')
+    //         // ->where('status_id', 1)
+    //         // ->where('operation_id', $id_operation)
+    //         // ->get();
 
-            return response()->json(['success' => $operations], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Houve um erro interno na aplicação'], 500);
-        }
-    }
+
+
+    //         return response()->json(['success' => $operations], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Houve um erro interno na aplicação'], 500);
+    //     }
+    // }
 
     public function check_complete(Request $request)
     {
@@ -462,52 +496,55 @@ class AnalyticsController extends Controller
         }
     }
 
-    public function qtdStatusChecklists(Request $request)
-    {
+    // public function qtdStatusChecklists(Request $request)
+    // {
 
-        try {
-            $status_checklist = [];
-            $query_status_checklist = StatusChecklist::all();
-            foreach ($query_status_checklist as $value) {
-                $status_checklist[] = ['name' => $value->name, 'total' => 0];
-            }
-            // return $status_checklist;
+    //     try {
+    //         $status_checklist = [];
+    //         $query_status_checklist = StatusChecklist::all();
+    //         foreach ($query_status_checklist as $value) {
+    //             $status_checklist[] = ['name' => $value->name, 'total' => 0];
+    //         }
+    //         // return $status_checklist;
 
-            $date = date('Y-m', strtotime('-1 month'));
+    //         $date = date('Y-m', strtotime('-1 month'));
 
-            $operations = $this->getOperationsByUser()->getData();
-            $ids_operations = [];
+    //         $operations = $this->getOperationsByUser()->getData();
+    //         $ids_operations = [];
 
-            foreach ($operations->success as $item) {
-                $ids_operations[] = $item->id;
-            }
+    //         foreach ($operations->success as $item) {
+    //             $ids_operations[] = $item->id;
+    //         }
 
-            $ids_contracts = Contract::select('id')->whereIn('operation_id', $ids_operations)->pluck('id');
-            // return $ids_contracts;
+    //         $ids_contracts = Contract::select('id')->whereIn('operation_id', $ids_operations)->pluck('id');
+    //         // return $ids_contracts;
 
-            $checklistCounts = Checklist::select('status_checklist.name', DB::raw('count(status_checklist.name) as total'))
-                ->leftJoin('status_checklist', 'status_checklist.id', '=', 'checklists.status_id')
-                ->whereIn('contract_id', $ids_contracts)
-                ->where('date_checklist', 'LIKE', $date . '%')
-                ->groupBy('status_checklist.name')
-                ->get();
-                // return $checklistCounts;
+    //         $checklistCounts = Checklist::select('status_checklist.name', DB::raw('count(status_checklist.name) as total'))
+    //             ->leftJoin('status_checklist', 'status_checklist.id', '=', 'checklists.status_id')
+    //             ->whereIn('contract_id', $ids_contracts)
+    //             ->where('date_checklist', 'LIKE', $date . '%')
+    //             ->groupBy('status_checklist.name')
+    //             ->get();
+    //             // return $checklistCounts;
 
-            foreach ($status_checklist as $key1 => $status1) {
-                foreach ($checklistCounts as $key2 => $status2) {
-                    if ($status1['name'] == $status2['name']) {
-                        $status_checklist[$key1]['total'] = $status2['total'];
-                    }
-                }
-            }
-
-
-            return $status_checklist;
+    //         foreach ($status_checklist as $key1 => $status1) {
+    //             foreach ($checklistCounts as $key2 => $status2) {
+    //                 if ($status1['name'] == $status2['name']) {
+    //                     $status_checklist[$key1]['total'] = $status2['total'];
+    //                 }
+    //             }
+    //         }
 
 
-            return response()->json(['success' => $checklistCounts], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    //         return $status_checklist;
+
+
+    //         return response()->json(['success' => $checklistCounts], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
 }
+
