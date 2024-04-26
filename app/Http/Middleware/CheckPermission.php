@@ -23,7 +23,7 @@ class CheckPermission
         $premissas = ['ALL','EXCLUDE'];
         $validPermissions = $permissions;
 
-        
+
         if(in_array($premissas[0],$permissions)) {
             //Recupera todas as permissoes em array
             $validPermissions = Permission::pluck('name')->toArray();
@@ -32,15 +32,15 @@ class CheckPermission
             unset($permissions[array_search($premissas[1], $permissions)]);
             $validPermissions = Permission::whereNotIn('name', $permissions)->pluck('name')->toArray();
         }
-        
+
         $colaborador = Collaborator::where('taxvat', Auth::user()['employeeid'])->first();
-        
+
         CauserResolver::setCauser($colaborador);
-        
+
         if($colaborador->hasPermission($validPermissions)) return $next($request);
 
-        return response()->json(['error' => 'Acesso não permitido'],403);
+        return response()->json(['error' => 'Acesso não permit v ido'],403);
     }
 
-    
+
 }
