@@ -22,9 +22,8 @@ class AnalyticsController extends Controller
             $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
             $data = [];
 
-            $user = User::with('operationContractUsers')->where('id',$user_id)->first();
-            $id_operations = $user->operationContractUsers->pluck('operation_id');
-            $id_contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo')->pluck('id');
+            $id_contracts = $this->getAllContractsByOperations($user_id)->pluck('id');
+            $id_operations = $this->getIdAllUsersByOperations($user_id)->pluck('id');
 
             $checklists = Checklist::whereIn('contract_uuid',$id_contracts)->get();
 
@@ -46,25 +45,17 @@ class AnalyticsController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Houve um erro interno na aplicação'], 500);
         }
     }
-    public function operationId_teste (Request $request) {
+    public function operationId($id) {
 
-        return 'teste';
+        $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
+        $data = [];
 
-        // $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
-        //     $data = [];
+        $user = User::with('operationContractUsers')->where('id',$user_id)->first();
+        $id_operations = $user->operationContractUsers->pluck('operation_id');
+        $id_contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo')->get();
 
-        //     $user = User::with('operationContractUsers')->where('id',$user_id)->first();
-        //     $id_operations = $user->operationContractUsers->pluck('operation_id');
-        //     $id_contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo');
+        return $id_contracts;
 
-        //     $checklists = Checklist::whereIn('contract_uuid',$id_contracts)->get();
-
-        //     return response()->json($checklists);
-
-   }
-
-   public function teste_teste (Request $request){
-    return 'teste 123456798';
    }
 
 
@@ -95,6 +86,24 @@ class AnalyticsController extends Controller
         ->makeHidden('operationContractUsers');
 
     return $users;
+
+}
+
+
+private function getAllContractsByOperations ($user_id) {
+
+    $user = User::with('operationContractUsers')->where('id',$user_id)->first();
+    $id_operations = $user->operationContractUsers->pluck('operation_id');
+    $contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo')->get();
+
+    return $contracts;
+}
+
+private function getIdAllUsersByOperations ($user_id) {
+
+    $user = User::with('operationContractUsers')->where('id',$user_id)->first();
+    $operations = $user->operationContractUsers;
+    return $operations;
 
 }
 

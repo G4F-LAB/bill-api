@@ -39,7 +39,7 @@ class CheckPermission
 
         if($colaborador->hasPermission($validPermissions)) return $next($request);
 
-        return response()->json(['error' => 'Acesso não permit v ido'],403);
+        return response()->json(['error' => 'Acesso não permitido'],403);
     }
 
 
