@@ -20,12 +20,10 @@ class SetupController extends Controller
 
     // Menus
     function navigation(Request $request) {
-        // Get the currently authenticated user...
-        // $user = Auth::user();
+        
         $colaborador = $this->auth_user;
-        // return response()->json($colaborador,200);
 
-        $menu = SetupNavigation::whereJsonContains('permission_ids', [1])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
+        $menu = SetupNavigation::whereJsonContains('permission_ids', [$colaborador->type])->where('parent_id', NULL)->orderBy('sort', 'asc')->get();
         $data = array();
         foreach ($menu as $index => $item) {
 

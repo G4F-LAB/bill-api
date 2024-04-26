@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\Permission;
 use LdapRecord\Container;
 use LdapRecord\Auth\Events\Failed;
@@ -121,21 +122,20 @@ class AuthController extends Controller
     private function checkDatabaseUser()
     {
         $firstLogin = false;
-        $user = Auth::user();
+        $user_auth = Auth::user();
         
-        $permission = $this->checkPermission($user) ?? $this->permissionID('Geral');
+        // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
 
-        $collaborator = Collaborator::firstOrNew(['taxvat' => $user['employeeid']]);
-        $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
-        $collaborator->email_corporate = isset($user['mail']) ? $user['mail'][0] : NULL;
-        $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
-        $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-        // $collaborator->type = $permission;
-        $collaborator->save();
+        $user = User::firstOrNew(['taxvat' => $user_auth['employeeid']]);
+        $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : NULL;
+        $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : NULL;
+        $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
+        $user->taxvat = isset($user_auth['employeeid']) ? $user_auth['employeeid'][0] : NULL;
+        $user->save();
         
-        $firstLogin = !$collaborator->exists;
+        $firstLogin = !$user->exists;
 
-        return ['firstLogin' => $firstLogin, 'user' => $collaborator];
+        return ['firstLogin' => $firstLogin, 'user' => $user];
         return response()->json(['message' => 'Realizado com sucesso!']);
     }
 
