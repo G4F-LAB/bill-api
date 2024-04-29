@@ -48,20 +48,23 @@ class AnalyticsController extends Controller
     }
     public function operationId($id) {
 
-        $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
-        $data = [];
-
-        $contracts = Operation::with(['contracts' => function($query) {
-            $query->where('status','Ativo');
-        }, 'contracts.checklists' => function($query) {
-            $query->orderBy('id','desc')->limit(2);
-        }])->where('id', $id)->get();
+        
 
 
+        // $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
+        // $data = [];
 
-        $data = $contracts;
+        // $contracts = Operation::with(['contracts' => function($query) {
+        //     $query->where('status','Ativo');
+        // }, 'contracts.checklists' => function($query) {
+        //     $query->orderBy('id','desc')->limit(2);
+        // }])->where('id', $id)->get();
 
-        return $data;
+
+
+        // $data = $contracts;
+
+        // return $data;
 
    }
 
