@@ -88,30 +88,33 @@ class ChecklistController extends Controller
 
     public function store(Request $request)
     {
+        // return $request->contract_uuid;
         try {
             $user = User::where('taxvat', Auth::user()['employeeid'])->first();
             $notification = new NotificationController($user);
             $data_notification = new ModelsNotification();
-            $checklistExists = Checklist::where('contract_id', $request->contract_uuid)
-                ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
-                ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-                ->exists();
-
+            $checklistExists = Checklist::where('contract_uuid', $request->contract_uuid)
+            ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
+            ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
+            ->exists();
+            
+            // return ;
             if ($checklistExists) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
+                return response()->json(['error'=> 'Não foi possivelxx criar checklist, já existe esse checklist.'],404);
             };
 
-            $this->checklist->contract_uuid  = $request->contract_id;
+            
+            $this->checklist->contract_uuid  = $request->contract_uuid;
             $this->checklist->date_checklist  = $request->date_checklist;
-            $this->checklist->month_reference = date('m', strtotime($$request->date_checklist));
+            $this->checklist->month_reference = date('m', strtotime($request->date_checklist));
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->user_id = $request->signed_by;
-
+            
             $this->checklist->save();
-
+            
             //Notification
             $data_notification->desc_id = 2;
             $data_notification->notification_cat_id = 2;
@@ -120,7 +123,8 @@ class ChecklistController extends Controller
             $notification->registerNotification($data_notification);
 
             if ($request->duplicate != null) {
-                $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
+                $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_uuid);
+                return 'teste duoplicate';
                 if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
@@ -128,7 +132,7 @@ class ChecklistController extends Controller
 
             // Send Notifications
             $to_users = User::whereIn('type', PERMISSIONS_RH_FIN)->get()->pluck('email');
-            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_users));
+            // Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_users));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 
@@ -137,7 +141,7 @@ class ChecklistController extends Controller
         }
     }
 
-    public function duplicateItems($duplicate, $checklist, $contract_id){
+    public function duplicateItems($duplicate, $checklist, $contract_uuid){
 
         $data = [
             "file_naming_id" => [],
@@ -147,7 +151,7 @@ class ChecklistController extends Controller
         ];
 
         $checklist_id_copy = Checklist::where([
-            'contract_id' => $contract_id,
+            'contract_uuid' => $contract_uuid,
             'date_checklist' => $duplicate.'-01'
         ])->value('id');
 
@@ -213,7 +217,7 @@ class ChecklistController extends Controller
 
         function checklistItensCreate(Request $request)
         {
-
+            
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
@@ -221,33 +225,35 @@ class ChecklistController extends Controller
                 $months = [];
                 $id_contract = $request->id;
                 $current_dates = [];
-
+                
                 for ($i = 2; $i >= 0; $i--) {
                     $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
+                
                 $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
-
+                
                 foreach ($months as $month) {
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
                         $query->select('id')
-                            ->from('checklists')
-                            ->where('contract_uuid', $id_contract)
-                            ->where('date_checklist', $month.'-01');
+                        ->from('checklists')
+                        ->where('contract_uuid', $id_contract)
+                        ->where('date_checklist', $month.'-01');
                     })->count();
                     // $current_dates[] = array('date' => $month, 'items' => $count_items);
                     $current_dates[] = array('date' => $month, 'items' => $count_items > 0 ? true : false);
                 }
                 //define as datas
-
+                
                 // return $current_dates;
-
+                
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
-
+                
                 $itens = Item::with('checklist', 'fileNaming','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
-                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_uuid = ".$id);
+                    $query->whereRaw("TO_CHAR(checklists.date_checklist, 'YYYY-MM') LIKE '".$reference."%' and checklists.contract_uuid = '".$id."'");
                 })->get();
-
+                // return $itens;
+                
                 $id_checklist = Checklist::where('contract_uuid', $id)
                     ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
                     ->value('id');
@@ -314,7 +320,7 @@ class ChecklistController extends Controller
         {
             try{
 
-                $data = Checklist::where('contract_id', $request->id)
+                $data = Checklist::where('contract_uuid', $request->id)
                 ->select('object_contract', 'obs', 'shipping_method')
                 ->where('date_checklist', $request->reference.'-01')
                 ->first();
