@@ -20,6 +20,7 @@ use App\Http\Controllers\ExecutiveController;
 use App\Http\Controllers\FileCompetenceController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OperationManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -169,9 +170,16 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
     Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
 
+//    //OperationManager
+//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);
+//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo/manager', [ExecutiveController::class, 'getById']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/executives', [OperationManagerController::class, 'getAllExecutives']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/allmanager', [OperationManagerController::class, 'getAllManager']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operation/delete{id}', [OperationManagerController::class, 'delete']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operation/manager', [OperationManagerController::class, 'create']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/executivo/{id}', [ExecutiveController::class, 'update']);
 
-
-    //Arquivos 
+    //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
 });
 
