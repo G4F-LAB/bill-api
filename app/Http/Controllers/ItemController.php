@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\Checklist;
 use App\Models\File;
 use App\Models\FileNaming;
 use App\Models\FilesItens;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +28,8 @@ class ItemController extends Controller
     public function show()
     {
         try {
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'Rh', 'Financeiro']))
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
             $itens = Item::all();
             return response()->json($itens, 200);
@@ -43,8 +43,8 @@ class ItemController extends Controller
     public function getbyID(string $id)
     {
         try {
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'Rh', 'Financeiro']))
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
             $itens = Item::find($id);
             return response()->json($itens, 200);
@@ -69,7 +69,6 @@ class ItemController extends Controller
         if (isset($addItems['error'])) {
             return response()->json($addItems, 200);
         }
-
         return response()->json(['message' => 'Item(s) adicionado(s) com sucesso'], 200);
     }
 
@@ -79,8 +78,8 @@ class ItemController extends Controller
         try{
             $errors = [];
             $errors['status'] = 'Error';
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            $notification = new NotificationController($colaborador);
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $notification = new NotificationController($user);
             $data_notification = new Notification();
             foreach ($data['file_naming_id'] as $file_naming_id) {
                 $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
@@ -173,8 +172,8 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            $notification = new NotificationController($colaborador);
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $notification = new NotificationController($user);
             $data_notification = new Notification();
             $this->item = Item::find($id);
 
@@ -201,7 +200,7 @@ class ItemController extends Controller
             $this->item->save();
 
             $checklist = Checklist::find($this->item->checklist_id);
-            // $checklist->sync_itens();
+            //Notification
             $data_notification->desc_id = 2;
             $data_notification->notification_cat_id = 3;
             $data_notification->contract_id = $checklist->contract_uuid;
@@ -222,8 +221,8 @@ class ItemController extends Controller
     public function destroy(string $id)
     {
         try {
-            $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-            $notification = new NotificationController($colaborador);
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $notification = new NotificationController($user);
             $data_notification = new Notification();
             $item = Item::find($id);
             $checklist = Checklist::where('id',$item->checklist_id)->first();
@@ -284,14 +283,10 @@ class ItemController extends Controller
                         $zip->addFile($tempImage,$file['group'].'/'.basename($file['path']));
                     }
                 }
-
                 $zip->close();
                 return response()->download(storage_path('app/itens.zip'))->deleteFileAfterSend(true);
             }
-
         }
-
-
     }
 
 }

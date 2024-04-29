@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 // use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -36,7 +37,7 @@ class User extends Authenticatable
         'password',
     ];
 
-    
+
     // public function getActivitylogOptions(): LogOptions
     // {
     //     return LogOptions::defaults()->useLogName('User')->logOnly([
@@ -93,5 +94,12 @@ class User extends Authenticatable
                 $model->id = Str::uuid();
             }
         });
+    }
+
+    public function getAuthUser()
+    {
+        if (Auth::user()) {
+            return $this->where('taxvat', Auth::user()['employeeid'])->first();
+        }
     }
 }
