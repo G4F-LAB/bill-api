@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\FileNaming;
 use App\Models\Item;
 use App\Models\FileType;
@@ -11,11 +11,20 @@ use Illuminate\Support\Facades\Auth;
 
 class FileNamingController extends Controller
 {
+
+    public function __construct(User $user) {
+        $this->user = $user->getAuthUser();
+        $this->allow_types = ['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro'];
+
+    }
+
     public function getAll()
     {
-        $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if (!$colaborador->hasPermission(['Admin', 'Operacao', 'Executivo', 'Analista', 'Rh', 'Fin']))
+        // Validate permissions
+        if (!in_array($this->user->type, $this->allow_types)){
             return response()->json(['error' => 'Acesso não permitido.'], 403);
+        }
+
 
 
             $file_naming = FileNaming::with('type');
@@ -78,6 +87,9 @@ class FileNamingController extends Controller
             if (!$colaborador->hasPermission(['Admin']))
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
 
+
+
+            }
 
 
             $file_naming = FileNaming::find($request->id);

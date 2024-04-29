@@ -4,6 +4,7 @@ use App\Http\Controllers\ContractDateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChecklistController;
@@ -43,7 +44,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Auth
     Route::get('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/me', [UserController::class, 'me']);
     Route::get('/refresh', [AuthController::class, 'refresh']);
     Route::put('/update_info', [AuthController::class, 'update_info']);
 
@@ -60,6 +61,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin, Executivo, Operacao, TI')->put('/collaborators', [CollaboratorController::class , 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operacao, TI')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
     Route::middleware('check.permission: Admin, Executivo, TI')->post('/collaborators/create', [CollaboratorController::class , 'create']);
+
+    //Users
+    Route::middleware('check.permission: Admin, Executivo, Operacao, TI')->get('/users', [UserController::class , 'index']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, TI')->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
+    Route::middleware('check.permission: Admin, Executivo, Operacao, TI')->put('/users', [UserController::class , 'update']);
 
     //Vincular/desvincular um colaborador a uma operação
     Route::middleware('check.permission: Admin, Executivo, Operacao')->post('/collaborator/operation', [CollaboratorController::class , 'collaboratorOperation']);
