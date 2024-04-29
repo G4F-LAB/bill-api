@@ -11,6 +11,7 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileNamingController;
+use App\Http\Controllers\FileNameController;
 use App\Http\Controllers\TesteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\SetupController;
@@ -117,6 +118,16 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 
     //Nomenclaturas padrão dos arquivos
+    
+    Route::middleware('check.permission:Admin')->prefix('filenames')->group(function () {
+        Route::get('/', [FileNameController::class, 'index']);
+        Route::post('/', [FileNameController::class, 'create']);
+        Route::get('/{id}', [FileNameController::class, 'get']);
+        Route::put('/{id}', [FileNameController::class, 'update']);
+        Route::delete('/{id}', [FileNameController::class, 'delete']);
+      
+    });
+    
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/filenaming', [FileNamingController::class, 'store']);
