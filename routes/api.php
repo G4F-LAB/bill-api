@@ -44,7 +44,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Auth
     Route::get('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/me', [UserController::class, 'me']);
     Route::get('/refresh', [AuthController::class, 'refresh']);
     Route::put('/update_info', [AuthController::class, 'update_info']);
 

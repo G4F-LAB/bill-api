@@ -6,13 +6,23 @@ use Illuminate\Http\Request;
 use LdapRecord\Container;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserController extends Controller
 {
-    // public function __construct(Collaborator $collaborator) {
-    //     $this->collaborator = $collaborator->getAuthUser();
-    // }
+    public function __construct(User $user) {
+        $this->user = $user->getAuthUser();
+    }
+
+    public function me()
+    {
+        try {
+            return response()->json($this->user);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
+        }
+    }
 
 
     public function index(Request $request) {
