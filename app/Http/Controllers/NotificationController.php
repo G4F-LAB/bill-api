@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\Collaborator;
 use App\Models\Notification_viewer;
 use App\Models\Notification;
 use App\Models\Contract;
+use App\Models\User;
 
 class NotificationController extends Controller
 {
 
 
-    public function __construct(Collaborator $collaborator)
+    public function __construct(User $user)
     {
-        $this->auth_user = $collaborator->getAuthUser();
+        $this->auth_user = $user->getAuthUser();
     }
 
 
@@ -57,7 +57,7 @@ class NotificationController extends Controller
                 ->limit(10)
                 ->orderBy('notifications.id', 'DESC')
                 ->get();
-                
+
             $id_notifications_viewer = Notification_viewer::where('collaborator_id', $id_user)->pluck('notification_id')->toArray();
 
             foreach ($notifications as $indice => $value) {

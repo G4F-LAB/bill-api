@@ -14,25 +14,23 @@ class Collaborator extends Model
 {
     use HasFactory;
     // use LogsActivity;
-    // protected $connection =  'data_G4F';
-
-    protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
-    protected $keyType = 'string';
-    protected $table = 'users';
+    protected $table = 'collaborators';
     protected $appends = ['name_initials'];
     protected $hidden = ['pivot'];
     protected $fillable = [
         'id',
-        'name',
-        'username',
+        'collaborators',
+        'name_initials',
+        'pivot',
+        'permission_id',
         'email',
-        'email_corporate',
-        'taxvat',
+        'username',
         'phone',
-        'status',
-        'type'
-    ];
+        'taxvat',
+        'office',
+        'role'
+            ];
 
     // public function getActivitylogOptions(): LogOptions
     // {        
@@ -78,7 +76,7 @@ class Collaborator extends Model
 
     public function contract()
     {
-        return $this->belongsToMany(Contract::class, 'operations', 'manager_id', 'id')->withTimestamps();
+        return $this->belongsToMany(Contract::class, 'operations','manager_id', 'id')->withTimestamps();
     }
 
     public function manager()
@@ -91,19 +89,17 @@ class Collaborator extends Model
         return $this->belongsToMany(Operation::class, 'collaborator_operations', 'collaborator_id', 'operation_id')->withTimestamps();
     }
 
-    public function operation()
+     public function operation()
     {
-        return $this->hasMany(Operation::class, 'manager_id', 'id');
+        return $this->hasMany(Operation::class,'manager_id','id');
     }
 
-    public function executive()
-    {
+    public function executive() {
         return $this->hasOne(Executive::class, 'manager_id', 'id');
     }
 
-    public function executives()
-    {
-        return $this->belongsTo(Executive::class, 'manager_id', 'id');
+    public function executives() {
+        return $this->belongsTo(Executive::class,'manager_id','id');
     }
 
     protected function nameInitials(): Attribute
@@ -117,65 +113,58 @@ class Collaborator extends Model
     }
 
 
-    public function getAuthUser()
-    {
-        if (Auth::user()) {
-            // print_r($this->where('taxvat', Auth::user()['employeeid'])->first());exit;
-            return $this->where('taxvat', Auth::user()['employeeid'])->first();
-        }
+    public function getAuthUser() {
+        if(Auth::user()){
+            return $this->where('objectZzZZZguid', Auth::user()->getConvertedGuid())->first();
+        } 
+       
     }
 
-    public function getAuthUserPermission()
-    {
+    public function getAuthUserPermission() {
         $user = $this->getAuthUser();
-        return Permission::where('id', $user->permission_id)->first();
+        return Permission::where('id',$user->permission_id)->first();
     }
 
-    public function is_analyst()
-    {
+    public function is_analyst() {
         $analyst = false;
-        $permission = Permission::where('name', 'ilike', '%Analista%')->first();
-        if ($permission->id == $this->permission_id) {
+        $permission = Permission::where('name','ilike','%Analista%')->first();
+        if($permission->id == $this->permission_id) {
             $analyst = true;
         }
         return $analyst;
     }
 
-    public function is_executive()
-    {
+    public function is_executive() {
         $executive = false;
-        $permission = Permission::where('name', 'ilike', '%Executivo%')->first();
-        if ($permission->id == $this->permission_id) {
+        $permission = Permission::where('name','ilike','%Executivo%')->first();
+        if($permission->id == $this->permission_id) {
             $executive = true;
         }
         return $executive;
     }
 
-    public function is_manager()
-    {
+    public function is_manager() {
         $manager = false;
-        $permission = Permission::where('name', 'ilike', '%Operacao%')->first();
-        if ($permission->id == $this->permission_id) {
+        $permission = Permission::where('name','ilike','%Operacao%')->first();
+        if($permission->id == $this->permission_id) {
             $manager = true;
         }
         return $manager;
     }
 
-    public function is_hr()
-    {
+    public function is_hr() {
         $hr = false;
-        $permission = Permission::where('name', 'ilike', '%Rh%')->first();
-        if ($permission->id == $this->permission_id) {
+        $permission = Permission::where('name','ilike','%Rh%')->first();
+        if($permission->id == $this->permission_id) {
             $hr = true;
         }
         return $hr;
     }
 
-    public function is_fin()
-    {
+    public function is_fin() {
         $fin = false;
-        $permission = Permission::where('name', 'ilike', '%Fin%')->first();
-        if ($permission->id == $this->permission_id) {
+        $permission = Permission::where('name','ilike','%Fin%')->first();
+        if($permission->id == $this->permission_id) {
             $fin = true;
         }
         return $fin;
@@ -196,4 +185,6 @@ class Collaborator extends Model
         $pieces = array_map('hexdec', $pieces);
         return pack('Vv2n4', ...$pieces);
     }
+
+    
 }

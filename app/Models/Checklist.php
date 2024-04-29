@@ -10,7 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class Checklist extends Model
 
 {
-    use LogsActivity;
+    // use LogsActivity;
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $fillable = [

@@ -31,18 +31,18 @@ class ContractController extends Controller
         // Parameters
         $status = $request->input('status');
         $searchTerm = $request->input('q');
-    
+
         $query = Contract::with(['operation'])
             // ->whereNotNull('operation_id')
             ->whereHas('operation', function ($query) {
-                $query->whereNotNull('reference'); 
+                $query->whereNotNull('reference');
             })
             ->where(function ($query) use ($searchTerm) {
-                $searchTermLower = mb_strtolower($searchTerm); 
+                $searchTermLower = mb_strtolower($searchTerm);
                 $query->whereHas('operation', function ($query) use ($searchTermLower) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]);
                 })
-                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]); 
+                ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]);
             })
             // ->whereHas('operation', function ($query) use ($user) {
             //     // Filter contracts based on the user's operations
@@ -53,7 +53,7 @@ class ContractController extends Controller
             if ($status !== null) {
                 $query->where('status', $status);
             }
-    
+
             $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->get();
 
         return response()->json($contracts, 200);
@@ -71,7 +71,7 @@ class ContractController extends Controller
                 }
                 ,'operation'
                 ,'operation.executive'
-                ,'operation.collaborators'              
+                ,'operation.collaborators'
                   ])
             // ->when($this->user->is_analyst(), function($query) {
             //     $query->whereHas('collaborators', function($query2) {
@@ -162,7 +162,7 @@ class ContractController extends Controller
     public function update(Request $request)
     {
         try {
-
+            //$user = User::where('taxvat', Auth::user()['employeeid'])->first();
             // $colaborador = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
 
             // if (!$colaborador->hasPermission(['Admin', 'Executivo', 'Operacao'])) return response()->json(['error' => 'Acesso não permitido.'], 403);
@@ -332,13 +332,14 @@ class ContractController extends Controller
 
     public function checklistByContractID($id,Request $request) {
         try{
-            $checklist = Contract::with('checklist.status')->where('id', $id)->first();
+            $contract = Contract::with('checklist.status')->where('id', $id)->first();
 
-            foreach ($checklist->checklist as $item) {
-                $item->date_checklist = Carbon::createFromFormat('Y-m-d', $item->date_checklist)->format('m/Y');
+            if($contract->checklist){
+                foreach ($contract->checklist as $item) {
+                    $item->date_checklist = Carbon::createFromFormat('Y-m-d', $item->date_checklist)->format('m/Y');
+                }
             }
-
-            return response()->json($checklist);
+            return response()->json($contract);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

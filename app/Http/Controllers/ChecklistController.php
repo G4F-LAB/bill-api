@@ -6,7 +6,6 @@ use App\Models\Checklist;
 use App\Models\FileNaming;
 use App\Models\Contract;
 use App\Models\Item;
-use App\Models\Collaborator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +18,7 @@ use Notification;
 use App\Models\FileCompetence;
 use App\Models\Notification as ModelsNotification;
 use App\Models\Operation;
+use App\Models\User;
 use DateTime;
 
 const PERMISSIONS_RH_FIN = ['RH', 'Financeiro'];
@@ -27,9 +27,9 @@ class ChecklistController extends Controller
 {
 
     public $checklist;
-    public function __construct(Checklist $checklist, Collaborator $collaborator)
+    public function __construct(Checklist $checklist, User $user)
     {
-        $this->user = $collaborator->getAuthUser();
+        $this->user = $user->getAuthUser();
         $this->checklist = $checklist;
     }
 
@@ -68,12 +68,8 @@ class ChecklistController extends Controller
             }, 'contract.operation'])
             ->get();
 
-
-        return response()->json($checklists, 200);
-
             return response()->json($checklists, 200);
         } catch (\Exception $e) {
-            dd($e);
             return response()->json(['error' => 'Não foi possivel acessar a checklist'], 500);
         }
     }
@@ -90,58 +86,35 @@ class ChecklistController extends Controller
 
     }
 
-    // public function getById($id)
-    // {
-    //     try {
-
-    //         /*$checklist = Checklist::find($id);
-
-    //         if ($checklist) {
-    //             $contractId = $checklist->contract_id;
-
-    //             $buscarChecklist = DB::table('checklists')
-    //                 ->join('itens', 'itens.checklist_id', '=', 'checklists.id')
-    //                 ->join('file_competences', 'file_competences.id', '=', 'itens.file_competence_id')
-    //                 ->join('file_types', 'file_types.id', '=', 'checklists.sector_id')
-    //                 ->join('contracts', 'contracts.id', '=', 'checklists.contract_id')
-    //                 ->where('contract_id', $contractId)
-    //                 ->orderBy('date_checklist', 'DESC')->limit(3)->get();
-    //             return response()->json($buscarChecklist, 200);
-    //         } else {
-    //             return response()->json(['error' => 'Checklist não encontrado'], 404);
-    //         }*/
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
     public function store(Request $request)
     {
-
+        // return $request->contract_uuid;
         try {
-            $notification = new NotificationController();
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $notification = new NotificationController($user);
             $data_notification = new ModelsNotification();
-            $checklistExists = Checklist::where('contract_id', $request->contract_uuid)
-                ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
-                ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
-                ->exists();
-
+            $checklistExists = Checklist::where('contract_uuid', $request->contract_uuid)
+            ->whereYear('date_checklist', '=', date('Y', strtotime($request->date_checklist)))
+            ->whereMonth('date_checklist', '=', date('m', strtotime($request->date_checklist)))
+            ->exists();
+            
+            // return ;
             if ($checklistExists) {
-                return response()->json(['error'=> 'Não foi possivel criar checklist, já existe esse checklist.'],404);
+                return response()->json(['error'=> 'Não foi possivelxx criar checklist, já existe esse checklist.'],404);
             };
 
-            $this->checklist->contract_uuid  = $request->contract_id;
+            
+            $this->checklist->contract_uuid  = $request->contract_uuid;
             $this->checklist->date_checklist  = $request->date_checklist;
-            $this->checklist->month_reference = date('m', strtotime($$request->date_checklist));
+            $this->checklist->month_reference = date('m', strtotime($request->date_checklist));
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
             $this->checklist->obs = $request->obs;
             $this->checklist->accept = $request->accept;
             $this->checklist->user_id = $request->signed_by;
-          
+            
             $this->checklist->save();
-
+            
             //Notification
             $data_notification->desc_id = 2;
             $data_notification->notification_cat_id = 2;
@@ -150,15 +123,16 @@ class ChecklistController extends Controller
             $notification->registerNotification($data_notification);
 
             if ($request->duplicate != null) {
-                $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_id);
+                $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_uuid);
+                return 'teste duoplicate';
                 if (isset($duplicated['error'])) {
                     return response()->json(['message' => $duplicated], 200);
                 }
             }
 
             // Send Notifications
-            $to_collaborators = User::whereIn('type', PERMISSIONS_RH_FIN)->get()->pluck('email');
-            Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_collaborators));
+            $to_users = User::whereIn('type', PERMISSIONS_RH_FIN)->get()->pluck('email');
+            // Notification::sendNow( [], new ChecklistNotification($this->checklist, $to_users));
 
             return response()->json(['message' => 'Checklist criado com sucesso'], 200);
 
@@ -167,7 +141,7 @@ class ChecklistController extends Controller
         }
     }
 
-    public function duplicateItems($duplicate, $checklist, $contract_id){
+    public function duplicateItems($duplicate, $checklist, $contract_uuid){
 
         $data = [
             "file_naming_id" => [],
@@ -177,7 +151,7 @@ class ChecklistController extends Controller
         ];
 
         $checklist_id_copy = Checklist::where([
-            'contract_id' => $contract_id,
+            'contract_uuid' => $contract_uuid,
             'date_checklist' => $duplicate.'-01'
         ])->value('id');
 
@@ -192,10 +166,10 @@ class ChecklistController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $notification = new NotificationController();
+            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $notification = new NotificationController($user);
             $data_notification = new ModelsNotification();
             $this->checklist = $this->checklist->find($id);
-            // dd($this->checklist);
             if ($request->method() == 'PATCH') {
                 $dinamicRules = array();
 
@@ -233,7 +207,7 @@ class ChecklistController extends Controller
             }
 
             if($this->checklist->getChanges()){
-                $this->checkChecklistExpired($this->checklist->getAttributes()["id"]);
+                $this->checkChecklistNotification($this->checklist->getAttributes()["id"], $this->checklist->status_id );
             }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
@@ -243,7 +217,7 @@ class ChecklistController extends Controller
 
         function checklistItensCreate(Request $request)
         {
-
+            
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
@@ -251,34 +225,36 @@ class ChecklistController extends Controller
                 $months = [];
                 $id_contract = $request->id;
                 $current_dates = [];
-
+                
                 for ($i = 2; $i >= 0; $i--) {
                     $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
+                
                 $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
-
+                
                 foreach ($months as $month) {
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
                         $query->select('id')
-                            ->from('checklists')
-                            ->where('contract_id', $id_contract)
-                            ->where('date_checklist', $month.'-01');
+                        ->from('checklists')
+                        ->where('contract_uuid', $id_contract)
+                        ->where('date_checklist', $month.'-01');
                     })->count();
                     // $current_dates[] = array('date' => $month, 'items' => $count_items);
                     $current_dates[] = array('date' => $month, 'items' => $count_items > 0 ? true : false);
                 }
                 //define as datas
-
+                
                 // return $current_dates;
-
+                
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
-
+                
                 $itens = Item::with('checklist', 'fileNaming','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
-                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_id = ".$id);
+                    $query->whereRaw("TO_CHAR(checklists.date_checklist, 'YYYY-MM') LIKE '".$reference."%' and checklists.contract_uuid = '".$id."'");
                 })->get();
-
-                $id_checklist = Checklist::where('contract_id', $id)
+                // return $itens;
+                
+                $id_checklist = Checklist::where('contract_uuid', $id)
                     ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
                     ->value('id');
 
@@ -293,7 +269,7 @@ class ChecklistController extends Controller
                 return response()->json($data, 200);
 
             }catch(\Exception $e){
-                return response()->json(['error'=>'Não foi possivel acessar a checklist'],500);
+                return response()->json(['error'=>$e->getMessage()],500);
             }
         }
 
@@ -344,7 +320,7 @@ class ChecklistController extends Controller
         {
             try{
 
-                $data = Checklist::where('contract_id', $request->id)
+                $data = Checklist::where('contract_uuid', $request->id)
                 ->select('object_contract', 'obs', 'shipping_method')
                 ->where('date_checklist', $request->reference.'-01')
                 ->first();
@@ -365,67 +341,61 @@ class ChecklistController extends Controller
                 $date = Carbon::now();
 
                 $ids_contracts = Contract::where('contractual_situation', true)->pluck('id');
-                // $date_atual = '2024-02';
-                // $date_reference = '2024-01';
                 $date_atual = $date->format('Y-m');
                 $date_reference = $date->subMonth()->format('Y-m');
 
 
                 foreach ($ids_contracts as $id_contract) {
-                    // if ($id_contract == 94) {
-                        # code...
+                    $checklist = new Checklist();
+                    $id_checklist = null;
 
-                        $checklist = new Checklist();
-                        $id_checklist = null;
+                    $id_checklist_reference = Checklist::where('contract_id', $id_contract)
+                        ->where('date_checklist', 'LIKE', $date_reference . '%')
+                        ->first();
 
-                        $id_checklist_reference = Checklist::where('contract_id', $id_contract)
-                            ->where('date_checklist', 'LIKE', $date_reference . '%')
+
+                    if (!empty($id_checklist_reference)) {
+
+                        $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
+                            ->where('mandatory', true)
+                            ->get(['file_competence_id', 'file_naming_id']);
+
+                        $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
+                            ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual . '-01')))
+                            ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual . '-01')))
                             ->first();
 
+                        if ($checklist_exists_atual === null) {
+                            $checklist->contract_id  = $id_checklist_reference->contract_id;
+                            $checklist->date_checklist  = $date_atual . '-01';
+                            $checklist->object_contract = $id_checklist_reference->object_contract;
+                            $checklist->shipping_method = $id_checklist_reference->shipping_method;
+                            $checklist->sector_id = $id_checklist_reference->sector_id;
+                            $checklist->obs = $id_checklist_reference->obs;
+                            $checklist->accept = $id_checklist_reference->accept;
+                            $checklist->signed_by = $id_checklist_reference->signed_by;
+                            $checklist->save();
+                            $id_checklist = $checklist->id;
+                        } else {
+                            $id_checklist = $checklist_exists_atual->id;
+                        }
 
-                        if (!empty($id_checklist_reference)) {
+                        if (!empty($ids_items_duplicate)) {
+                            foreach ($ids_items_duplicate as $value) {
+                                // print($value);exit;
+                                $data = [
+                                    "file_naming_id" => [$value->file_naming_id],
+                                    "checklist_id" => $id_checklist,
+                                    "status" => false,
+                                    "file_competence_id" => $value->file_competence_id
+                                ];
 
-                            $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
-                                ->where('mandatory', true)
-                                ->get(['file_competence_id', 'file_naming_id']);
+                                $itemController = new ItemController(null);
 
-                            $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
-                                ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual . '-01')))
-                                ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual . '-01')))
-                                ->first();
-
-                            if ($checklist_exists_atual === null) {
-                                $checklist->contract_id  = $id_checklist_reference->contract_id;
-                                $checklist->date_checklist  = $date_atual . '-01';
-                                $checklist->object_contract = $id_checklist_reference->object_contract;
-                                $checklist->shipping_method = $id_checklist_reference->shipping_method;
-                                $checklist->sector_id = $id_checklist_reference->sector_id;
-                                $checklist->obs = $id_checklist_reference->obs;
-                                $checklist->accept = $id_checklist_reference->accept;
-                                $checklist->signed_by = $id_checklist_reference->signed_by;
-                                $checklist->save();
-                                $id_checklist = $checklist->id;
-                            } else {
-                                $id_checklist = $checklist_exists_atual->id;
-                            }
-
-                            if (!empty($ids_items_duplicate)) {
-                                foreach ($ids_items_duplicate as $value) {
-                                    // print($value);exit;
-                                    $data = [
-                                        "file_naming_id" => [$value->file_naming_id],
-                                        "checklist_id" => $id_checklist,
-                                        "status" => false,
-                                        "file_competence_id" => $value->file_competence_id
-                                    ];
-
-                                    $itemController = new ItemController(null);
-
-                                    $itemController->addItems($data);
-                                }
+                                $itemController->addItems($data);
                             }
                         }
-                    // }
+                    }
                 }
                 return response()->json(['status' => 'ok'], 200);
             } catch (\Exception $e) {
@@ -450,7 +420,7 @@ class ChecklistController extends Controller
             return $date->subDay(); // Retorna o sétimo dia útil do mês
         }
 
-        public function checkChecklistExpired($id = null)
+        public function checkChecklistExpired()
         {
             try{
                 $date = Carbon::now();
@@ -481,6 +451,40 @@ class ChecklistController extends Controller
                 return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
             }
 
+        }
+
+        public function checkChecklistNotification($id = null, $status_id = null)
+        {
+            try{
+                $status = "";
+                if($status_id == 5){
+                    $status = "Finalizado";
+                }else{
+                    $status = "Alterado";
+                }
+                var_dump("teste");exit;
+                $checklists = Checklist::with([
+                    'contract.operationContractUsers.user'
+                ])
+                ->with('status_checklist')
+                ->where('id',$id)
+                ->get()->toArray();
+                echo "<pre>";
+                print_r($checklists);exit;
+                foreach($checklists as $key => $checklist)
+                {
+                    if($checklist['contract']){
+                        $contract = $checklist['contract'];
+                        $emailCollab = $contract['operation_contract_users'];
+                    }
+                    // echo "<pre>";
+                    // Notification::sendNow( [], new ChecklistExpired($checklist, $emailCollab['email']));
+                    Notification::sendNow( [], new ChecklistExpired($checklist, "talis.santiago@g4f.com.br"));
+                }
+
+            }catch(\Exception $e){
+                return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+            }
         }
 
 
