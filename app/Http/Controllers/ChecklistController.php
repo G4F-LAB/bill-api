@@ -213,7 +213,7 @@ class ChecklistController extends Controller
 
         function checklistItensCreate(Request $request)
         {
-
+            
             try{
                 //define as datas
                 $dataAtual = Carbon::now();
@@ -221,33 +221,35 @@ class ChecklistController extends Controller
                 $months = [];
                 $id_contract = $request->id;
                 $current_dates = [];
-
+                
                 for ($i = 2; $i >= 0; $i--) {
                     $months[] = $dataAtual->copy()->subMonths($i)->format('Y-m');
                 }
+                
                 $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
-
+                
                 foreach ($months as $month) {
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
                         $query->select('id')
-                            ->from('checklists')
-                            ->where('contract_uuid', $id_contract)
-                            ->where('date_checklist', $month.'-01');
+                        ->from('checklists')
+                        ->where('contract_uuid', $id_contract)
+                        ->where('date_checklist', $month.'-01');
                     })->count();
                     // $current_dates[] = array('date' => $month, 'items' => $count_items);
                     $current_dates[] = array('date' => $month, 'items' => $count_items > 0 ? true : false);
                 }
                 //define as datas
-
+                
                 // return $current_dates;
-
+                
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
-
+                
                 $itens = Item::with('checklist', 'fileNaming','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
-                    $query->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%' and checklists.contract_uuid = ".$id);
+                    $query->whereRaw("TO_CHAR(checklists.date_checklist, 'YYYY-MM') LIKE '".$reference."%' and checklists.contract_uuid = '".$id."'");
                 })->get();
-
+                // return $itens;
+                
                 $id_checklist = Checklist::where('contract_uuid', $id)
                     ->whereRaw("TO_CHAR( checklists.date_checklist, 'YYYY-MM' ) LIKE '".$reference."%'")
                     ->value('id');
