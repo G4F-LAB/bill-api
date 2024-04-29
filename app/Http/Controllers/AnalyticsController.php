@@ -39,7 +39,7 @@ class AnalyticsController extends Controller
             $data['total_collaborators'] = $this->collaborators_operation($id_operations)->count();
             $data['checklists_status_progress'] = $checklists_status;
 
-            return response()->json(['status' => 'ok','message' => 'Dados carregado com sucesso', 'data' =>  $data], 500);
+            return response()->json(['status' => 'ok','message' => 'Dados carregado com sucesso', 'data' =>  $data], 200);
 
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Houve um erro interno na aplicação'], 500);
@@ -57,22 +57,6 @@ class AnalyticsController extends Controller
         return $id_contracts;
 
    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
