@@ -87,27 +87,18 @@ class FileNamingController extends Controller
             if (!$colaborador->hasPermission(['Admin']))
                 return response()->json(['error' => 'Acesso não permitido.'], 403);
 
-
-
-            }
-
-
             $file_naming = FileNaming::find($request->id);
             if (!$file_naming) {
                 return response()->json(['error' => 'Nomenclatura não encontrada'], 404);
 
             } else{
-
                 $file_naming->file_name = trim($request->file_name);
                 $file_naming->group = trim($request->group);
                 $file_naming->standard_file_naming = trim($request->standard_file_naming);
                 $file_naming->file_type_id = trim($request->file_type_id);
                 $file_naming->save();
-
             }
-
             return response()->json(['message' => 'Nomeclatura atualizada com sucesso'], 200);
-
         } catch (\Exception $exception) {
             return response()->json(['error' => 'Não foi possível atualizar, tente novamente mais tarde.'], 500);
             // return response()->json(['error'=> $exception->getMessage()], 500);
