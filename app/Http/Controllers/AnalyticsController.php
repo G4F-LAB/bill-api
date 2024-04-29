@@ -51,8 +51,13 @@ class AnalyticsController extends Controller
         $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
         $data = [];
 
-        $contracts = Operation::with(['contracts','contracts.checklists'])->where('id', $id)->get();
-        $manager = Executive::with(['id','name'])
+        $contracts = Operation::with(['contracts' => function($query) {
+            $query->where('status','Ativo');
+        }, 'contracts.checklists' => function($query) {
+            $query->orderBy('id','desc')->limit(2);
+        }])->where('id', $id)->get();
+
+
 
         $data = $contracts;
 
