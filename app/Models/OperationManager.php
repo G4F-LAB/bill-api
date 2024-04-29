@@ -40,16 +40,16 @@ class OperationManager extends Model
 
     public function operation()
     {
-        return $this->hasMany(Operation::class);
+        return $this->hasOne(Operation::class);
     }
 
-    public function manger()
+    public function manager()
     {
-        return $this->hasMany(User::class, 'id','manager_id');
+        return $this->hasOne(User::class, 'id','manager_id');
     }
     public function executive()
     {
-        return $this->hasMany(User::class, 'id','executive_id');
+        return $this->hasOne(User::class, 'id','executive_id');
     }
 
 }

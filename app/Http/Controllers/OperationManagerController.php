@@ -43,12 +43,12 @@ class OperationManagerController extends Controller
         }
     }
 
-    public function getAllExecutives(Request $request)
+    public function getAllExecutives()
     {
         try {
-            $executive = OperationManager::whereNotNull('executive_id')
+            $executivo = User::where('type','Executivo')
             ->orderBy('id','ASC')->get();
-            return response()->json($executive, 200);
+            return response()->json($executivo, 200);
 
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage()], 500);
