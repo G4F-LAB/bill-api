@@ -20,6 +20,8 @@ use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\ExecutiveController;
 use App\Http\Controllers\FileCompetenceController;
 use App\Http\Controllers\OperationController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OperationManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -149,16 +151,16 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 
     //Nomenclaturas padrão dos arquivos
-    
+
     Route::middleware('check.permission:Admin')->prefix('filenames')->group(function () {
         Route::get('/', [FileNameController::class, 'index']);
         Route::post('/', [FileNameController::class, 'create']);
         Route::get('/{id}', [FileNameController::class, 'get']);
         Route::put('/{id}', [FileNameController::class, 'update']);
         Route::delete('/{id}', [FileNameController::class, 'delete']);
-      
+
     });
-    
+
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/filenaming', [FileNamingController::class, 'store']);
@@ -207,6 +209,21 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
     Route::middleware('check.permission:All')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
 
+    //notifications
+    Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
+    Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
+
+//    //OperationManager
+//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);
+//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo/manager', [ExecutiveController::class, 'getById']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/executives', [OperationManagerController::class, 'getAllExecutives']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/allmanager', [OperationManagerController::class, 'getAllManager']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operation/delete{id}', [OperationManagerController::class, 'delete']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operation/manager', [OperationManagerController::class, 'create']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/executivo/{id}', [ExecutiveController::class, 'update']);
+
+    //Arquivos
+    Route::post('/files/importRH', [FileController::class, 'importRH']);
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);

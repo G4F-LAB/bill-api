@@ -71,15 +71,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-
-    public function getAuthUser()
-    {
-        if (Auth::user()) {
-            // print_r($this->where('taxvat', Auth::user()['employeeid'])->first());exit;
-            return $this->where('taxvat', Auth::user()['employeeid'])->first();
-        }
-    }
-
     protected function nameInitials(): Attribute {
         if (!is_null($this->name)) {
             preg_match('/(?:\w+\. )?(\w+).*?(\w+)(?: \w+\.)?$/', $this->name, $result);
