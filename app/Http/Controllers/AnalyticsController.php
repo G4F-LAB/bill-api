@@ -23,7 +23,7 @@ class AnalyticsController extends Controller
             $data = [];
 
             $id_contracts = $this->getAllContractsByOperations($user_id)->pluck('id');
-            $id_operations = $this->getIdAllUsersByOperations($user_id)->pluck('id');
+            $id_operations = $this->getIdAllUsersByOperations($user_id)->pluck('operation_id');
 
             $checklists = Checklist::whereIn('contract_uuid',$id_contracts)->get();
 
@@ -32,6 +32,7 @@ class AnalyticsController extends Controller
             ->whereIn('contract_uuid', $id_contracts)
             ->groupBy('status_checklist.name')
             ->get();
+
 
             $data['total_contracts'] = $id_contracts->count();
             $data['total_checklists_done'] = $checklists->where('completion', 100)->count();
@@ -50,11 +51,12 @@ class AnalyticsController extends Controller
         $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
         $data = [];
 
-        $user = User::with('operationContractUsers')->where('id',$user_id)->first();
-        $id_operations = $user->operationContractUsers->pluck('operation_id');
-        $id_contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo')->get();
+        $contracts = Operation::with('contracts')->where('id', $id)->get();
 
-        return $id_contracts;
+
+        $data = $contracts;
+
+        return $data;
 
    }
 
@@ -72,6 +74,7 @@ class AnalyticsController extends Controller
     return $users;
 
 }
+
 
 
 private function getAllContractsByOperations ($user_id) {
