@@ -119,16 +119,16 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     // Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
 
     //Nomenclaturas padrão dos arquivos
-    
+
     Route::middleware('check.permission:Admin')->prefix('filenames')->group(function () {
         Route::get('/', [FileNameController::class, 'index']);
         Route::post('/', [FileNameController::class, 'create']);
         Route::get('/{id}', [FileNameController::class, 'get']);
         Route::put('/{id}', [FileNameController::class, 'update']);
         Route::delete('/{id}', [FileNameController::class, 'delete']);
-      
+
     });
-    
+
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming', [FileNamingController::class, 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->get('/filenaming/{id}', [FileNamingController::class, 'getByID']);
     Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin')->post('/filenaming', [FileNamingController::class, 'store']);
@@ -148,13 +148,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->post('/update/competence/{id}', [ItemController::class,'updateCompetence']);
 
     //Operações
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operacoes', [OperationController::class, 'getAll']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operacoes/{id}', [OperationController::class, 'delete']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes', [OperationController::class, 'create']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operacoes/{id}', [OperationController::class, 'update']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations', [OperationController::class, 'getAllOperations']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/managers', [OperationController::class, 'getAllManagerofOperation']);
-    Route::middleware('check.permission: Admin,Executivo,Operacao,Analista,Rh,Fin,Geral')->post('/collab_operacoes', [OperationController::class, 'deleteCollabOperation']);
+    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/managers', [OperationController::class, 'index']);
 
     //Executivo
     Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);
@@ -181,14 +175,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
     Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
 
-//    //OperationManager
-//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo', [ExecutiveController::class, 'getAll']);
-//    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/executivo/manager', [ExecutiveController::class, 'getById']);
+   //OperationManager
    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/executives', [OperationManagerController::class, 'getAllExecutives']);
    Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operation/allmanager', [OperationManagerController::class, 'getAllManager']);
-   Route::middleware('check.permission: Admin,Executivo,Operacao')->delete('/operation/delete{id}', [OperationManagerController::class, 'delete']);
    Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operation/manager', [OperationManagerController::class, 'create']);
-   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/executivo/{id}', [ExecutiveController::class, 'update']);
+   Route::middleware('check.permission: Admin,Executivo,Operacao')->post('/operation/manager/{id}', [OperationManagerController::class, 'update']);
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
