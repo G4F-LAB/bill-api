@@ -10,6 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class OperationManager extends Model
 {
     use HasFactory;
+    use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *
@@ -26,8 +27,7 @@ class OperationManager extends Model
 
     protected $fillable = [
         'operation_id',
-        'executive_id',
-        'manager_id',
+
     ];
     public function getActivitylogOptions(): LogOptions
     {
@@ -40,7 +40,7 @@ class OperationManager extends Model
 
     public function operation()
     {
-        return $this->hasOne(Operation::class);
+        return $this->hasOne(Operation::class, 'id', 'operation_id');
     }
 
     public function manager()

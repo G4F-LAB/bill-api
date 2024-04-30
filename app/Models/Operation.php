@@ -70,22 +70,15 @@ class Operation extends Model
         return $this->hasMany(OperationContractUser::class);
     }
 
-
-    // public function contract() {
-    //     return $this->hasMany(Contract::class,'operation_id','id');
-    // }
-
-    // public function executive() {
-    //     return $this->belongsTo(Executive::class);
-    // }
-
-    // public function collaborators() {
-    //     return $this->belongsToMany(Collaborator::class, 'collaborator_operations', 'operation_id', 'collaborator_id')->withTimestamps();
-    // }
-
-    public function collaborator() {
-        return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
+    public function operationManagers()
+    {
+        return $this->hasMany(OperationManager::class, 'operation_id', 'id');
     }
+
+
+    // public function collaborator() {
+    //     return $this->belongsTo(Collaborator::class, 'manager_id', 'id');
+    // }
 
     // public function executives() {
     //     return $this->belongsTo(Executive::class,'executive_id','id');

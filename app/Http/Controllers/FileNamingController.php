@@ -42,9 +42,9 @@ class FileNamingController extends Controller
 
     public function getByID(Request $request)
     {
-        $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-        if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
-            return response()->json(['error' => 'Acesso não permitido.'], 403);
+        // $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+        // if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
+        //     return response()->json(['error' => 'Acesso não permitido.'], 403);
 
         $file_naming = FileNaming::find($request->id);
 
@@ -61,9 +61,9 @@ class FileNamingController extends Controller
     public function store(Request $request)
     {
         try {
-            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-            if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
-                return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            // if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
+            //     return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = new FileNaming();
             $file_naming->file_name = trim($request->file_name);
@@ -83,9 +83,9 @@ class FileNamingController extends Controller
 
         try {
 
-            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-            if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
-                return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            // if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
+            //     return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = FileNaming::find($request->id);
             if (!$file_naming) {
@@ -108,9 +108,9 @@ class FileNamingController extends Controller
     {
         try {
 
-            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-            if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
-                return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            // if (!$user->hasPermission(['Admin', 'Operação', 'Executivo', 'Analista', 'RH', 'Financeiro']))
+            //     return response()->json(['error' => 'Acesso não permitido.'], 403);
 
             $file_naming = FileNaming::find($request->id_file_naming);
 

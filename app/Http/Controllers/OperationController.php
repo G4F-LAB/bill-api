@@ -3,34 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
-use App\Models\CollaboratorsOperations;
 use App\Models\Operation;
 use App\Models\Executive;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OperationController extends Controller
 {
     //
-    public function getAll(Request $request)
+    public function index(Request $request)
     {
-        $collaborator = Collaborator::where('objectguid', Auth::user()->getConvertedGuid())->first();
-        if ($request->has('q')) {
-            $operations = Operation::with(['contract','collaborators' => function($query) {
-                $query->where('deleted_at',NULL);
-            }])
-                ->where('manager_id', $collaborator->id)
-                ->get();
-            return response()->json($operations, 200);
-        }
-    }
-
-    public function getAllOperations(Request $request)
-    {
-        $operations = Operation::with(['executives','collaborator','collaborator_operations' => function($query) {
-            $query->where('deleted_at',NULL);
-        }])
-        ->where('id', $request->id)
+        $operations = Operation::with(['operationManagers.manager'])
+        ->with(['operationManagers.executive'])
+        ->with(['operationContractUsers.user'])
         ->where([
             [function ($query) use ($request) {
                 if (($s = $request->q)) {
@@ -38,31 +24,10 @@ class OperationController extends Controller
                         ->get();
                 }
             }],
-
-        ])->orderBy('id','ASC')->get();
+        ])->get()->toArray();
         return response()->json($operations, 200);
     }
-    public function getAllManagerofOperation(Request $request)
-    {
-        try {
-            $executive = Operation::with(['collaborator','executives','collaborator_operations' => function($query) {
-                $query->where('deleted_at',NULL);
-            }])
-            ->where([
-            [function ($query) use ($request) {
-                if (($s = $request->q)) {
-                    $query->orWhere('name', 'LIKE', '%' . $s . '%')
-                        ->get();
-                }
-            }],
 
-            ])->orderBy('id','ASC')
-            ->get();
-            return response()->json($executive, 200);
-        } catch (\Exception $e) {
-            return response()->json(['erro' => $e->getMessage()], 500);
-        }
-    }
 
     public function create(Request $request)
     {
@@ -99,7 +64,6 @@ class OperationController extends Controller
             return response()->json($operation, 200);
         } catch (\Exception $exception) {
             return response()->json([$exception->getMessage()], 500);
-            //throw $th;
         }
     }
 
@@ -116,33 +80,7 @@ class OperationController extends Controller
             return response()->json([$operation, 'message' => 'Operação atualizada com sucesso!'], 200);
         } catch (\Exception $exception) {
             return response()->json([$exception->getMessage()], 500);
-            //throw $th;
         }
     }
 
-    public function delete(Request $request, $id)
-    {
-        try {
-            $operation = Operation::findOrFail($id);
-            $operation->deleted_at = now();
-            $operation->save();
-            return response()->json(['message' => 'Registro com id = ' . $operation->id . ' foi excluído com sucesso!'], 200);
-        } catch (\Exception $exception) {
-            return response()->json([$exception->getMessage()], 500);
-        }
-    }
-
-    public function deleteCollabOperation(Request $request)
-    {
-        try {
-            $collab_operation = CollaboratorsOperations::withTrashed()
-            ->where('operation_id',$request->operation_id)
-            ->where('collaborator_id', $request->collaborator_id)
-            ->first();
-            $collab_operation->delete();
-            return response()->json(['message' => 'Registro com id = ' . $collab_operation->id . ' foi excluído com sucesso!'], 200);
-        } catch (\Exception $exception) {
-            return response()->json([$exception->getMessage()], 500);
-        }
-    }
 }
