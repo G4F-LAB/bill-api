@@ -87,8 +87,6 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->get('/checklists/{id}', [ChecklistController::class,'get']);
-
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist',[ChecklistController::class, 'store']);
@@ -150,13 +148,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->post('/update/competence/{id}', [ItemController::class,'updateCompetence']);
 
     //Operações
-    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operacoes', [OperationController::class, 'getAll']);
-    Route::middleware('check.permission: Admin,Executivo,Operação')->delete('/operacoes/{id}', [OperationController::class, 'delete']);
-    Route::middleware('check.permission: Admin,Executivo,Operação')->post('/operacoes', [OperationController::class, 'create']);
-    Route::middleware('check.permission: Admin,Executivo,Operação')->post('/operacoes/{id}', [OperationController::class, 'update']);
-    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations', [OperationController::class, 'getAllOperations']);
-    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations/managers', [OperationController::class, 'getAllManagerofOperation']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->post('/collab_operacoes', [OperationController::class, 'deleteCollabOperation']);
+    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations/managers', [OperationController::class, 'index']);
 
     //Executivo
     Route::middleware('check.permission: Admin,Executivo,Operação')->get('/executivo', [ExecutiveController::class, 'getAll']);
@@ -183,19 +175,14 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
     Route::middleware('check.permission: Admin')->post('/notifications/viewer', [NotificationController::class, 'notificationsViewer']);
 
-//    //OperationManager
-//    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/executivo', [ExecutiveController::class, 'getAll']);
-//    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/executivo/manager', [ExecutiveController::class, 'getById']);
+   //OperationManager
    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operation/executives', [OperationManagerController::class, 'getAllExecutives']);
    Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operation/allmanager', [OperationManagerController::class, 'getAllManager']);
-   Route::middleware('check.permission: Admin,Executivo,Operação')->delete('/operation/delete{id}', [OperationManagerController::class, 'delete']);
    Route::middleware('check.permission: Admin,Executivo,Operação')->post('/operation/manager', [OperationManagerController::class, 'create']);
-   Route::middleware('check.permission: Admin,Executivo,Operação')->post('/executivo/{id}', [ExecutiveController::class, 'update']);
+   Route::middleware('check.permission: Admin,Executivo,Operação')->post('/operation/manager/{id}', [OperationManagerController::class, 'update']);
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
-    Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
-
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);
