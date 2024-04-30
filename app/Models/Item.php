@@ -21,7 +21,7 @@ class Item extends Model
     protected $fillable = [
         'file_type_id',
         'status',
-        'file_naming_id',
+        'file_name_id',
         'checklist_id',
         'mandatory'
     ];

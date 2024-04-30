@@ -247,12 +247,15 @@ class ChecklistController extends Controller
                 $months[] = $dataAtual->copy()->addMonth(1)->format('Y-m');
                 
                 foreach ($months as $month) {
+
                     $count_items = Item::where('checklist_id', function ($query) use ($id_contract, $month) {
+
                         $query->select('id')
                         ->from('checklists')
                         ->where('contract_uuid', $id_contract)
                         ->where('date_checklist', $month.'-01');
                     })->count();
+
                     // $current_dates[] = array('date' => $month, 'items' => $count_items);
                     $current_dates[] = array('date' => $month, 'items' => $count_items > 0 ? true : false);
                 }
