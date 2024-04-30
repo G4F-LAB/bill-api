@@ -64,6 +64,15 @@ return [
             'clientSecret' => env('SHAREPOINT_CLIENT_SECRET'),
             'sharepointSite' => env('SHAREPOINT_SITE'),
             'prefix' => env('SHAREPOINT_PREFIX'),
+        ],
+        
+        'sharepoint_rh' => [
+            'driver' => 'sharepoint',
+            'tenantId' => env('SHAREPOINT_TENANT_ID'),
+            'clientId' => env('SHAREPOINT_CLIENT_ID'),
+            'clientSecret' => env('SHAREPOINT_CLIENT_SECRET'),
+            'sharepointSite' => env('SHAREPOINT_SITE_RH'),
+            'prefix' => env('SHAREPOINT_PREFIX'),
         ]
 
     ],

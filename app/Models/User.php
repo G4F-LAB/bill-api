@@ -103,6 +103,7 @@ class User extends Authenticatable
         return $this->hasMany(OperationContractUser::class);
     }
 
+    
     protected static function boot()
     {
         parent::boot();
@@ -119,5 +120,23 @@ class User extends Authenticatable
         if (Auth::user()) {
             return $this->where('taxvat', Auth::user()['employeeid'])->first();
         }
+    }
+
+    public function hasPermission($validPermissions)
+    {
+        $flag = false;
+
+        foreach ($validPermissions as $index => $validPermission) {
+
+            $permissao = Permission::where('name', $validPermission)->first();
+            if ($permissao == NULL) return response()->json(['error' => 'Permissão inválida: ' . $validPermission], 404);
+
+            if ($this->permission_id == $permissao->id) {
+                $flag = true;
+                break;
+            }
+        }
+
+        return $flag;
     }
 }
