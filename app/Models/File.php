@@ -9,7 +9,7 @@ use Spatie\Activitylog\LogOptions;
 class File extends Model
 {
     use HasFactory;
-    use LogsActivity;
+
     protected $table = 'files';
     protected $primaryKey = 'id';
     protected $connection =  'book';
@@ -50,4 +50,5 @@ class File extends Model
     {
         return $this->belongsToMany(Item::class,'files_itens','file_id','item_id')->withTimestamps();
     }
+
 }

@@ -10,7 +10,7 @@ use Spatie\Activitylog\LogOptions;
 
 class FilesItens extends Model
 {
-    use LogsActivity;
+    // use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'files_itens';
     protected $fillable = [

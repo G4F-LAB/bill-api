@@ -126,7 +126,7 @@ class AuthController extends Controller
         
         // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
 
-        $user = User::firstOrNew(['taxvat' => $user_auth['employeeid']]);
+        $user = User::with('operationContractUsers')->firstOrNew(['taxvat' => $user_auth['employeeid']]);
         $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : NULL;
         $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : NULL;
         $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
