@@ -65,11 +65,12 @@ class ItemController extends Controller
             "mandatory" => true
         ];
         $addItems = $this->addItems($data);
-        // return $addItems;
+
         if (isset($addItems['errors'])) {
             return response()->json($addItems, 200);
         }
-        return response()->json(['message' => 'Item(s) adicionado(s) com sucesso'], 200);
+
+        return response()->json(['message' => 'Atualizado com sucesso'], 200);
     }
 
 
@@ -86,8 +87,7 @@ class ItemController extends Controller
             $data_notification = new Notification();
 
             foreach ($data['file_naming_id'] as $file_naming_id) {
-                $item = Item::where('checklist_id', $data['checklist_id'])->where('file_naming_id', $file_naming_id)->first();
-
+                $item = Item::where('checklist_id', $data['checklist_id'])->where('file_name_id', $file_naming_id)->first();
                 if (!empty($item)) {
                     $errors['errors'][] = [
                         'message' => 'O item com o nome escolhido já existe para esse checklist!',
@@ -95,15 +95,16 @@ class ItemController extends Controller
                     ];
                     continue;
                 }
-
+                
 
                 $this->item = new Item();
                 $this->item->status = false;
-                $this->item->file_naming_id = $file_naming_id;
+                $this->item->file_name_id = $file_naming_id;
                 $this->item->file_competence_id = $data['file_competence_id'];
                 $this->item->checklist_id = $data['checklist_id'];
                 $this->item->save();
-
+                
+                // return 'etstexxxx';
                 $checklist = Checklist::where('id', $this->item->checklist_id)->first();
                 $data_notification->desc_id = 1;
                 $data_notification->notification_cat_id = 3;
@@ -147,12 +148,12 @@ class ItemController extends Controller
             if ($errors['errors']) {
                 return $errors;
             } else {
-                return 'Atualizdo com sucesso';
+                return 'Atualizado com sucesso';
             }
             
 
         } catch (\Exception $e) {
-            return ['error' => 'Houve um erro interno na aplicação'];
+            return ['error' => $e->getMessage()];
         }
     }
 
