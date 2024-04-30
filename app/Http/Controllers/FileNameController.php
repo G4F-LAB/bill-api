@@ -26,10 +26,10 @@ class FileNameController extends Controller
         
         // Apply filter if provided
         if ($request->has('q')) {
-            $query->whereRaw('LOWER(file_name) LIKE ?', ['%' . strtolower($request->q) . '%']);
+            $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($request->q) . '%']);
         }
 
-        $response = $query->get();
+        $response = $query->orderBy('name', 'asc')->get();
 
         return response()->json($response, 200);
     }
