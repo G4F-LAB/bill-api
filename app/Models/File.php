@@ -14,6 +14,7 @@ class File extends Model
     protected $primaryKey = 'id';
     protected $connection =  'book';
     protected $hidden = ['pivot'];
+    protected $appends = ['full_path'];
 
     protected $fillable = [
         'item_id',
@@ -32,6 +33,17 @@ class File extends Model
             'updated_at',
             'path'
         ]);
+    }
+
+    public function getFullPathAttribute()
+    {
+        // Check if the path starts with "storage"
+        if (strpos($this->path, 'storage') === 0) {
+            return asset($this->path); // If it's already a storage path, return it
+        }
+
+        // Otherwise, prepend the storage path
+        return storage_path('app/public/' . ltrim($this->path, '/'));
     }
 
     public function itens()

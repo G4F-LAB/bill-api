@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\Checklist;
 use App\Models\File;
-use App\Models\FileNaming;
+use App\Models\FileName;
 use App\Models\FilesItens;
 use App\Models\Notification;
 use App\Models\User;
@@ -123,7 +123,7 @@ class ItemController extends Controller
                 $date = $date->subMonths($sub_months)->format('Y-m');
 
                 $files = File::where('path', 'ilike', "%$date%")->get()->toArray();
-                $item_name = FileNaming::where('id', $this->item->file_naming_id)->first();
+                $item_name = FileName::where('id', $this->item->file_naming_id)->first();
 
                 $file_found = null;
 
@@ -259,11 +259,11 @@ class ItemController extends Controller
                 if (!empty($file_itens)) {
 
                     foreach ($file_itens as $file_item) {
-                        $item = FileNaming::with('items')
+                        $item = FileName::with('items')
                             ->whereHas('items', function ($query) use ($file_item) {
                                 $query->where('id', $file_item['item_id']);
                             })
-                            ->pluck('group')->toArray();
+                            ->pluck('file_group')->toArray();
                         $files[] = [
                             'path' => File::where('id', $file_item['file_id'])->first()->toArray()['path'],
                             'group' => $item[0]
