@@ -6,13 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-
+use App\Events\FilesItensSaved;
 
 class FilesItens extends Model
 {
     // use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'files_itens';
+
+    protected $dispatchesEvents = [
+        'saved' => \App\Events\FilesItensSaved::class,
+        'deleted' => \App\Events\FilesItensSaved::class,
+        // 'deleted' => 'App\Events\FilesItensDeleted',
+    ];
+
     protected $fillable = [
         'item_id',
         'file_id',
@@ -32,6 +39,8 @@ class FilesItens extends Model
             'deleted_at']);
     }
 
+    
+
     public function file()
     {
         return $this->belongsTo(File::class, 'file_id');
@@ -39,6 +48,8 @@ class FilesItens extends Model
 
     public function item()
     {
-        return $this->belongsTo(Item::class, 'item_id');
+        return $this->belongsTo(Item::class);
     }
+
+ 
 }

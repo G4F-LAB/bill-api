@@ -12,7 +12,7 @@ class Item extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $connection =  'book';
     protected $table = 'itens';

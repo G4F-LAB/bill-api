@@ -34,17 +34,26 @@ class FileController extends Controller
      
 
         try {
-            // Storage::disk('sharepoint')->put('test.txt', 'testContentN7');
-            $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            // $files = Storage::disk('sharepoint')->put('/BillData/test.txt', 'testContentN7');
+            // $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            $this->syncFilesItensChanges();
+            $folderPath = 'BillDatas';
 
-
+            // Check if the folder exists in SharePoint
+            if (!Storage::disk('sharepoint')->exists($folderPath)) {
+                // If the folder does not exist, create it
+                Storage::disk('sharepoint')->makeDirectory($folderPath);
+            }
+            
+            // Store the file in SharePoint
+            $filePath = $file->store($folderPath, 'sharepoint');
             
             
             // // Output directories
             // foreach ($files as $file) {
             //     echo $file . "\n";
             // }
-            return $files;
+            return $filePath;
             
             
         } catch (\Exception $exception) {
@@ -139,13 +148,8 @@ class FileController extends Controller
             if (!$valid) {
                 $failedFiles[] = $file->getClientOriginalName();
             } else {
-                // If file matches, add to success files array and process the file
-                $successFiles[] = [
-                    'file_name' => $file->getClientOriginalName(),
-                    'item_name' => $item_name,
-                    'item_name_id' => $item_name_id
-                ];
-
+               
+              
 
 
                 // Process the file 
@@ -161,10 +165,18 @@ class FileController extends Controller
                 ]);
 
                 // Associate the file with the checklist item
-                $filesItem = FilesItens::updateOrCreate(
-                    ['item_id' => $item->id], 
-                    ['file_id' => $newFile->id] 
-                );
+                $filesItem = FilesItens::create([
+                    'item_id' => $item->id,
+                    'file_id' => $newFile->id
+                ]);
+
+                $successFiles[] = [
+                    'file_name' => $file->getClientOriginalName(),
+                    'item_name' => $item_name,
+                    'item_name_id' => $item_name_id,
+                    'file_path' => null
+                ];
+
                 
             }
         }
@@ -182,6 +194,41 @@ class FileController extends Controller
     
     
 
+
+    public function syncFilesItensChanges()
+    {
+        // Get all checklists
+        $checklists = Checklist::all();
+    
+        foreach ($checklists as $checklist) {
+            // Get all items for the checklist
+            $items = Item::where('checklist_id', $checklist->id)->get();
+    
+            $completedItemsCount = 0;
+            $totalItemsCount = $items->count();
+    
+            foreach ($items as $item) {
+                // Get all filesItens for the item
+                $filesItens = FilesItens::where('item_id', $item->id)->get();
+    
+                // Check if any file is available for the item
+                $hasAvailableFile = $filesItens->contains('status', true);
+    
+                if ($hasAvailableFile) {
+                    $completedItemsCount++;
+                }
+            }
+    
+            // Calculate the completion percentage
+            $completionPercentage = $totalItemsCount > 0 
+                ? ($completedItemsCount / $totalItemsCount) * 100 
+                : 0;
+    
+            // Update the completion status in the Checklist table
+            $checklist->completion = $completionPercentage;
+            $checklist->save();
+        }
+    }
     
     public function uploadChecklistFiles(Request $request) {
 
