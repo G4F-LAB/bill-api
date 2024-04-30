@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\DB;
 use App\Models\StatusChecklist;
 use App\Models\OperationContractUser;
 use App\Models\Operation;
-
+use App\Models\OperationManager;
+use App\Models\ContractUser;
 
 class AnalyticsController extends Controller
 {
 
-   public function operation_contract (Request $request){
+   public function operation_data (Request $request){
 
         try {
             $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
@@ -46,28 +47,118 @@ class AnalyticsController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Houve um erro interno na aplicação'], 500);
         }
     }
-    public function operationId($id) {
+    public function contracts($id) {
+        $data = [];
 
-        
+        $operation = Operation::with([
+                'contracts' => function($query) {
+                    $query->where('status','Ativo');
+                },
+                'contracts.checklists' => function($query) {
+                    $query->orderBy('id','desc')->limit(2);
+                }
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if (!$operation) {
+            return ['error' => 'Operação não encontrada'];
+        }
+
+        $contracts = $operation->contracts;
+
+        if ($contracts->isEmpty()) {
+            return ['error' => 'Nenhum contrato ativo encontrado para esta operação'];
+        }
+
+        $data['contracts'] = $contracts;
+
+        $manager = OperationManager::with('manager')
+            ->where('operation_id', $operation->id)
+            ->whereNotNull('manager_id')
+            ->first();
+
+        if ($manager) {
+            $data['manager'] = ['id' => $manager->manager->id, 'name' => $manager->manager->name];
+        } else {
+            $data['manager'] = null;
+        }
+
+        $executive = OperationManager::with('executive')
+            ->where('operation_id', $operation->id)
+            ->whereNotNull('executive_id')
+            ->first();
+
+        if ($executive) {
+            $data['executive'] = ['id' => $executive->executive->id, 'name' => $executive->executive->name];
+        } else {
+            $data['executive'] = null;
+        }
+
+        return $data;
+    }
 
 
-        // $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
-        // $data = [];
 
-        // $contracts = Operation::with(['contracts' => function($query) {
-        //     $query->where('status','Ativo');
-        // }, 'contracts.checklists' => function($query) {
-        //     $query->orderBy('id','desc')->limit(2);
-        // }])->where('id', $id)->get();
+   public function collaborators($id) {
+    // Recupera os detalhes das operações relacionadas ao contrato
+    $operations = Contract::leftJoin('operation_contract_users', 'operation_contract_users.contract_id', 'contracts.id')
+        ->leftJoin('users', 'users.id', 'operation_contract_users.user_id')
+        ->leftJoin('operations', 'operations.id', 'operation_contract_users.operation_id')
+        ->select('operations.id as id', 'operations.name as name')
+        ->where('contracts.id', $id)
+        ->where('users.status', 'Ativo')
+        ->groupBy('operations.id') // Agrupar pelos IDs das operações
+        ->get();
 
+    // Verifica se há operações
+    if ($operations->isEmpty()) {
+        return [
+            'error' => 'Contrato não encontrado ou encerrado'
+        ];
+    }
 
+    // Monta a estrutura de retorno para a primeira operação encontrada
+    $firstOperation = $operations->first();
 
-        // $data = $contracts;
+    // Recupera os detalhes do gerente associado à primeira operação encontrada
+    $manager = OperationManager::with('executive')
+        ->where('operation_id', $firstOperation->id)
+        ->whereNotNull('executive_id')
+        ->first();
 
-        // return $data;
+    // Recupera os detalhes do executivo associado à primeira operação encontrada
+    $executive = OperationManager::with('executive')
+        ->where('operation_id', $firstOperation->id)
+        ->whereNotNull('executive_id')
+        ->first();
 
-   }
+    // Monta a estrutura de retorno
+    $collaboratorsData = [
+        'id' => $firstOperation->id,
+        'name' => $firstOperation->name,
+        'manager' => $manager ? ['id' => $manager->executive->id, 'name' => $manager->executive->name] : null,
+        'executive' => $executive ? ['id' => $executive->executive->id, 'name' => $executive->executive->name] : null,
+        'collaborators' => [] // Inicializa a lista de colaboradores
+    ];
 
+    // Preenche os detalhes dos colaboradores para o contrato
+    $collaborators = User::join('operation_contract_users', 'operation_contract_users.user_id', '=', 'users.id')
+        ->where('operation_contract_users.contract_id', $id)
+        ->where('users.status', 'Ativo')
+        ->select('users.id', 'users.name')
+        ->get();
+
+    $collaboratorsData['collaborators'] = [
+        'count' => $collaborators->count(),
+        'list' => $collaborators->map(function ($collaborator) {
+            return ['id' => $collaborator->id, 'name' => $collaborator->name];
+        })->toArray()
+    ];
+
+    // Retorna os dados
+    return $collaboratorsData;
+}
 
 
 
