@@ -194,6 +194,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
+    Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
+    
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);

@@ -14,7 +14,7 @@ use App\Models\Checklist;
 use App\Models\Contract;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Validator;
 use App\Services\SharePointService;
 
 class FileController extends Controller
@@ -35,7 +35,7 @@ class FileController extends Controller
 
         try {
             // Storage::disk('sharepoint')->put('test.txt', 'testContentN7');
-            $files = Storage::disk('sharepoint')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
 
 
             
@@ -93,6 +93,94 @@ class FileController extends Controller
     }
 
 
+
+    public function addChecklistFiles(Request $request) {
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+            'files.*' => 'required|file'
+        ]);
+    
+        // Check if the request fails validation
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+    
+        // Check if contract alias is not null
+        $checklist = Checklist::find($request->id);
+        if (!$checklist || is_null($checklist->contract->alias)) {
+            return response()->json(['message' => 'O alias do contrato não pode ser nulo'], 400);
+        }
+    
+        // Get the uploaded files
+        $uploadedFiles = $request->file('files');
+    
+        // Initialize arrays to store results
+        $successFiles = [];
+        $failedFiles = [];
+    
+        // Loop through each uploaded file
+        foreach ($uploadedFiles as $file) {
+            $valid = false;
+            $matchedItem = '';
+    
+            // Loop through checklist items to validate the file name
+            $checklistItems = $checklist->itens;
+            foreach ($checklistItems as $item) {
+                if (stripos($file->getClientOriginalName(), $item->fileName->standard_file_naming) !== false) {
+                    $valid = true;
+                    $item_name_id = $item->fileName->id; 
+                    $item_name = $item->fileName->name; 
+                    break;
+                }
+            }
+    
+            // If file does not match any checklist item, add to failed files array
+            if (!$valid) {
+                $failedFiles[] = $file->getClientOriginalName();
+            } else {
+                // If file matches, add to success files array and process the file
+                $successFiles[] = [
+                    'file_name' => $file->getClientOriginalName(),
+                    'item_name' => $item_name,
+                    'item_name_id' => $item_name_id
+                ];
+
+
+
+                // Process the file 
+
+                $storagePath = $checklist->contract->alias . '/' . date('Y/m-Y');
+
+                // Store the file in SharePoint
+                $filePath = $file->store($storagePath, 'sharepoint');
+
+                // Update the database
+                $newFile = File::create([
+                    'path' => $filePath
+                ]);
+
+                // Associate the file with the checklist item
+                $filesItem = FilesItens::updateOrCreate(
+                    ['item_id' => $item->id], 
+                    ['file_id' => $newFile->id] 
+                );
+                
+            }
+        }
+    
+        // Prepare response with success and failed files
+        $message = count($successFiles) > 0 ? 'Arquivos enviados com sucesso (' . count($successFiles) . ' de ' . count($uploadedFiles) . ')' : 'Nenhum arquivo enviado com sucesso';
+        $response = [
+            'message' => $message,
+            'successFiles' => $successFiles,
+            'failedFiles' => $failedFiles
+        ];
+    
+        return response()->json($response, 200);
+    }
+    
+    
 
     
     public function uploadChecklistFiles(Request $request) {
