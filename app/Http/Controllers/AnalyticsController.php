@@ -49,39 +49,15 @@ class AnalyticsController extends Controller
 
         
 
+        $user = User::with('operationContractUsers')->where('id',$user_id)->first();
+        $id_operations = $user->operationContractUsers->pluck('operation_id');
+        $id_contracts = Contract::whereIn('operation_id',$id_operations)->where('status','Ativo')->with('checklists')->get();
+      
+        return $id_contracts;
 
-        // $user_id = 'd2f99cb5-77f4-4855-ad7c-cb2742d6a537';
-        // $data = [];
-
-        // $contracts = Operation::with(['contracts' => function($query) {
-        //     $query->where('status','Ativo');
-        // }, 'contracts.checklists' => function($query) {
-        //     $query->orderBy('id','desc')->limit(2);
-        // }])->where('id', $id)->get();
-
-
-
-        // $data = $contracts;
-
-        // return $data;
+       
 
    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
