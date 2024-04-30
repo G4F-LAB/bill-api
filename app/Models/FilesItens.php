@@ -32,5 +32,13 @@ class FilesItens extends Model
             'deleted_at']);
     }
 
-    
+    public function file()
+    {
+        return $this->belongsTo(File::class, 'file_id');
+    }
+
+    public function item()
+    {
+        return $this->belongsTo(Item::class, 'item_id');
+    }
 }

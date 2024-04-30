@@ -40,7 +40,7 @@ class OperationManager extends Model
 
     public function operation()
     {
-        return $this->hasMany(Operation::class);
+        return $this->hasOne(Operation::class);
     }
 
     public function manager()

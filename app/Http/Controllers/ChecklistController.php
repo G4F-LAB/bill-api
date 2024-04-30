@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use App\Models\FileNaming;
+use App\Models\FileName;
 use App\Models\Contract;
 use App\Models\Item;
 use Carbon\Carbon;
@@ -33,6 +34,19 @@ class ChecklistController extends Controller
         $this->checklist = $checklist;
     }
 
+
+    public function get($id)
+    {
+  // Retrieve the checklist along with its items
+  $checklist = Checklist::with(['contract','itens.fileName','itens.files'])->find($id);
+
+  if (!$checklist) {
+      return response()->json(['error' => 'Checklist not found'], 404);
+  }
+
+  return response()->json($checklist, 200);
+    }
+    
 
     public function updateContactIds(){
         $contract_ids = Contract::on('book')->get();
@@ -249,7 +263,7 @@ class ChecklistController extends Controller
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
                 
-                $itens = Item::with('checklist', 'fileNaming','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
+                $itens = Item::with('checklist', 'fileName','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
                     $query->whereRaw("TO_CHAR(checklists.date_checklist, 'YYYY-MM') LIKE '".$reference."%' and checklists.contract_uuid = '".$id."'");
                 })->get();
                 // return $itens;
@@ -277,25 +291,25 @@ class ChecklistController extends Controller
         {
             try{
                 $type = NULL;
-                if($this->user->is_hr()) {
+                if($this->user->type  === 'RH') {
                     $type = 1;
                 }
-                if($this->user->is_fin()) {
+                if($this->user->type  === 'Financeiro') {
                     $type = 2;
                 }
-                $items = Item::with('fileNaming')->with('files')
+                $items = Item::with('fileName')->with('files')
                     ->when(!empty($type), function($query) use($type){
-                        $query->whereHas('fileNaming', function($query2) use($type) {
+                        $query->whereHas('fileName', function($query2) use($type) {
                             $query2->where('file_type_id',$type);
                         });
                     })
                     ->where('checklist_id', $request->id)->get();
                 $this->checklist = Checklist::with('status')->find($request->id);
-                $contract = Contract::where('contract_uuid', $this->checklist->contract_uuid);
+                $contract = Contract::where('id', $this->checklist->contract_uuid);
 
                 $data['checklist'] = $this->checklist;
                 $data['contract'] = $contract;
-                $data['items_name'] = FileNaming::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
+                $data['items_name'] = FileName::whereIn('id',$items->pluck('file_naming_id'))->pluck('standard_file_naming');
 
                 $items = $items->toArray();
                 foreach($items as $index => $item) {

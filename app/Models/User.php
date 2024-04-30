@@ -114,4 +114,10 @@ class User extends Authenticatable
         });
     }
 
+    public function getAuthUser()
+    {
+        if (Auth::user()) {
+            return $this->where('taxvat', Auth::user()['employeeid'])->first();
+        }
+    }
 }
