@@ -110,7 +110,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
 
-
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/contract/checklist/{id}', [AnalyticsController::class,'getAllChecklist']);
 
 
 

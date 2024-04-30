@@ -41,7 +41,7 @@ class AnalyticsController extends Controller
             $data['total_collaborators'] = $this->collaborators_operation($id_operations)->count();
             $data['checklists_status_progress'] = $checklists_status;
 
-            return response()->json(['status' => 'ok','message' => 'Dados carregado com sucesso', 'data' =>  $data], 500);
+            return response()->json(['status' => 'ok','message' => 'Dados carregado com sucesso', 'data' =>  $data], 200);
 
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Houve um erro interno na aplicação'], 500);
@@ -205,6 +205,36 @@ private function getIdAllUsersByOperations ($user_id) {
     $operations = $user->operationContractUsers;
     return $operations;
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function getAllChecklist (Request $request){
+
+    // $id_contract = $request->id;
+    $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
+    $data = Contract::with('checklists')->where('id',$id_contract)->first();
+    return $data;
 }
 
 }
