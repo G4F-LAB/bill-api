@@ -109,9 +109,11 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
 
-
+//RAFAEL / WESLEY
     Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/contract/checklist/{id}', [AnalyticsController::class,'getAllChecklist']);
-
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/analytics/contract/checklist/teste/{id}', [AnalyticsController::class,'getAllChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/analytics/checklist/completion/{id}', [AnalyticsController::class,'getCompletion']);
+//RAFAEL / WESLEY
 
 
 
