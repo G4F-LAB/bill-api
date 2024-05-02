@@ -87,6 +87,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklists/{id}', [ChecklistController::class,'show']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist',[ChecklistController::class, 'store']);
@@ -183,6 +184,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
+    Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
+    
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);

@@ -34,26 +34,28 @@ class FileController extends Controller
      
 
         try {
-            // $files = Storage::disk('sharepoint')->put('/BillData/test.txt', 'testContentN7');
-            // $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
-            $this->syncFilesItensChanges();
-            $folderPath = 'BillDatas';
+            // $files = Storage::disk('sharepoint')->put('Lists/Arquivos/test.txt', 'testContentN7');
+            $files = Storage::disk('sharepoint')->put('Arquivos/file.txt', 'jsidj');
 
-            // Check if the folder exists in SharePoint
-            if (!Storage::disk('sharepoint')->exists($folderPath)) {
-                // If the folder does not exist, create it
-                Storage::disk('sharepoint')->makeDirectory($folderPath);
-            }
+            // $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            // $this->syncFilesItensChanges();
+            // $folderPath = 'BillDatas';
+
+            // // Check if the folder exists in SharePoint
+            // if (!Storage::disk('sharepoint')->exists($folderPath)) {
+            //     // If the folder does not exist, create it
+            //     Storage::disk('sharepoint')->makeDirectory($folderPath);
+            // }
             
-            // Store the file in SharePoint
-            $filePath = $file->store($folderPath, 'sharepoint');
+            // // Store the file in SharePoint
+            // $filePath = $file->store($folderPath, 'sharepoint');
             
             
             // // Output directories
             // foreach ($files as $file) {
             //     echo $file . "\n";
             // }
-            return $filePath;
+            return $files;
             
             
         } catch (\Exception $exception) {
@@ -158,10 +160,12 @@ class FileController extends Controller
 
                 // Store the file in SharePoint
                 $filePath = $file->store($storagePath, 'sharepoint');
+                $fileContent = file_get_contents($file->path()); // Get file contents
+                $saveFile = Storage::disk('sharepoint')->put($storagePath . '/' . $file->getClientOriginalName(), $fileContent);
 
                 // Update the database
                 $newFile = File::create([
-                    'path' => $filePath
+                    'path' => $storagePath . '/' . $file->getClientOriginalName()
                 ]);
 
                 // Associate the file with the checklist item
@@ -170,11 +174,12 @@ class FileController extends Controller
                     'file_id' => $newFile->id
                 ]);
 
+                
                 $successFiles[] = [
                     'file_name' => $file->getClientOriginalName(),
                     'item_name' => $item_name,
                     'item_name_id' => $item_name_id,
-                    'file_path' => null
+                    // 'file_path' => Storage::disk('sharepoint')->read($filePath)
                 ];
 
                 

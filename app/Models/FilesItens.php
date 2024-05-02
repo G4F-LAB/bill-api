@@ -27,7 +27,6 @@ class FilesItens extends Model
         'updated_at',
         'deleted_at'
     ];
-    use HasFactory;
 
     public function getActivitylogOptions(): LogOptions
     {

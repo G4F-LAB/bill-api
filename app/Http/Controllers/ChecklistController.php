@@ -35,7 +35,7 @@ class ChecklistController extends Controller
     }
 
 
-    public function get($id)
+    public function show($id)
     {
   // Retrieve the checklist along with its items
   $checklist = Checklist::with(['contract','itens.fileName','itens.files'])->find($id);

@@ -64,6 +64,7 @@ return [
             'clientSecret' => env('SHAREPOINT_CLIENT_SECRET'),
             'sharepointSite' => env('SHAREPOINT_SITE'),
             'prefix' => env('SHAREPOINT_PREFIX'),
+            'visibility' => 'public'
         ],
         
         'sharepoint_rh' => [
