@@ -231,10 +231,19 @@ private function getIdAllUsersByOperations ($user_id) {
 
 public function getAllChecklist (Request $request){
 
-    // $id_contract = $request->id;
-    $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
+    $id_contract = $request->id;
+    // $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
     $data = Contract::with('checklists')->where('id',$id_contract)->first();
     return $data;
 }
+
+
+public function getCompletion (Request $request){
+    // $id_contract = $request->id;
+    $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
+   return Contract::with('checklist')->where('id', $id_contract)->first();
+
+}
+
 
 }
