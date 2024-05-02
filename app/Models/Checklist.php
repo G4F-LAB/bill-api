@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Carbon;
 
 class Checklist extends Model
 
@@ -13,6 +14,7 @@ class Checklist extends Model
     // use LogsActivity;
     protected $connection =  'book';
     protected $primaryKey = 'id';
+    protected $appends = ['name'];
     protected $fillable = [
         'contract_id',
         'date_checklist',
@@ -59,6 +61,13 @@ class Checklist extends Model
             'sector.required' => 'O campo do setor é de preenchimento obrigatório.'
 
         ];
+    }
+
+    public function getNameAttribute()
+    {
+        $date = Carbon::createFromFormat('Y-m-d', $this->date_checklist);
+        $monthYear = $date->translatedFormat('F Y');
+        return "{$this->id} - {$monthYear}";
     }
 
     public function contract(){

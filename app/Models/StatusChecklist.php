@@ -13,6 +13,6 @@ class StatusChecklist extends Model
     protected $primaryKey = 'id';
 
     public function checklist() {
-        return $this->hasMany(Checklist::class);
+        return $this->belongsTo(Checklist::class);
     }
 }
