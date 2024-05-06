@@ -138,10 +138,10 @@ class FileController extends Controller
             // Loop through checklist items to validate the file name
             $checklistItems = $checklist->itens;
             foreach ($checklistItems as $item) {
-                if (stripos($file->getClientOriginalName(), $item->fileName->standard_file_naming) !== false) {
+                if (stripos($file->getClientOriginalName(), $item->file_name->standard_file_naming) !== false) {
                     $valid = true;
-                    $item_name_id = $item->fileName->id; 
-                    $item_name = $item->fileName->name; 
+                    $item_name_id = $item->file_name->id; 
+                    $item_name = $item->file_name->name; 
                     break;
                 }
             }

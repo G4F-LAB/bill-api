@@ -79,7 +79,7 @@ class Item extends Model
         return $this->belongsTo(FileNaming::class);
     }
 
-    public function fileName()
+    public function file_name()
     {
         return $this->belongsTo(FileName::class);
     }
