@@ -14,7 +14,7 @@ class FileName extends Model
     protected $connection =  'book';
 
     protected $fillable = [
-        'file_name',
+        'name',
         'standard_file_naming',
         'file_group',
         'automate',
@@ -35,7 +35,7 @@ class FileName extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('FileNaming')->logOnly([
-            'file_name',
+            'name',
             'standard_file_naming',
             'file_group',
             'file_type_id',

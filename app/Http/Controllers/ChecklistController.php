@@ -120,7 +120,7 @@ class ChecklistController extends Controller
             
             $this->checklist->contract_uuid  = $request->contract_uuid;
             $this->checklist->date_checklist  = $request->date_checklist;
-            $this->checklist->month_reference = date('m', strtotime($request->date_checklist));
+            // $this->checklist->month_reference = date('m', strtotime($request->date_checklist));
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
             $this->checklist->obs = $request->obs;
