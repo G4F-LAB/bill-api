@@ -38,7 +38,7 @@ class ChecklistController extends Controller
     public function show($id)
     {
   // Retrieve the checklist along with its items
-  $checklist = Checklist::with(['contract','itens.fileName','itens.files'])->find($id);
+  $checklist = Checklist::with(['contract','itens.file_name.task.integration','itens.files'])->find($id);
 
   if (!$checklist) {
       return response()->json(['error' => 'Checklist not found'], 404);
@@ -266,7 +266,7 @@ class ChecklistController extends Controller
                 $id = $request->id;
                 $reference = ($request->reference) ? $request->reference : $months[2] ;
                 
-                $itens = Item::with('checklist', 'fileName','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
+                $itens = Item::with('checklist', 'file_name','file_competence')->whereHas('checklist',function($query) use($id,$reference) {
                     $query->whereRaw("TO_CHAR(checklists.date_checklist, 'YYYY-MM') LIKE '".$reference."%' and checklists.contract_uuid = '".$id."'");
                 })->get();
                 // return $itens;
@@ -300,9 +300,9 @@ class ChecklistController extends Controller
                 if($this->user->type  === 'Financeiro') {
                     $type = 2;
                 }
-                $items = Item::with('fileName')->with('files')
+                $items = Item::with('file_name')->with('files')
                     ->when(!empty($type), function($query) use($type){
-                        $query->whereHas('fileName', function($query2) use($type) {
+                        $query->whereHas('file_name', function($query2) use($type) {
                             $query2->where('file_type_id',$type);
                         });
                     })
