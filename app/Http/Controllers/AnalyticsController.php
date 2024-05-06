@@ -107,10 +107,12 @@ class AnalyticsController extends Controller
             ->leftJoin('operations', 'operations.id', 'operation_contract_users.operation_id')
             ->select('operations.id as id', 'operations.name as name')
             ->where('contracts.id', $id)
-            ->where('users.status', 'Ativo')
+            // ->where('users.status', 'Ativo')
             ->groupBy('operations.id') // Agrupar pelos IDs das operações
             ->get();
 
+
+            // return $operations;
         // Verifica se há operações
         if ($operations->isEmpty()) {
             return [
