@@ -58,7 +58,7 @@ class ItemController extends Controller
         // return $request->file_naming_id;
 
         $data = [
-            "file_naming_id" => $request->file_naming_id,
+            "file_naming_id" => $request->file_name_id,
             "checklist_id" => $request->checklist_id,
             //"status" => $request->status,
             "file_competence_id" => $request->file_competence_id,
