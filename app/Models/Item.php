@@ -27,18 +27,18 @@ class Item extends Model
     ];
 
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->useLogName('item')
-            ->logOnly([
-                'file_type_id',
-                'status',
-                'file_name_id',
-                'checklist_id',
-                'mandatory'
-            ]);
-    }
+    // public function getActivitylogOptions(): LogOptions
+    // {
+    //     return LogOptions::defaults()
+    //         ->useLogName('item')
+    //         ->logOnly([
+    //             'file_type_id',
+    //             'status',
+    //             'file_name_id',
+    //             'checklist_id',
+    //             'mandatory'
+    //         ]);
+    // }
 
     public function rules()
     {
