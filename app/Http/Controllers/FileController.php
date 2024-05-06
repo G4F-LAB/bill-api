@@ -864,19 +864,7 @@ class FileController extends Controller
             }
             $items_file->delete();
 
-            // $file = File::find($file_id);
-            // $file->delete();
 
-            $item_files = FilesItens::where('item_id', $item_id)->first();
-            if($item_files === null){
-                Item::where('id', $item_id)->update(['status' => false]);
-            }else{
-                Item::where('id', $item_id)->update(['status' => true]);
-            }
-
-            $checklist_id =  Item::where('id', $item_id)->first()->checklist_id;
-            $checklist = Checklist::find($checklist_id);
-            $checklist->sync_itens();
 
             return response()->json(['message' => ' Arquivo excluído com sucesso'], 200);
         } catch (\Exception $e) {
