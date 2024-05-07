@@ -15,6 +15,7 @@ class FileName extends Model
     protected $connection = 'book';
 
     protected $fillable = [
+        
         'name',
         'standard_file_naming',
         'file_group',
