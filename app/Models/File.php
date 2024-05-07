@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Facades\Storage;
 class File extends Model
 {
     use HasFactory;
@@ -15,7 +16,7 @@ class File extends Model
     protected $primaryKey = 'id';
     protected $connection =  'book';
     protected $hidden = ['pivot'];
-    protected $appends = ['full_path'];
+    protected $appends = ['full_path', 'basename'];
 
     protected $fillable = [
         'item_id',
@@ -38,13 +39,15 @@ class File extends Model
 
     public function getFullPathAttribute()
     {
-        // Check if the path starts with "storage"
-        if (strpos($this->path, 'storage') === 0) {
-            return asset($this->path); // If it's already a storage path, return it
-        }
+       return 'https://g4fcombr.sharepoint.com/sites/NuvemBill/Documentos%20Compartilhados/public/'. $this->path;
+    }
+    
+    
 
-        // Otherwise, prepend the storage path
-        return storage_path('app/public/' . ltrim($this->path, '/'));
+    public function getBasenameAttribute()
+    {
+
+        return basename($this->path);
     }
 
     public function itens()

@@ -34,10 +34,21 @@ class FileController extends Controller
      
 
         try {
-            // Storage::disk('sharepoint')->put('test.txt', 'testContentN7');
-            $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            // $files = Storage::disk('sharepoint')->put('Lists/Arquivos/test.txt', 'testContentN7');
+            $files = Storage::disk('sharepoint')->put('Arquivos/file.txt', 'jsidj');
 
+            // $files = Storage::disk('sharepoint_rh')->allFiles('/SGG/GDP.%E2%80%8B/CDP/03-Fopag/01-SEFIP_Conectividade Social/2024/03-2024/INSS');
+            // $this->syncFilesItensChanges();
+            // $folderPath = 'BillDatas';
 
+            // // Check if the folder exists in SharePoint
+            // if (!Storage::disk('sharepoint')->exists($folderPath)) {
+            //     // If the folder does not exist, create it
+            //     Storage::disk('sharepoint')->makeDirectory($folderPath);
+            // }
+            
+            // // Store the file in SharePoint
+            // $filePath = $file->store($folderPath, 'sharepoint');
             
             
             // // Output directories
@@ -127,10 +138,10 @@ class FileController extends Controller
             // Loop through checklist items to validate the file name
             $checklistItems = $checklist->itens;
             foreach ($checklistItems as $item) {
-                if (stripos($file->getClientOriginalName(), $item->fileName->standard_file_naming) !== false) {
+                if (stripos($file->getClientOriginalName(), $item->file_name->standard_file_naming) !== false) {
                     $valid = true;
-                    $item_name_id = $item->fileName->id; 
-                    $item_name = $item->fileName->name; 
+                    $item_name_id = $item->file_name->id; 
+                    $item_name = $item->file_name->name; 
                     break;
                 }
             }
@@ -139,13 +150,8 @@ class FileController extends Controller
             if (!$valid) {
                 $failedFiles[] = $file->getClientOriginalName();
             } else {
-                // If file matches, add to success files array and process the file
-                $successFiles[] = [
-                    'file_name' => $file->getClientOriginalName(),
-                    'item_name' => $item_name,
-                    'item_name_id' => $item_name_id
-                ];
-
+               
+              
 
 
                 // Process the file 
@@ -154,17 +160,28 @@ class FileController extends Controller
 
                 // Store the file in SharePoint
                 $filePath = $file->store($storagePath, 'sharepoint');
+                $fileContent = file_get_contents($file->path()); // Get file contents
+                $saveFile = Storage::disk('sharepoint')->put($storagePath . '/' . $file->getClientOriginalName(), $fileContent);
 
                 // Update the database
                 $newFile = File::create([
-                    'path' => $filePath
+                    'path' => $storagePath . '/' . $file->getClientOriginalName()
                 ]);
 
                 // Associate the file with the checklist item
-                $filesItem = FilesItens::updateOrCreate(
-                    ['item_id' => $item->id], 
-                    ['file_id' => $newFile->id] 
-                );
+                $filesItem = FilesItens::create([
+                    'item_id' => $item->id,
+                    'file_id' => $newFile->id
+                ]);
+
+                
+                $successFiles[] = [
+                    'file_name' => $file->getClientOriginalName(),
+                    'item_name' => $item_name,
+                    'item_name_id' => $item_name_id,
+                    // 'file_path' => Storage::disk('sharepoint')->read($filePath)
+                ];
+
                 
             }
         }
@@ -182,6 +199,41 @@ class FileController extends Controller
     
     
 
+
+    public function syncFilesItensChanges()
+    {
+        // Get all checklists
+        $checklists = Checklist::all();
+    
+        foreach ($checklists as $checklist) {
+            // Get all items for the checklist
+            $items = Item::where('checklist_id', $checklist->id)->get();
+    
+            $completedItemsCount = 0;
+            $totalItemsCount = $items->count();
+    
+            foreach ($items as $item) {
+                // Get all filesItens for the item
+                $filesItens = FilesItens::where('item_id', $item->id)->get();
+    
+                // Check if any file is available for the item
+                $hasAvailableFile = $filesItens->contains('status', true);
+    
+                if ($hasAvailableFile) {
+                    $completedItemsCount++;
+                }
+            }
+    
+            // Calculate the completion percentage
+            $completionPercentage = $totalItemsCount > 0 
+                ? ($completedItemsCount / $totalItemsCount) * 100 
+                : 0;
+    
+            // Update the completion status in the Checklist table
+            $checklist->completion = $completionPercentage;
+            $checklist->save();
+        }
+    }
     
     public function uploadChecklistFiles(Request $request) {
 
@@ -812,19 +864,7 @@ class FileController extends Controller
             }
             $items_file->delete();
 
-            // $file = File::find($file_id);
-            // $file->delete();
 
-            $item_files = FilesItens::where('item_id', $item_id)->first();
-            if($item_files === null){
-                Item::where('id', $item_id)->update(['status' => false]);
-            }else{
-                Item::where('id', $item_id)->update(['status' => true]);
-            }
-
-            $checklist_id =  Item::where('id', $item_id)->first()->checklist_id;
-            $checklist = Checklist::find($checklist_id);
-            $checklist->sync_itens();
 
             return response()->json(['message' => ' Arquivo excluído com sucesso'], 200);
         } catch (\Exception $e) {

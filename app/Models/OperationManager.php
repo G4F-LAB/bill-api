@@ -10,7 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class OperationManager extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *
@@ -30,14 +30,14 @@ class OperationManager extends Model
         'executive_id',
         'manager_id',
     ];
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->useLogName('OperationManager')->logOnly([
-            'operation_id',
-            'executive_id',
-            'manager_id',
-        ]);
-    }
+    // public function getActivitylogOptions(): LogOptions
+    // {
+    //     return LogOptions::defaults()->useLogName('OperationManager')->logOnly([
+    //         'operation_id',
+    //         'executive_id',
+    //         'manager_id',
+    //     ]);
+    // }
 
     public function operation()
     {

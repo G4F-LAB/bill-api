@@ -12,6 +12,7 @@ class OperationManagerController extends Controller
     public function create(Request $request)
     {
         try {
+
             $operation_manager = new OperationManager();
             if ($request->has('operation_id'))$operation_manager->operation_id = $request->operation_id;
             if ($request->has('manager_id'))$operation_manager->manager_id = $request->manager_id;
@@ -58,9 +59,15 @@ class OperationManagerController extends Controller
     {
         try {
             $operation = OperationManager::where('operation_id',$id)->first();
-            if ($request->has('manager_id')) $operation->manager_id = $request->manager_id;
-            if ($request->has('executive_id')) $operation->executive_id = $request->executive_id;
-            $operation->save();
+            if($operation){
+
+                if ($request->has('manager_id')) $operation->manager_id = $request->manager_id;
+                if ($request->has('executive_id')) $operation->executive_id = $request->executive_id;
+                $operation->save();
+                dd($operation);
+            }else{
+                $this->create($request);
+            }
             return response()->json($operation, 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage(), 'Não foi possivel atualizar esse registro.'], 500);

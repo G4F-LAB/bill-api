@@ -123,7 +123,7 @@ class AuthController extends Controller
     {
         $firstLogin = false;
         $user_auth = Auth::user();
-        
+
         // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
 
         $user = User::with('operationContractUsers')->firstOrNew(['taxvat' => $user_auth['employeeid']]);
@@ -132,7 +132,7 @@ class AuthController extends Controller
         $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
         $user->taxvat = isset($user_auth['employeeid']) ? $user_auth['employeeid'][0] : NULL;
         $user->save();
-        
+
         $firstLogin = !$user->exists;
 
         return ['firstLogin' => $firstLogin, 'user' => $user];
@@ -173,7 +173,7 @@ class AuthController extends Controller
             //         "name" => "Rh"
             //     ]
             // ];
-            
+
 
             return response()->json($colaborador);
         } catch (\Exception $e) {
@@ -188,10 +188,10 @@ class AuthController extends Controller
             "trainee_w"             => 'Admin',
             "gerencia_executiva1_w" => 'Executivo',
             "gerencia_executiva2_w" => 'Executivo',
-            "Gerentes_Operacoes"    => 'Operacao',
-            "rh_checklist_w"        => 'Rh',
-            "rh_book_w"             => 'Rh',
-            "financeiro_book_w"     => 'Fin',
+            "Gerentes_Operacoes"    => 'Operação',
+            "rh_checklist_w"        => 'RH',
+            "rh_book_w"             => 'RH',
+            "financeiro_book_w"     => 'Financeiro',
             "g_TI"                  => 'TI'
         ];
 

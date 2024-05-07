@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "33b58e014b51ec61f4034183d217b803",
+    "content-hash": "72a41398896f39d4bcc1f7e082e401a2",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2718,6 +2718,45 @@
                 "source": "https://github.com/thephpleague/oauth2-client/tree/2.7.0"
             },
             "time": "2023-04-16T18:19:15+00:00"
+        },
+        {
+            "name": "lubnik2005/sharepoint-flysystem",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lubnik2005/sharepoint-flysystem.git",
+                "reference": "0d8aafb5505036a9a90ba3b7893cd1384dfcf98d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lubnik2005/sharepoint-flysystem/zipball/0d8aafb5505036a9a90ba3b7893cd1384dfcf98d",
+                "reference": "0d8aafb5505036a9a90ba3b7893cd1384dfcf98d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.4",
+                "league/flysystem": "^3.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "league/flysystem-adapter-test-utilities": "^3.0",
+                "phpunit/phpunit": "^9.5",
+                "vlucas/phpdotenv": "^5.4"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lubnik2005\\SharepointFlysystem\\": "src/"
+                }
+            },
+            "description": "A PHP Flysystem for Microsoft's Sharepoint using GraphQL",
+            "support": {
+                "source": "https://github.com/lubnik2005/sharepoint-flysystem/tree/main",
+                "issues": "https://github.com/lubnik2005/sharepoint-flysystem/issues"
+            },
+            "time": "2023-09-28T00:27:51+00:00"
         },
         {
             "name": "microsoft/kiota-abstractions",
@@ -10505,7 +10544,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,

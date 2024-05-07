@@ -65,7 +65,7 @@ class Contract extends Model
     }
     public function checklists(){
 
-        return $this->hasMany(Checklist::class, 'contract_uuid', 'id');
+        return $this->hasMany(Checklist::class, 'contract_uuid', 'id')->with('status');
     }
 
 

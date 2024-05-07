@@ -10,7 +10,7 @@ use Spatie\Activitylog\LogOptions;
 class Notification extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $table = 'notifications';
     protected $primaryKey = 'id';

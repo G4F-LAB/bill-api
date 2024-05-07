@@ -87,6 +87,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklists/{id}', [ChecklistController::class,'show']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist',[ChecklistController::class, 'store']);
@@ -102,18 +103,47 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     //automate
     Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
-    //Analytics
-    Route::prefix('/analytics')->group(function () {
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations',[AnalyticsController::class,'getOperationsByUser']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/contracts/{id}',[AnalyticsController::class,'getContractsByOperation']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/checklistcomplete',[AnalyticsController::class,'check_complete']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/checklistsstatus',[AnalyticsController::class,'qtdStatusChecklists']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/contracts',[AnalyticsController::class,'contractsAll']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/collaborators/{id}', [AnalyticsController::class,'getCollaboratorById']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/collaborators', [AnalyticsController::class,'getAllCollaborators']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/checklist', [AnalyticsController::class,'getChecklist']);
-        // Route::middleware('check.permission: Admin,Executivo,Operação')->get('/analytics',[AnalyticsController::class,'getMyAnalytics']);
+
+
+
+
+
+
+//RAFAEL / WESLEY
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/contract/checklist/{id}', [AnalyticsController::class,'getAllChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/analytics/contract/checklist/teste/{id}', [AnalyticsController::class,'getAllChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operacao,Analista')->get('/analytics/checklist/completion/{id}', [AnalyticsController::class,'getCompletion']);
+//RAFAEL / WESLEY
+
+
+
+
+
+
+
+
+
+      //Analytics
+      Route::prefix('/analytics')->group(function () {
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations', [AnalyticsController::class,'operation_data']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/operations/{id}/contracts', [AnalyticsController::class,'contracts']);
+        Route::middleware('check.permission: Admin,Executivo,Operacao')->get('/contracts/{id}/collaborators', [AnalyticsController::class,'collaborators']);
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     Route::middleware('check.permission: Admin')->get('/directory',[DirectoryController::class,'getAnalyticsDirectory']);
     // Route::middleware('check.permission: Admin,Executivo,Operação')->get('/analytics/{id}',[AnalyticsController::class,'getMyAnalytics']);
@@ -169,7 +199,7 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Automação
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
-    Route::middleware('check.permission:All')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
 
     //notifications
     Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);
@@ -183,6 +213,8 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
+    Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
+    
 });
 
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);

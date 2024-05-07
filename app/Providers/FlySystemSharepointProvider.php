@@ -31,7 +31,7 @@ class FlySystemSharepointProvider extends ServiceProvider
                     $config['tenantId'],
                     $config['clientId'],
                     $config['clientSecret'],
-                    $config['sharepointSite'],
+                    $config['sharepointSite']
                 ),
                 $config['prefix'],
             );

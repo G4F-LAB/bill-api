@@ -12,7 +12,7 @@ class Item extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $connection =  'book';
     protected $table = 'itens';
@@ -27,16 +27,18 @@ class Item extends Model
     ];
 
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->useLogName('item')->logOnly(['file_type_id',
-        'status',
-        'file_naming_id',
-        'checklist_id',
-        'mandatory']);
-
-
-    }
+    // public function getActivitylogOptions(): LogOptions
+    // {
+    //     return LogOptions::defaults()
+    //         ->useLogName('item')
+    //         ->logOnly([
+    //             'file_type_id',
+    //             'status',
+    //             'file_name_id',
+    //             'checklist_id',
+    //             'mandatory'
+    //         ]);
+    // }
 
     public function rules()
     {
@@ -50,8 +52,9 @@ class Item extends Model
         ];
     }
 
-    public function feedback() {
-        return[
+    public function feedback()
+    {
+        return [
             'checklist_id.required' => 'O campo do checklist_id é de preenchimento obrigatório.',
             'file_naming_id.required' => 'O campo do id da nomeclatura de arquivo é de preenchimento obrigatório.',
             'file_type_id.required' => 'O campo do id de tipo de arquivo é de preenchimento obrigatório.',
@@ -59,19 +62,21 @@ class Item extends Model
             'competence.required' => 'O campo do competencia é de preenchimento obrigatório.'
 
         ];
-
     }
-    
-    public function checklist() {
+
+    public function checklist()
+    {
         return $this->belongsTo(Checklist::class);
     }
 
-    public function file_nomenclatures() {
-        return $this->belongsTo(Item::class,'file_nomenclatures', 'file_naming_id', 'id');
+    public function file_nomenclatures()
+    {
+        return $this->belongsTo(Item::class, 'file_nomenclatures', 'file_naming_id', 'id');
     }
 
-    public function file_types() {
-        return $this->belongsTo(Item::class,'file_types', 'file_type_id', 'id');
+    public function file_types()
+    {
+        return $this->belongsTo(Item::class, 'file_types', 'file_type_id', 'id');
     }
 
     public function fileNaming()
@@ -79,7 +84,7 @@ class Item extends Model
         return $this->belongsTo(FileNaming::class);
     }
 
-    public function fileName()
+    public function file_name()
     {
         return $this->belongsTo(FileName::class);
     }

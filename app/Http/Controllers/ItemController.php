@@ -58,7 +58,7 @@ class ItemController extends Controller
         // return $request->file_naming_id;
 
         $data = [
-            "file_naming_id" => $request->file_naming_id,
+            "file_naming_id" => $request->file_name_id,
             "checklist_id" => $request->checklist_id,
             //"status" => $request->status,
             "file_competence_id" => $request->file_competence_id,
@@ -83,8 +83,8 @@ class ItemController extends Controller
             $errors = [];
             $errors['status'] = 'Error';
             $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-            $notification = new NotificationController($user);
-            $data_notification = new Notification();
+            // $notification = new NotificationController($user);
+            // $data_notification = new Notification();
 
             foreach ($data['file_naming_id'] as $file_naming_id) {
                 $item = Item::where('checklist_id', $data['checklist_id'])->where('file_name_id', $file_naming_id)->first();
@@ -104,13 +104,12 @@ class ItemController extends Controller
                 $this->item->checklist_id = $data['checklist_id'];
                 $this->item->save();
                 
-                // return 'etstexxxx';
                 $checklist = Checklist::where('id', $this->item->checklist_id)->first();
-                $data_notification->desc_id = 1;
-                $data_notification->notification_cat_id = 3;
-                $data_notification->contract_id = $checklist['contract_uuid'];
-                $data_notification->notification_type_id = 1;
-                $notification->registerNotification($data_notification);
+                // $data_notification->desc_id = 1;
+                // $data_notification->notification_cat_id = 3;
+                // $data_notification->contract_id = $checklist['contract_uuid'];
+                // $data_notification->notification_type_id = 1;
+                // $notification->registerNotification($data_notification);
 
                 $sub_months = NULL;
 

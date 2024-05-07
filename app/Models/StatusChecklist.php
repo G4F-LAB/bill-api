@@ -10,8 +10,9 @@ class StatusChecklist extends Model
     use HasFactory;
 
     protected $table = 'status_checklist';
+    protected $primaryKey = 'id';
 
     public function checklist() {
-        return $this->hasMany(Checklist::class);
+        return $this->belongsTo(Checklist::class);
     }
 }

@@ -22,7 +22,7 @@ class FileNameController extends Controller
     public function index(Request $request)
     {
         // Retrieve file naming records
-        $query = FileName::with('type');
+        $query = FileName::with(['type', 'task.integration']);
         
         // Apply filter if provided
         if ($request->has('q')) {
