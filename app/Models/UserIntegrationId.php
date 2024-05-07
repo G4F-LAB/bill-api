@@ -8,7 +8,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 class UserIntegrationId extends Model
 {
-    use LogsActivity;
+    // use LogsActivity;
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
     protected $keyType = 'string';

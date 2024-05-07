@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class SetupNavigation extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $table = 'setup_navigations';
     protected $primaryKey = 'id';

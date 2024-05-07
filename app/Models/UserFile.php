@@ -7,7 +7,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 class UserFile extends Model
 {
-    use LogsActivity;
+    // use LogsActivity;
     protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    use LogsActivity;
+    // use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *

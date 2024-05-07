@@ -8,7 +8,7 @@ use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Str;
 class OperationContractUser extends Model
 {
-    use LogsActivity;
+    // use LogsActivity;
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
     protected $keyType = 'string';

@@ -9,7 +9,7 @@ use Spatie\Activitylog\LogOptions;
 class Permission extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
 
     protected $fillable = [
         'name',

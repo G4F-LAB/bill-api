@@ -12,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 class Operation extends Model
 {
     use HasFactory;
-    use LogsActivity;
+    // use LogsActivity;
     // use SoftDeletes;
 
     protected $connection =  'data_G4F';
