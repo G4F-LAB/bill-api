@@ -23,41 +23,46 @@ class UserController extends Controller
             return response()->json(['error' => 'Falha ao buscar seus dados'], 500);
         }
     }
-
-
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $q = $request->input('q');
         $status = $request->input('status');
         $type = $request->input('type');
-
-        $users = User::with(['operationContractUsers.contractUser'])
-            ->where(function ($query) use ($q, $status, $type) {
-                $query->where(function ($query) use ($q) {
-                    $query->where('name', 'ILIKE', '%' . $q . '%')
-                        ->orWhere('register', 'ILIKE', '%' . $q . '%')
-                        ->orWhere('taxvat', 'ILIKE', '%' . $q . '%');
-                });
-
-                if ($status) {
-                    $query->where('status', $status);
-                }
-
-                if ($type) {
-                    $query->where('type', $type);
-                }
-            })
-            // ->orWhereHas('operationContractUsers.contractUser', function ($query) use ($q) {
-            //     $query->where('position_name', 'ILIKE', '%' . $q . '%')
-            //         ->orWhere('department_name', 'ILIKE', '%' . $q . '%');
-            // })
-            ->orderByRaw("CASE WHEN status = 'Ativo' THEN 0 ELSE 1 END")
-            ->paginate(100);
-
+        $contractId = $request->input('contract');
+    
+        $usersQuery = User::query();
+    
+        $usersQuery->when($contractId, function ($query) use ($contractId) {
+            $query->whereHas('operationContractUsers', function ($subQuery) use ($contractId) {
+                $subQuery->where('contract_id', $contractId)->with('contractUser');
+            });
+        })->with(['operationContractUsers' => function ($query) use ($contractId) {
+            if ($contractId) {
+                $query->where('contract_id', $contractId)->with('contractUser');
+            } else {
+                $query->with('contractUser');
+            }
+        }]);
+    
+        $users = $usersQuery->where(function ($query) use ($q) {
+            $query->where('name', 'ILIKE', '%' . $q . '%')
+                ->orWhere('register', 'ILIKE', '%' . $q . '%')
+                ->orWhere('taxvat', 'ILIKE', '%' . $q . '%');
+        })
+        ->when($status, function ($query) use ($status) {
+            $query->where('status', $status);
+        })
+        ->when($type, function ($query) use ($type) {
+            $query->where('type', $type);
+        })
+        ->orderByRaw("CASE WHEN status = 'Ativo' THEN 0 ELSE 1 END")
+        ->paginate(100);
+    
         return response()->json($users, 200);
     }
-
-
-
+    
+    
+    
 
     // public function create(Request $request)
     // {
