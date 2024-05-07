@@ -23,7 +23,9 @@ class Notification extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Notification')->logOnly([
-        'notifications'
+            "desc_id",
+            "notification_cat_id",
+            "notification_type_id",
         ]);
     }
 }

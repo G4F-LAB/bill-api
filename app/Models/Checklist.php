@@ -10,11 +10,11 @@ use Spatie\Activitylog\LogOptions;
 class Checklist extends Model
 
 {
-    // use LogsActivity;
+    use LogsActivity;
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'contract_id',
+        'contract_uuid',
         'date_checklist',
         'object_contract',
         'shipping_method',
@@ -25,7 +25,6 @@ class Checklist extends Model
 
     public function rules(){
         return [
-        'contract_id' => 'required|int',
         'date_checklist' => 'required|date',
         'object_contract' => 'required|string',
         'shipping_method' => 'required|string',
@@ -33,7 +32,6 @@ class Checklist extends Model
         'accept' => 'boolean',
         'sector' => 'required|string',
         'user_id' => 'string'
-
         ];
     }
 
@@ -41,14 +39,13 @@ class Checklist extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('Checklist')->logOnly([
-        'contract_id',
-        'date_checklist',
-        'object_contract',
-        'shipping_method',
-        'obs',
-        'accept',
-        'sector',
-        'user_id']);
+            'contract_uuid',
+            'date_checklist',
+            'object_contract',
+            'shipping_method',
+            'obs',
+            'accept',
+            'user_id']);
     }
 
     public function feedback() {
@@ -73,7 +70,6 @@ class Checklist extends Model
         return $this->belongsTo(StatusChecklist::class);
     }
 
-   
 
     public function sync_itens($id = NULL) {
         if($id == NULL) $id = $this->id;

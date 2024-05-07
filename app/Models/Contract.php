@@ -5,16 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Support\Str;
 use App\Models\Operation;
 
 class Contract extends Model
 {
     use HasFactory;
-    // use LogsActivity;
+    use LogsActivity;
 
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';

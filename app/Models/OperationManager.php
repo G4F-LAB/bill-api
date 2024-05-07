@@ -27,7 +27,8 @@ class OperationManager extends Model
 
     protected $fillable = [
         'operation_id',
-
+        'executive_id',
+        'manager_id',
     ];
     public function getActivitylogOptions(): LogOptions
     {

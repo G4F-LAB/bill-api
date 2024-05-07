@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-// use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *
@@ -39,19 +40,19 @@ class User extends Authenticatable
         'password',
     ];
 
-
-    // public function getActivitylogOptions(): LogOptions
-    // {
-    //     return LogOptions::defaults()->useLogName('User')->logOnly([
-    //         'name',
-    //         'email',
-    //         'username',
-    //     ]);
-    // }
-
-
-
-
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->useLogName('User')->logOnly([
+            'name',
+            'username',
+            'email',
+            'email_corporate',
+            'taxvat',
+            'phone',
+            'status',
+            'type',
+        ]);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -103,7 +104,7 @@ class User extends Authenticatable
         return $this->hasMany(OperationContractUser::class);
     }
 
-    
+
     protected static function boot()
     {
         parent::boot();

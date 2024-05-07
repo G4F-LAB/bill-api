@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Str;
-
 class OperationContractUser extends Model
 {
+    use LogsActivity;
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
@@ -17,6 +19,15 @@ class OperationContractUser extends Model
         'contract_id',
         'user_id',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->useLogName('OperationContractUser')->logOnly([
+            'operation_id',
+            'contract_id',
+            'user_id',
+        ]);
+    }
 
     // Define relationships
     public function operation()

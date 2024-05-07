@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 class UserIntegrationId extends Model
 {
+    use LogsActivity;
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
@@ -17,6 +20,14 @@ class UserIntegrationId extends Model
         'uuid',
     ];
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->useLogName('UserIntegrationId')->logOnly([
+            'user_id',
+            'integration_id',
+            'uuid',
+        ]);
+    }
     // Define relationships
     public function user()
     {

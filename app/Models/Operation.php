@@ -24,12 +24,12 @@ class Operation extends Model
         'reference',
         'name',
     ];
-    // protected $fillables = [
-    //     'name',
-    //     'manager_id',
-    //     'reference',
-    //     'executive_id'
-    // ];
+    protected $fillables = [
+        'name',
+        'manager_id',
+        'reference',
+        'executive_id'
+    ];
     protected $appends = ['op_initials'];
 
 
