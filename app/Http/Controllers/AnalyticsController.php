@@ -235,7 +235,7 @@ public function getAllChecklist (Request $request){
 
     $id_contract = $request->id;
     // $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
-    $data = Contract::with(['checklists'])->where('id',$id_contract)->first();
+    $data = Contract::with(['checklists', 'checklist'])->where('id',$id_contract)->first();
     return $data;
 }
 
