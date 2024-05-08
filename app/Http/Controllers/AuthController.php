@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-use App\Models\Collaborator;
 use App\Models\User;
 use App\Models\Permission;
 use LdapRecord\Container;
@@ -73,6 +72,11 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
+
+                if($user['employeeid'] === null){
+                    return response()->json(['message' => 'Necessário atualizar as informações cadastrais'], 401);
+                 }
+
                 if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
                 return response()->json(['token' => $token, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
             } else {
@@ -101,7 +105,7 @@ class AuthController extends Controller
 
     public function update_info()
     {
-        $collaborators = Collaborator::all();
+        $collaborators = User::all();
 
         foreach ($collaborators as $collaborator) {
 
