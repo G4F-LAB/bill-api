@@ -51,23 +51,23 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
     Route::put('/update_info', [AuthController::class, 'update_info']);
 
     //Setup
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/setup/navigation', [SetupController::class, 'navigation']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->post('/setup/navigation', [SetupController::class, 'navigation_upsert']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->delete('/setup/navigation/{id}', [SetupController::class, 'navigation_delete']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/setup/permissions', [SetupController::class, 'permissions']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->get('/setup/navigation', [SetupController::class, 'navigation']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->post('/setup/navigation', [SetupController::class, 'navigation_upsert']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->delete('/setup/navigation/{id}', [SetupController::class, 'navigation_delete']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->get('/setup/permissions', [SetupController::class, 'permissions']);
 
 
     //Colaboradores e Permissões
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->get('/colaboradores/manager', [CollaboratorController::class , 'getAllManagers']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->put('/collaborators', [CollaboratorController::class , 'update']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->get('/colaboradores', [CollaboratorController::class , 'getAllDb']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->get('/colaboradores/manager', [CollaboratorController::class , 'getAllManagers']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->put('/collaborators', [CollaboratorController::class , 'update']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->get('/collaborators/permissions', [CollaboratorController::class , 'collaboratorsByPermission']);
     Route::middleware('check.permission: Admin, Executivo, TI')->post('/collaborators/create', [CollaboratorController::class , 'create']);
 
     //Users
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->get('/users', [UserController::class , 'index']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, TI')->put('/users', [UserController::class , 'update']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->get('/users', [UserController::class , 'index']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, TI,Processos')->put('/users', [UserController::class , 'update']);
 
     //Vincular/desvincular um colaborador a uma operação
     Route::middleware('check.permission: Admin, Executivo, Operação')->post('/collaborator/operation', [CollaboratorController::class , 'collaboratorOperation']);
@@ -76,32 +76,32 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
     //Contratos
-    Route::middleware('check.permission: Admin, Executivo, Operação, Analista')->get('/contracts', [ContractController::class, 'index']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, Analista')->put('/contracts', [ContractController::class, 'update']);
-    Route::middleware('check.permission: Admin, Executivo, Operação, Analista')->post('/contracts/update', [ContractController::class, 'update']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, Analista,Processos')->get('/contracts', [ContractController::class, 'index']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, Analista,Processos')->put('/contracts', [ContractController::class, 'update']);
+    Route::middleware('check.permission: Admin, Executivo, Operação, Analista,Processos')->post('/contracts/update', [ContractController::class, 'update']);
     Route::middleware('check.permission: Admin, Executivo, Operação')->post('/contracts/new', [ContractController::class, 'updateListContracts']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->get('/contracts/{id}/checklist', [ContractController::class, 'checklistByContractID']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/default/files', [FileController::class,'uploadDefaultFiles']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/ocurrences', [FileController::class,'searchOcurrence']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/files', [FileController::class,'uploadContractFiles']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->post('/contract/create', [ContractController::class,'createContract']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral,Processos')->get('/contracts/{id}/checklist', [ContractController::class, 'checklistByContractID']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeir,Processos')->post('/default/files', [FileController::class,'uploadDefaultFiles']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Processos')->post('/contract/ocurrences', [FileController::class,'searchOcurrence']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Processos')->post('/contract/files', [FileController::class,'uploadContractFiles']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Processos')->post('/contract/create', [ContractController::class,'createContract']);
 
     //CheckList//
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklists/{id}', [ChecklistController::class,'show']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral')->get('/checklist', [ChecklistController::class , 'getAll']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist',[ChecklistController::class, 'store']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist/{id}', [ChecklistController::class,'update']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->patch('/checklist/{id}', [ChecklistController::class,'update']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista')->get('/checklist/{id}/items/create', [ChecklistController::class,'checklistItensCreate']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/checklist/{id}/{reference}', [ChecklistController::class,'getDataChecklist']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/competence', [ChecklistController::class,'getAllCompetence']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/check/checklist', [ChecklistController::class,'checkChecklistExpired']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->get('/checklists/{id}', [ChecklistController::class,'show']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->get('/checklist/updateContractId', [ChecklistController::class , 'updateContactIds']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,TI,Geral,Processos')->get('/checklist', [ChecklistController::class , 'getAll']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analist,Processos')->post('/checklist',[ChecklistController::class, 'store']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,Processos')->post('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,Processos')->patch('/checklist/{id}', [ChecklistController::class,'update']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,Processos')->post('/checklist/{id}/files', [FileController::class,'uploadChecklistFiles']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Processos')->get('/checklist/{id}/items', [ChecklistController::class,'checklistItens']);
+    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,Processos')->get('/checklist/{id}/items/create', [ChecklistController::class,'checklistItensCreate']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/checklist/{id}/filter', [ContractDateController::class,'getListChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/checklist/{id}/{reference}', [ChecklistController::class,'getDataChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/competence', [ChecklistController::class,'getAllCompetence']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/check/checklist', [ChecklistController::class,'checkChecklistExpired']);
     //automate
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/automate/checklist/items/duplicateall', [ChecklistController::class,'duplicateall']);
 
 
 
@@ -110,9 +110,9 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
 
 //RAFAEL / WESLEY
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/contract/checklist/{id}', [AnalyticsController::class,'getAllChecklist']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/analytics/contract/checklist/teste/{id}', [AnalyticsController::class,'getAllChecklist']);
-    Route::middleware('check.permission:Admin,Executivo,Operação,Analista')->get('/analytics/checklist/completion/{id}', [AnalyticsController::class,'getCompletion']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista,Processos')->get('/contract/checklist/{id}', [AnalyticsController::class,'getAllChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista, Processos')->get('/analytics/contract/checklist/teste/{id}', [AnalyticsController::class,'getAllChecklist']);
+    Route::middleware('check.permission:Admin,Executivo,Operação,Analista, Processos')->get('/analytics/checklist/completion/{id}', [AnalyticsController::class,'getCompletion']);
 //RAFAEL / WESLEY
 
 
@@ -125,9 +125,9 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
       //Analytics
       Route::prefix('/analytics')->group(function () {
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations', [AnalyticsController::class,'operation_data']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/operations/{id}/contracts', [AnalyticsController::class,'contracts']);
-        Route::middleware('check.permission: Admin,Executivo,Operação')->get('/contracts/{id}/collaborators', [AnalyticsController::class,'collaborators']);
+        Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations', [AnalyticsController::class,'operation_data']);
+        Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations/{id}/contracts', [AnalyticsController::class,'contracts']);
+        Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/contracts/{id}/collaborators', [AnalyticsController::class,'collaborators']);
     });
 
 
