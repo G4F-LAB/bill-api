@@ -401,14 +401,14 @@ class ChecklistController extends Controller
                         foreach ($ids_items_duplicate as $value) {
                             // print($value);exit;
                             $data = [
-                                "file_naming_id" => [$value->file_naming_id],
+                                "file_naming_id" => [$value->file_name_id],
                                 "checklist_id" => $id_checklist,
                                 "status" => false,
                                 "file_competence_id" => $value->file_competence_id
                             ];
 
                             $itemController = new ItemController(null);
-
+// return $data;
                             $itemController->addItems($data);
                         }
                     }
