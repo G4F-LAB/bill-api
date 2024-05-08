@@ -352,11 +352,12 @@ class ChecklistController extends Controller
 
     function duplicateall(Request $request)
     {
-
+// return 'false';
         try {
             $date = Carbon::now();
 
-            $ids_contracts = Contract::where('contractual_situation', true)->pluck('id');
+            $ids_contracts = Contract::pluck('id');
+            // $ids_contracts = Contract::where('contractual_situation', true)->pluck('contract_uuid');
             $date_atual = $date->format('Y-m');
             $date_reference = $date->subMonth()->format('Y-m');
 
@@ -365,7 +366,7 @@ class ChecklistController extends Controller
                 $checklist = new Checklist();
                 $id_checklist = null;
 
-                $id_checklist_reference = Checklist::where('contract_id', $id_contract)
+                $id_checklist_reference = Checklist::where('contract_uuid', $id_contract)
                     ->where('date_checklist', 'LIKE', $date_reference . '%')
                     ->first();
 
@@ -374,15 +375,15 @@ class ChecklistController extends Controller
 
                     $ids_items_duplicate = Item::where('checklist_id', $id_checklist_reference->id)
                         ->where('mandatory', true)
-                        ->get(['file_competence_id', 'file_naming_id']);
+                        ->get(['file_competence_id', 'file_name_id']);
 
-                    $checklist_exists_atual = Checklist::where('contract_id', $id_contract)
+                    $checklist_exists_atual = Checklist::where('contract_uuid', $id_contract)
                         ->whereYear('date_checklist', '=', date('Y', strtotime($date_atual . '-01')))
                         ->whereMonth('date_checklist', '=', date('m', strtotime($date_atual . '-01')))
                         ->first();
 
                     if ($checklist_exists_atual === null) {
-                        $checklist->contract_id  = $id_checklist_reference->contract_id;
+                        $checklist->contract_uuid  = $id_checklist_reference->contract_uuid;
                         $checklist->date_checklist  = $date_atual . '-01';
                         $checklist->object_contract = $id_checklist_reference->object_contract;
                         $checklist->shipping_method = $id_checklist_reference->shipping_method;
