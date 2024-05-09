@@ -73,12 +73,21 @@ class AuthController extends Controller
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
 
-                if($user['employeeid'] === null){
+                if ($user['employeeid'] === null) {
                     return response()->json(['message' => 'Necessário atualizar as informações cadastrais'], 401);
-                 }
+                }
 
-                if ($this->checkDatabaseUser()['firstLogin']) return response()->json(['token' => $token, 'first_access' => true, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
-                return response()->json(['token' => $token, 'userData' => $this->checkDatabaseUser()['user']], $httpCode);
+                $checkDatabaseUser = $this->checkDatabaseUser();
+
+                if ($checkDatabaseUser->firstLogin) {
+                    return response()->json(['token' => $token, 'first_access' => true, 'userData' => $checkDatabaseUser->user], $httpCode);
+                }
+
+                if ($checkDatabaseUser->user->status === 'Inativo') {
+                    return response()->json(['error' => 'Falha ao realizar logout'], 422);
+                }
+
+                return response()->json(['token' => $token, 'userData' => $checkDatabaseUser->user], $httpCode);
             } else {
                 if (empty($message)) {
                     $message = 'Usuário ou senha inválidos!';
@@ -91,8 +100,6 @@ class AuthController extends Controller
         }
     }
 
-
-
     public function logout()
     {
         try {
@@ -103,44 +110,41 @@ class AuthController extends Controller
         }
     }
 
-    public function update_info()
-    {
-        $collaborators = User::all();
-
-        foreach ($collaborators as $collaborator) {
-
-            $user = Container::getConnection('default')->query()->where('objectguid', $this->str_to_guid($collaborator->objectguid))->first();
-
-            $collaborator->username = isset($user['samaccountname']) ? $user['samaccountname'][0] : NULL;
-            $collaborator->email = isset($user['mail']) ? $user['mail'][0] : NULL;
-            $collaborator->phone = isset($user['telephonenumber']) ? $user['telephonenumber'][0] : NULL;
-            $collaborator->taxvat = isset($user['employeeid']) ? $user['employeeid'][0] : NULL;
-            $collaborator->office = isset($user['physicaldeliveryofficename']) ? $user['physicaldeliveryofficename'][0] : NULL;
-            $collaborator->role = isset($user['title']) ? $user['title'][0] : NULL;
-            $collaborator->save();
-        }
-
-        return response()->json(['message' => 'Realizado com sucesso!']);
-    }
-
     private function checkDatabaseUser()
     {
         $firstLogin = false;
         $user_auth = Auth::user();
 
-        // $permission = $this->checkPermission($user_auth) ?? $this->permissionID('Geral');
+        // Ensure $user_auth['employeeid'] is set and not empty
+        if (isset($user_auth['employeeid']) && !empty($user_auth['employeeid'])) {
+            // Check if $user_auth['employeeid'] is an array
+            if (is_array($user_auth['employeeid'])) {
+                $taxvat = $user_auth['employeeid'][0];
+            } else {
+                $taxvat = $user_auth['employeeid'];
+            }
 
-        $user = User::with('operationContractUsers')->firstOrNew(['taxvat' => $user_auth['employeeid']]);
-        $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : NULL;
-        $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : NULL;
-        $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : NULL;
-        $user->taxvat = isset($user_auth['employeeid']) ? $user_auth['employeeid'][0] : NULL;
-        $user->save();
+            $user = User::firstOrNew(['taxvat' => $taxvat, 'status' => 'Ativo']);
 
-        $firstLogin = !$user->exists;
+            if (!$user->exists) {
+                // Ensure that name is set as a string
+                $name = is_array($user_auth->name) ? $user_auth->name[0] : strtoupper($user_auth->name);
+                $user->name = strtoupper($name);
+                $user->status = 'Ativo';
+                $user->type = 'Geral';
+            }
 
-        return ['firstLogin' => $firstLogin, 'user' => $user];
-        return response()->json(['message' => 'Realizado com sucesso!']);
+            $user->username = isset($user_auth['samaccountname']) ? $user_auth['samaccountname'][0] : null;
+            $user->email_corporate = isset($user_auth['mail']) ? $user_auth['mail'][0] : null;
+            $user->phone = isset($user_auth['telephonenumber']) ? $user_auth['telephonenumber'][0] : null;
+            $user->save();
+
+            $firstLogin = !$user->exists;
+
+            return (object)['firstLogin' => $firstLogin, 'user' => $user];
+        } else {
+            return (object)['error' => 'Employee ID not found'];
+        }
     }
 
     public function refresh()
