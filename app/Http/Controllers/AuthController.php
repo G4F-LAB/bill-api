@@ -76,16 +76,19 @@ class AuthController extends Controller
                 if ($user['employeeid'] === null) {
                     return response()->json(['message' => 'Necessário atualizar as informações cadastrais'], 401);
                 }
-
+                $db_user = User::where('taxvat', $user['employeeid'])->where('status', 'Ativo')->first();
+     
+                if (!$db_user) {
+                    return response()->json(['error' => 'Falha ao realizar login'], 422);
+                }
+                
                 $checkDatabaseUser = $this->checkDatabaseUser();
 
                 if ($checkDatabaseUser->firstLogin) {
                     return response()->json(['token' => $token, 'first_access' => true, 'userData' => $checkDatabaseUser->user], $httpCode);
                 }
 
-                if ($checkDatabaseUser->user->status === 'Inativo') {
-                    return response()->json(['error' => 'Falha ao realizar logout'], 422);
-                }
+              
 
                 return response()->json(['token' => $token, 'userData' => $checkDatabaseUser->user], $httpCode);
             } else {
@@ -126,7 +129,7 @@ class AuthController extends Controller
 
             $user = User::firstOrNew(['taxvat' => $taxvat, 'status' => 'Ativo']);
 
-            if (!$user->exists) {
+            if (!$user->exists && $user->status != 'Inativo') {
                 // Ensure that name is set as a string
                 $name = is_array($user_auth->name) ? $user_auth->name[0] : strtoupper($user_auth->name);
                 $user->name = strtoupper($name);
