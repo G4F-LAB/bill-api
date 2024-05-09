@@ -79,7 +79,7 @@ class AuthController extends Controller
                 $db_user = User::where('taxvat', $user['employeeid'])->where('status', 'Ativo')->first();
      
                 if (!$db_user) {
-                    return response()->json(['error' => 'Falha ao realizar login'], 422);
+                    return response()->json(['message' => 'Falha ao realizar login'], 422);
                 }
                 
                 $checkDatabaseUser = $this->checkDatabaseUser();
