@@ -129,11 +129,14 @@ class FileController extends Controller
         // Get the uploaded files
         $uploadedFiles = $request->file('files');
 
-       
         // Loop through each uploaded file
-        $response = $this->fileUploadService->uploadByName($checklist, $uploadedFiles);
-    
-    
+       if($request->item_id){
+            $response = $this->fileUploadService->uploadByUserRegister($checklist, $request->item_id, $uploadedFiles);
+        }else {        
+            $response = $this->fileUploadService->uploadByName($checklist, $uploadedFiles);
+        }
+
+
         return response()->json($response, 200);
     }
     
