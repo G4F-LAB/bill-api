@@ -159,7 +159,7 @@ class FileUploadService
 
                     // Update the database
                     $newFile = File::create([
-                        'path' => $storagePath . '/' . $newFileName
+                        'path' => $storagePath . '/' . $newFileName. '.' . $file->extension()
                     ]);
 
                     // Associate the file with the checklist item
