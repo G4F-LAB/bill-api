@@ -34,7 +34,7 @@ class CheckPermission
         //     $validPermissions = Permission::whereNotIn('name', $permissions)->pluck('name')->toArray();
         // }
 
-        $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+        $user = User::where('taxvat', Auth::user()['employeeid'])->where('status', 'Ativo')->first();
 
         CauserResolver::setCauser($user);
 

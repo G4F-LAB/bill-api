@@ -35,18 +35,53 @@ class ChecklistController extends Controller
     }
 
 
+
     public function show($id)
     {
         // Retrieve the checklist along with its items
-        $checklist = Checklist::with(['contract', 'itens.file_name.task.integration', 'itens.files'])->find($id);
-
+        $checklist = Checklist::with(['status', 'contract', 'itens.file_name.task.integration', 'itens.file_name.type', 'itens.files'])->find($id);
+    
         if (!$checklist) {
             return response()->json(['error' => 'Checklist not found'], 404);
         }
 
-        return response()->json($checklist, 200);
-    }
+        // Order the items by file_name.name
+        $orderedItems = $checklist->itens->sortBy(function ($item) {
+            return $item->file_name->name;
+        })->values()->all();
 
+    
+        // Group the items by file_name.type and count items.files on each group
+        $progress = collect($checklist->itens)->map(function ($item) {
+            $type = optional($item->file_name->type)->files_category; // Use optional() to prevent errors if type is null
+            $count = $item->files->count(); // Count files for each item
+            return [
+                'type' => $type,
+                'count' => $count
+            ];
+        })->groupBy('type')->map(function ($group) {
+            return [
+                'types' => $group->first()['type'],
+                'count' => $group->sum('count')
+            ];
+        })->values()->toArray(); // Reset keys to numeric and convert to array
+    
+        $data = [
+            "id" => $checklist->id,
+            "name" => $checklist->name,
+            "completion" => $checklist->completion,
+            "object_contract" => $checklist->object_contract,
+            "obs" => $checklist->obs,
+            "date_checklist" => $checklist->date_checklist,
+            'status' => $checklist->status->name,
+            "contract" => $checklist->contract,
+            "itens" => $orderedItems,
+            "progress" => $progress
+        ];
+    
+        return response()->json($data, 200);
+    }
+    
 
 
     public function updateContactIds()

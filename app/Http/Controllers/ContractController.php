@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Database\Eloquent\Builder;
 
-use App\Models\Collaborator;
+use App\Models\User;
 use App\Models\Permission;
 use App\Models\Contract;
 use App\Models\Executive;
@@ -15,8 +15,8 @@ use Carbon\Carbon;
 
 class ContractController extends Controller
 {
-    public function __construct(Collaborator $collaborator) {
-        // $this->user = $collaborator->getAuthUser();
+    public function __construct(User $user) {
+        $this->user = $user->getAuthUser();
         // $this->current_month =  now()->format('m');
 
         // if(now()->format('d') <= 17){
@@ -28,12 +28,12 @@ class ContractController extends Controller
 
     public function index(Request $request)
     {
+        $current_user = $this->user; 
         // Parameters
         $status = $request->input('status');
         $searchTerm = $request->input('q');
 
         $query = Contract::with(['operation'])
-            // ->whereNotNull('operation_id')
             ->whereHas('operation', function ($query) {
                 $query->whereNotNull('reference');
             })
@@ -43,18 +43,17 @@ class ContractController extends Controller
                     $query->whereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]);
                 })
                 ->orWhereRaw('LOWER(name) LIKE ?', ["%$searchTermLower%"]);
-            })
-            // ->whereHas('operation', function ($query) use ($user) {
-            //     // Filter contracts based on the user's operations
-            //     $query->whereIn('id', $user->operations()->pluck('id'));
-            // })
-          ;
+            });
 
-            if ($status !== null) {
-                $query->where('status', $status);
-            }
+        if (!empty($current_user->operationContractUsers->pluck('operation_id')->toArray())) {
+            $query->whereIn('operation_id', $current_user->operationContractUsers->pluck('operation_id'));
+        }
 
-            $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->get();
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+
+        $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->get();
 
         return response()->json($contracts, 200);
     }

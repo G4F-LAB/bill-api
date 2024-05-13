@@ -39,7 +39,7 @@ class File extends Model
 
     public function getFullPathAttribute()
     {
-       return 'https://g4fcombr.sharepoint.com/sites/NuvemBill/Documentos%20Compartilhados/public/'. $this->path;
+       return 'https://g4fcombr.sharepoint.com/sites/NuvemBill/Documentos%20Compartilhados/'. $this->path;
     }
     
     

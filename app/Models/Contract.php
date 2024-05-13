@@ -61,8 +61,13 @@ class Contract extends Model
 
     public function checklist()
     {
-        return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->latest();
+        return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->with(['status', 'itens.file_name.task.integration', 'itens.file_name.type', 'itens.files'])
+        ->latest();
     }
+
+
+
+    
     public function checklists(){
 
         return $this->hasMany(Checklist::class, 'contract_uuid', 'id')->with('status');
