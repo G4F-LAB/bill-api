@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Support\Str;
 use App\Models\Operation;
 
 class Contract extends Model
 {
     use HasFactory;
-    use LogsActivity;
+
 
     protected $connection =  'data_G4F';
     protected $primaryKey = 'id';
@@ -36,21 +34,6 @@ class Contract extends Model
     ];
 
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->useLogName('Contract')->logOnly([
-            'operation_id',
-            'name',
-            'alias',
-            'uuid',
-            'status',
-            'start_date',
-            'end_date',
-            'renew_date',
-            'renew_limit_date',
-        ]);
-    }
-
     // public function collaborators() {
     //     return $this->belongsToMany(Collaborator::class,'operations','manager_id', 'manager_id')->withTimestamps();
     // }
@@ -63,11 +46,9 @@ class Contract extends Model
     {
         return $this->hasOne(Checklist::class, 'contract_uuid', 'id')->with(['status', 'itens.file_name.task.integration', 'itens.file_name.type', 'itens.files'])
         ->latest();
+        
     }
 
-
-
-    
     public function checklists(){
 
         return $this->hasMany(Checklist::class, 'contract_uuid', 'id')->with('status');

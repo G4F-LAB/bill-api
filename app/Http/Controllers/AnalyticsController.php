@@ -230,13 +230,40 @@ private function getIdAllUsersByOperations ($user_id) {
 
 
 
-
-public function getAllChecklist (Request $request){
-
+public function getAllChecklist(Request $request)
+{
     $id_contract = $request->id;
-    // $id_contract = 'b80d5d61-430f-48b1-ad54-a319f49a5861';
-    $data = Contract::with(['checklists', 'checklist'])->where('id',$id_contract)->first();
+
+    // Retrieve contract with its checklist
+    $data = Contract::with(['checklist', 'checklists'])->where('id', $id_contract)->first();
+
+    // Calculate progress for the checklist
+    if ($data && $data->checklist) {
+        $progress = $this->calculateChecklistProgress($data->checklist);
+        $data->checklist->progress = $progress;
+    }
+
     return $data;
+}
+
+private function calculateChecklistProgress($checklist)
+{
+    // Calculate progress
+    $progress = $checklist->itens->map(function ($item) {
+        $type = optional($item->file_name->type)->files_category;
+        $count = $item->files->count();
+        return [
+            'type' => $type ?: 'Unknown',
+            'count' => $count,
+        ];
+    })->groupBy('type')->map(function ($group) {
+        return [
+            'type' => $group->first()['type'],
+            'count' => $group->sum('count'),
+        ];
+    })->values()->toArray();
+
+    return $progress;
 }
 
 
