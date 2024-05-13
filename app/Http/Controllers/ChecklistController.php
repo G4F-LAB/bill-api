@@ -140,10 +140,9 @@ class ChecklistController extends Controller
 
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_uuid);
-                return 'teste duoplicate';
-                if (isset($duplicated['error'])) {
-                    return response()->json(['message' => $duplicated], 200);
-                }
+                // if (isset($duplicated['error'])) {
+                    // return response()->json($duplicated, 200);
+                // }
             }
 
             // Send Notifications
@@ -171,7 +170,7 @@ class ChecklistController extends Controller
             'date_checklist' => $duplicate . '-01'
         ])->value('id');
 
-        $data['file_naming_id'] = Item::where('checklist_id', $checklist_id_copy)->pluck('file_naming_id');
+        $data['file_naming_id'] = Item::where('checklist_id', $checklist_id_copy)->pluck('file_name_id');
 
         $itemController = new ItemController(null);
 
@@ -335,12 +334,15 @@ class ChecklistController extends Controller
 
     function getDataChecklist(Request $request)
     {
-        try {
 
+        try {
+            
             $data = Checklist::where('contract_uuid', $request->id)
-                ->select('object_contract', 'obs', 'shipping_method')
-                ->where('date_checklist', $request->reference . '-01')
-                ->first();
+            // ->select('object_contract', 'obs', 'shipping_method')
+            ->where('date_checklist', $request->reference . '-01')
+            ->first();
+
+            return $data;
 
             return response()->json($data, 200);
         } catch (\Exception $e) {
@@ -396,6 +398,7 @@ class ChecklistController extends Controller
                     } else {
                         $id_checklist = $checklist_exists_atual->id;
                     }
+                    
 
                     if (!empty($ids_items_duplicate)) {
                         foreach ($ids_items_duplicate as $value) {
