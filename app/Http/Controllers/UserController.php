@@ -25,6 +25,7 @@ class UserController extends Controller
     }
     public function index(Request $request)
     {
+        $per_page = $request->input('per_page') ? : 100;
         $q = $request->input('q');
         $status = $request->input('status');
         $type = $request->input('type');
@@ -56,7 +57,7 @@ class UserController extends Controller
             $query->where('type', $type);
         })
         ->orderByRaw("CASE WHEN status = 'Ativo' THEN 0 ELSE 1 END")
-        ->paginate(100);
+        ->paginate($per_page);
     
         return response()->json($users, 200);
     }
