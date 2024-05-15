@@ -26,7 +26,7 @@ class User extends Authenticatable
     protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $appends = ['name_initials'];
+    protected $appends = ['name_initials', 'position'];
 
     protected $fillable = [
         'name',
@@ -87,6 +87,14 @@ class User extends Authenticatable
         );
     }
 
+    public function position(): Attribute
+    {
+        $firstContractUser = $this->operationContractUsers()->first();
+
+        return new Attribute(
+            get: fn () =>  $firstContractUser ? $firstContractUser->contractUser->position_name : null,
+        );
+}
 
     // Define relationships
     public function files()

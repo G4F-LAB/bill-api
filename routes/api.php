@@ -69,8 +69,9 @@ Route::middleware(['sec.check', 'handle.cors', 'sys.auth'])->group(function () {
 
     //Users
     Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
+    Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
     Route::middleware($all_permissions)->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
-    Route::middleware($all_permissions)->put('/users', [UserController::class , 'update']);
+    Route::middleware($all_permissions)->get('/users/birthdays', [UserController::class , 'birthdays']);
 
     //Vincular/desvincular um colaborador a uma operação
     Route::middleware('check.permission: Admin, Executivo, Operação')->post('/collaborator/operation', [CollaboratorController::class , 'collaboratorOperation']);
