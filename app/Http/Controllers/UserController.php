@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -142,27 +142,30 @@ class UserController extends Controller
     }
 
 
-    
     public function getUsersGroupedByType() {
-        $usersGrouped = User::where('status', 'Ativo')
+        $usersGrouped = User::select('type', DB::raw('COUNT(*) as total'))
+                            ->where('status', 'Ativo')
+                            ->groupBy('type')
                             ->orderBy('type')
-                            ->get()
-                            ->groupBy('type');
+                            ->get();
     
         $data = [];
     
-        foreach ($usersGrouped as $type => $users) {
+        foreach ($usersGrouped as $group) {
+            $users = User::where('type', $group->type)
+                         ->where('status', 'Ativo')
+                         ->get(['name']); // Fetch only the 'name' column
+    
             $data[] = [
-                'name' => $type,
-                'total' => $users->count(),
+                'name' => $group->type,
+                'total' => $group->total,
                 'users' => $users,
             ];
         }
     
         return $data;
     }
-
-
+    
 
 
     public function birthdays(Request $request) {
