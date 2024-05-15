@@ -169,48 +169,53 @@ class UserController extends Controller
 
 
     public function birthdays(Request $request) {
-        // Get day and month from request, or use current day and month if not provided
-        $day = $request->input('day', date('d'));
-        $month = $request->input('month', date('m'));
-    
-        // Make API request using Laravel HTTP client
-        $response = Http::withHeaders([
-            'x-uuid' => '07CE8192-BB8E-425D-9ECF-0A12636CCC36',
-            'x-api-key' => 'xirZhoimtBkUa8Xm1b0TxH3iNE7D7PekJDX49KeTyf',
-            'Content-Type' => 'application/json'
-        ])->post('https://senior.g4fcorporate.com/employee/birthdays', [
-            'day' => $day,
-            'month' => $month
-        ]);
-    
-        // Check if request was successful
-        if ($response->failed()) {
-            return response()->json(['error' => 'Failed to retrieve birthdays'], 500);
+        try {
+            // Get day and month from request, or use current day and month if not provided
+            $day = $request->input('day', date('d'));
+            $month = $request->input('month', date('m'));
+        
+            // Make API request using Laravel HTTP client
+            $response = Http::withHeaders([
+                'x-uuid' => '07CE8192-BB8E-425D-9ECF-0A12636CCC36',
+                'x-api-key' => 'xirZhoimtBkUa8Xm1b0TxH3iNE7D7PekJDX49KeTyf',
+                'Content-Type' => 'application/json'
+            ])->post('https://senior.g4fcorporate.com/employee/birthdays', [
+                'day' => $day,
+                'month' => $month
+            ]);
+        
+            // Check if request was successful
+            if ($response->failed()) {
+                return response()->json(['error' => 'Failed to retrieve birthdays'], 500);
+            }
+        
+            // Decode the response
+            $data = $response->json();
+        
+            // Check if decoding was successful
+            if (!$data) {
+                return response()->json(['error' => 'Failed to decode response'], 500);
+            }
+        
+            // Modify the data keys
+            foreach ($data['data'] as &$item) {
+                $item['name'] = $item['nomfun'];
+                unset($item['nomfun']);
+        
+                $item['taxvat'] = $item['numcpf'];
+                unset($item['numcpf']);
+        
+                $item['contract'] = $item['nomccu'];
+                unset($item['nomccu']);
+            }
+        
+            // Return the response data as JSON
+            return response()->json(['message' => 'Processado com sucesso', 'data' => $data['data']], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-    
-        // Decode the response
-        $data = $response->json();
-    
-        // Check if decoding was successful
-        if (!$data) {
-            return response()->json(['error' => 'Failed to decode response'], 500);
-        }
-    
-        // Modify the data keys
-        foreach ($data['data'] as &$item) {
-            $item['name'] = $item['nomfun'];
-            unset($item['nomfun']);
-    
-            $item['taxvat'] = $item['numcpf'];
-            unset($item['numcpf']);
-    
-            $item['contract'] = $item['nomccu'];
-            unset($item['nomccu']);
-        }
-    
-        // Return the response data as JSON
-        return response()->json(['message' => 'Processado com sucesso', 'data' => $data['data']], 200);
     }
+    
     
  
 
