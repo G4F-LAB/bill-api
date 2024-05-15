@@ -118,7 +118,7 @@ class SetupController extends Controller
     {
         try {
 
-            $permissions = ['Admin', 'Diretoria', 'Superintendência', 'Executivo', 'Gerente', 'Operação', 'RH', 'Financeiro', 'Processos', 'TI', 'Colaborador', 'Geral'];
+            $permissions = ['Admin', 'Diretoria', 'Superintendência', 'Executivo', 'Gerente', 'Operação', 'RH', 'Financeiro', 'Processos', 'TI', 'Colaborador','Prestador', 'Geral'];
             if (!$permissions)
                 return response()->json(['error' => 'Menu não encontrado'], 404);
 

@@ -70,9 +70,12 @@ class ChecklistController extends Controller
             "id" => $checklist->id,
             "name" => $checklist->name,
             "completion" => $checklist->completion,
+            'user_id' => $checklist->user_id,
+            'accept' => $checklist->accept,
             "object_contract" => $checklist->object_contract,
             "obs" => $checklist->obs,
             "date_checklist" => $checklist->date_checklist,
+            'status_id' => $checklist->status_id,
             'status' => $checklist->status->name,
             "contract" => $checklist->contract,
             "itens" => $orderedItems,
@@ -140,7 +143,7 @@ class ChecklistController extends Controller
     {
         // return $request->contract_uuid;
         try {
-            $user = User::where('taxvat', Auth::user()['employeeid'])->first();
+            $user = $this->user;
             $notification = new NotificationController($user);
             $data_notification = new ModelsNotification();
             $checklistExists = Checklist::where('contract_uuid', $request->contract_uuid)
@@ -247,18 +250,18 @@ class ChecklistController extends Controller
 
             $this->checklist->update();
 
-            //Notification
-            if ($this->checklist->status_id = 5 && $this->checklist->getChanges()) {
-                $data_notification->desc_id = 4;
-                $data_notification->notification_cat_id = 2;
-                $data_notification->contract_id = $this->checklist->contract_uuid;
-                $data_notification->notification_type_id = 1;
-                $notification->registerNotification($data_notification);
-            }
+            // //Notification
+            // if ($this->checklist->status_id = 5 && $this->checklist->getChanges()) {
+            //     $data_notification->desc_id = 4;
+            //     $data_notification->notification_cat_id = 2;
+            //     $data_notification->contract_id = $this->checklist->contract_uuid;
+            //     $data_notification->notification_type_id = 1;
+            //     $notification->registerNotification($data_notification);
+            // }
 
-            if ($this->checklist->getChanges()) {
-                $this->checkChecklistNotification($this->checklist->getAttributes()["id"], $this->checklist->status_id);
-            }
+            // if ($this->checklist->getChanges()) {
+            //     $this->checkChecklistNotification($this->checklist->getAttributes()["id"], $this->checklist->status_id);
+            // }
             return response()->json(['message' => 'Checklist atualizado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json(['erro' => $e->getMessage()], 500);

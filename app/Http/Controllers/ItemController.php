@@ -279,7 +279,7 @@ class ItemController extends Controller
 
             if ($zip->open(storage_path('app/itens.zip'), \ZipArchive::CREATE) === TRUE) {
                 foreach ($files as $file) {
-                    if (Storage::disk('s3')->exists($file['path'])) {
+                    if (Storage::disk('sharepoint')->exists($file['path'])) {
                         $tempImage = tempnam(sys_get_temp_dir(), basename($file['path']));
                         copy(env('AWS_URL') . $file['path'], $tempImage);
                         $zip->addFile($tempImage, $file['group'] . '/' . basename($file['path']));
