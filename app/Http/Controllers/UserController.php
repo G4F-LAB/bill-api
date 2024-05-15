@@ -7,6 +7,7 @@ use LdapRecord\Container;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 
 class UserController extends Controller
@@ -162,54 +163,33 @@ class UserController extends Controller
     }
 
 
+
+
     public function birthdays(Request $request) {
         // Get day and month from request, or use current day and month if not provided
         $day = $request->input('day', date('d'));
         $month = $request->input('month', date('m'));
     
-        // Set parameters for the request
-        $parameters = [
+        // Make API request using Laravel HTTP client
+        $response = Http::withHeaders([
+            'x-uuid' => '07CE8192-BB8E-425D-9ECF-0A12636CCC36',
+            'x-api-key' => 'xirZhoimtBkUa8Xm1b0TxH3iNE7D7PekJDX49KeTyf',
+            'Content-Type' => 'application/json'
+        ])->post('https://senior.g4fcorporate.com/employee/birthdays', [
             'day' => $day,
             'month' => $month
-        ];
-    
-        // Initialize cURL
-        $curl = curl_init();
-    
-        // Set cURL options
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://senior.g4fcorporate.com/employee/birthdays',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_POSTFIELDS => json_encode($parameters),
-            CURLOPT_HTTPHEADER => array(
-                'x-uuid: 07CE8192-BB8E-425D-9ECF-0A12636CCC36',
-                'x-api-key: xirZhoimtBkUa8Xm1b0TxH3iNE7D7PekJDX49KeTyf',
-                'Content-Type: application/json'
-            ),
-        ));
-    
-        // Execute cURL request
-        $response = curl_exec($curl);
-    
-        // Close cURL session
-        curl_close($curl);
+        ]);
     
         // Check if request was successful
-        if ($response === false) {
+        if ($response->failed()) {
             return response()->json(['error' => 'Failed to retrieve birthdays'], 500);
         }
     
         // Decode the response
-        $data = json_decode($response, true);
+        $data = $response->json();
     
         // Check if decoding was successful
-        if ($data === null) {
+        if (!$data) {
             return response()->json(['error' => 'Failed to decode response'], 500);
         }
     
@@ -228,6 +208,7 @@ class UserController extends Controller
         // Return the response data as JSON
         return response()->json(['message' => 'Processado com sucesso', 'data' => $data['data']], 200);
     }
+    
  
 
 }
