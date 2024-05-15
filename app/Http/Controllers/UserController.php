@@ -192,9 +192,25 @@ class UserController extends Controller
             // Decode the response
             $data = $response->json();
         
+            // Check if decoding was successful
+            if (!$data) {
+                return response()->json(['error' => 'Failed to decode response'], 500);
+            }
+        
+            // Modify the data keys
+            foreach ($data['data'] as &$item) {
+                $item['name'] = $item['nomfun'];
+                unset($item['nomfun']);
+        
+                $item['taxvat'] = $item['numcpf'];
+                unset($item['numcpf']);
+        
+                $item['contract'] = $item['nomccu'];
+                unset($item['nomccu']);
+            }
         
             // Return the response data as JSON
-            return response()->json(['message' => 'Processado com sucesso', 'data' => $data], 200);
+            return response()->json(['message' => 'Processado com sucesso', 'data' => $data['data']], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
