@@ -71,7 +71,7 @@ Route::middleware(['sec.check', 'sys.auth'])->group(function () {
     Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
     Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
     Route::middleware($all_permissions)->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
-    Route::middleware($all_permissions)->get('/users/birthdays', [UserController::class , 'birthdays']);
+    // Route::middleware($all_permissions)->get('/users/birthdays', [UserController::class , 'birthdays']);
 
     //Vincular/desvincular um colaborador a uma operação
     Route::middleware('check.permission: Admin, Executivo, Operação')->post('/collaborator/operation', [CollaboratorController::class , 'collaboratorOperation']);
@@ -224,7 +224,7 @@ Route::middleware(['sec.check', 'sys.auth'])->group(function () {
     Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
     
 });
-
+Route::get('/users/birthdays', [UserController::class , 'birthdays']);
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);
 Route::post('/teste', [TesteController::class, 'novoteste']);
 Route::get('/teste2', [TesteController::class, 'novoteste2']);
