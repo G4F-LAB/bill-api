@@ -60,9 +60,9 @@ class TimelineController extends Controller
                 $response[] = [
                     'type' => $log->event,
                     'name' => $log->log_name,
-                    'causer' =>  $log->causer_id ? $this->fetchRelatedModel($log->causer_id): null,
+                    'causer' =>  $log->causer_id ? $this->fetchRelatedModel($log->causer_id) : null,
                     'causer_type' => $log->causer_type,
-                    'created_at' =>  Carbon::parse($log->created_at)->format('d/m/Y H:i'),
+                    'created' =>  Carbon::parse($log->created_at)->format('d/m/Y H:i'),
                     'changes' => $changesData
                 ];
             }

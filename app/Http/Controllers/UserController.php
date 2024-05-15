@@ -143,10 +143,13 @@ class UserController extends Controller
 
     
     public function getUsersGroupedByType() {
-        $usersGrouped = User::orderBy('type')->get()->groupBy('type');
-
+        $usersGrouped = User::where('status', 'Ativo')
+                            ->orderBy('type')
+                            ->get()
+                            ->groupBy('type');
+    
         $data = [];
-
+    
         foreach ($usersGrouped as $type => $users) {
             $data[] = [
                 'name' => $type,
@@ -154,10 +157,9 @@ class UserController extends Controller
                 'users' => $users,
             ];
         }
-
+    
         return $data;
     }
-
 
  
 
