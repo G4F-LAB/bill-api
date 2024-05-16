@@ -69,7 +69,7 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
 
     //Users
     Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
-    Route::middleware($all_permissions)->get('/users', [UserController::class , 'index']);
+    Route::middleware($all_permissions)->put('/users', [UserController::class , 'update']);
     Route::middleware($all_permissions)->get('/users/types', [UserController::class , 'getUsersGroupedByType']);
     // Route::middleware($all_permissions)->get('/users/birthdays', [UserController::class , 'birthdays']);
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use App\Events\FilesItensSaved;
+use App\Events\FilesItensEvent;
 
 class FilesItens extends Model
 {
@@ -15,8 +15,8 @@ class FilesItens extends Model
     protected $table = 'files_itens';
 
     protected $dispatchesEvents = [
-        'saved' => \App\Events\FilesItensSaved::class,
-        'deleted' => \App\Events\FilesItensSaved::class,
+        'saved' => \App\Events\FilesItensEvent::class,
+        'deleted' => \App\Events\FilesItensEvent::class,
         // 'deleted' => 'App\Events\FilesItensDeleted',
     ];
 
