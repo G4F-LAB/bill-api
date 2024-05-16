@@ -73,7 +73,8 @@ class TimelineController extends Controller
                     'name' => $log->log_name,
                     'causer' =>  $log->causer_id ? $this->fetchRelatedModel($log->causer_id) : null,
                     'causer_type' => $log->causer_type,
-                    'created' =>  Carbon::parse($log->created_at)->format('d/m/Y H:i'),
+                    'created' =>  Carbon::parse($log->created_at)->locale('pt_BR')->isoFormat('LL'),
+                    'created_time' =>  Carbon::parse($log->created_at)->locale('pt_BR')->isoFormat('HH:mm'),
                     'changes' => $changesData
                 ];
             }
@@ -91,26 +92,40 @@ class TimelineController extends Controller
     public function checklist(Request $request, $id)
     {
         try {
-            // Fetch timeline data
-            // $timeline = Activity::inLog('checklist', 'file_item')->where('subject_id', $id)->get();
-
             $checklist = Checklist::with('itens.file_itens')->find($id);
             
             $fileItensIds = [$id];
-
+    
             foreach ($checklist->itens as $item) {
                 $fileItensIds = array_merge($fileItensIds, $item->file_itens->pluck('id')->toArray());
             }
-
-
-            $response =  Activity::inLog('checklist', 'file_item')->whereIn('subject_id', $fileItensIds)->get();
     
+            $response = Activity::inLog('checklist', 'file_item')
+                ->whereIn('subject_id', $fileItensIds)
+                ->get()
+                ->reject(function ($activity) {
+                    return empty($activity->properties['attributes']) && empty($activity->properties['old']);
+                });
+    
+            $response = $response->map(function ($activity) {
+                // Get user's name if causer_id is not null
+                $activity->causer = optional(User::find($activity->causer_id))->name;
+                $activity->created =  Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('LL');
+                $activity->created_time =  Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('HH:mm');
+        
+                // Unset "causer_id"
+                unset($activity->causer_id);
+        
+                return $activity;
+            });
+        
             return response()->json($response, 200);
-    
+        
         } catch (\Exception $e) {
-            return response()->json(['error' =>$e], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
 
     
     private function fetchRelatedModel($userDetails)

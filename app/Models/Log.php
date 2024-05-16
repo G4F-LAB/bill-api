@@ -9,4 +9,11 @@ class Log extends Model
 
 
     protected $table = 'activity_log';
+
+    protected $appends = ['name'];
+    public function getNameAttribute()
+    {
+
+        return 2;
+    }
 }
