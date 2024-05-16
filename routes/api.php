@@ -202,7 +202,8 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
     Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->post('/log/collaborator', [LogController::class, 'getLogCollaborator']);
 
     //Timelines
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->get('/timelines/contract/{id}', [TimelineController::class,'contract']);
+    Route::middleware($all_permissions)->get('/timelines/contract/{id}', [TimelineController::class,'contract']);
+    Route::middleware($all_permissions)->get('/timelines/checklist/{id}', [TimelineController::class,'checklist']);
 
 
     //Automação

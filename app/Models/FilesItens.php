@@ -36,7 +36,6 @@ class FilesItens extends Model
             'created_at',
             'updated_at',
             'file',
-            'item',
             'deleted_at'])->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
     }
 

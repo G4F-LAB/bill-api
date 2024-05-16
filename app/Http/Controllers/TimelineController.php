@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LogData;
+use App\Models\Log;
+use Spatie\Activitylog\Models\Activity;
 use App\Models\Contract;
 use App\Models\User;
+use App\Models\Checklist;
 use App\Models\Operation;
 use Carbon\Carbon;
 
@@ -25,13 +28,12 @@ class TimelineController extends Controller
     
                 $changesData = [];
     
-                // Check for attributes and old data
-                if (isset($properties['attributes']) && isset($properties['old'])) {
+                // Check for attributes
+                if (isset($properties['attributes'])) {
                     // Keep original fields intact
                     $changesData['attributes'] = $properties['attributes'];
-                    $changesData['old'] = $this->fetchRelatedModel($properties['old']);
     
-                    // Check inside 'attributes' and 'old' for specific fields
+                    // Check inside 'attributes' for specific fields
                     foreach (['operation.operationContractUsers'] as $field) {
                         if (isset($properties['attributes'][$field])) {
                             $relatedModels = [];
@@ -43,7 +45,16 @@ class TimelineController extends Controller
                             }
                             $changesData['attributes'][$field] = $relatedModels;
                         }
+                    }
+                }
     
+                // Check for old data
+                if (isset($properties['old'])) {
+                    // Keep original fields intact
+                    $changesData['old'] = $this->fetchRelatedModel($properties['old']);
+    
+                    // Check inside 'old' for specific fields
+                    foreach (['operation.operationContractUsers'] as $field) {
                         if (isset($properties['old'][$field])) {
                             $relatedModels = [];
                             foreach ($properties['old'][$field] as $userDetails) {
@@ -74,6 +85,33 @@ class TimelineController extends Controller
             return response()->json(['error' => 'Não foi possível acessar os Logs'], 500);
         }
     }
+    
+
+
+    public function checklist(Request $request, $id)
+    {
+        try {
+            // Fetch timeline data
+            // $timeline = Activity::inLog('checklist', 'file_item')->where('subject_id', $id)->get();
+
+            $checklist = Checklist::with('itens.file_itens')->find($id);
+            
+            $fileItensIds = [$id];
+
+            foreach ($checklist->itens as $item) {
+                $fileItensIds = array_merge($fileItensIds, $item->file_itens->pluck('id')->toArray());
+            }
+
+
+            $response =  Activity::inLog('checklist', 'file_item')->whereIn('subject_id', $fileItensIds)->get();
+    
+            return response()->json($response, 200);
+    
+        } catch (\Exception $e) {
+            return response()->json(['error' =>$e], 500);
+        }
+    }
+
     
     private function fetchRelatedModel($userDetails)
     {

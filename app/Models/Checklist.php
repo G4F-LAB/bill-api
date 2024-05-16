@@ -22,8 +22,10 @@ class Checklist extends Model
         'shipping_method',
         'obs',
         'accept',
+        'status_id',
         'signed_by',
-        'user_id'
+        'user_id',
+        'completion'
     ];
 
     public function rules(){
@@ -46,6 +48,7 @@ class Checklist extends Model
             'date_checklist',
             'object_contract',
             'shipping_method',
+            'completion',
             'obs',
             'accept',
             'signed_by',
