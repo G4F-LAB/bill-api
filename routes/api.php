@@ -221,7 +221,7 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
 
     //Arquivos
     Route::post('/files/importRH', [FileController::class, 'importRH']);
-    Route::post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
+    Route::middleware($all_permissions)->post('/files/checklist/', [FileController::class, 'addChecklistFiles']);
     
 });
 Route::get('/users/birthdays', [UserController::class , 'birthdays']);

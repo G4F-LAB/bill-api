@@ -45,7 +45,6 @@ class Item extends Model
             'contract',
             'file_name',
             'files',
-            'file_types',
             'file_competence',
             'file_itens'
         ])->useLogName('Item')->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
