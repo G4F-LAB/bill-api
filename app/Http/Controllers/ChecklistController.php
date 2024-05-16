@@ -69,9 +69,9 @@ class ChecklistController extends Controller
         $data = [
             "id" => $checklist->id,
             "name" => $checklist->name,
-            "completion" => $checklist->completion,
-            'user_id' => $checklist->user_id,
-            'accept' => $checklist->accept,
+            "completion" => floatval($checklist->completion),
+            'accepted_by' => $checklist->accepted_by,
+            'signed_by' => $checklist->signed_by,
             "object_contract" => $checklist->object_contract,
             "obs" => $checklist->obs,
             "date_checklist" => $checklist->date_checklist,
@@ -158,23 +158,23 @@ class ChecklistController extends Controller
 
             $this->checklist->contract_uuid  = $request->contract_uuid;
             $this->checklist->date_checklist  = $request->date_checklist;
-            // $this->checklist->month_reference = date('m', strtotime($request->date_checklist));
+
             $this->checklist->object_contract = $request->object_contract;
             $this->checklist->shipping_method = $request->shipping_method;
             $this->checklist->obs = $request->obs;
-            $this->checklist->accept = $request->accept;
-            $this->checklist->user_id = $request->signed_by;
+            $this->checklist->accepted_by = $request->accepted_by;
+            $this->checklist->signed_by = $request->signed_by;
 
 
             $this->checklist->save();
 
 
             //Notification
-            $data_notification->desc_id = 2;
-            $data_notification->notification_cat_id = 2;
-            $data_notification->contract_uuid = $this->checklist->contract_uuid;
-            $data_notification->notification_type_id = 1;
-            $notification->registerNotification($data_notification);
+            // $data_notification->desc_id = 2;
+            // $data_notification->notification_cat_id = 2;
+            // $data_notification->contract_uuid = $this->checklist->contract_uuid;
+            // $data_notification->notification_type_id = 1;
+            // $notification->registerNotification($data_notification);
 
             if ($request->duplicate != null) {
                 $duplicated = $this->duplicateItems($request->duplicate, $this->checklist->id, $request->contract_uuid);
@@ -220,8 +220,8 @@ class ChecklistController extends Controller
     {
         try {
             $user = User::where('taxvat', Auth::user()['employeeid'])->first();
-            $notification = new NotificationController($user);
-            $data_notification = new ModelsNotification();
+            // $notification = new NotificationController($user);
+            // $data_notification = new ModelsNotification();
             $this->checklist = $this->checklist->find($id);
             if ($request->method() == 'PATCH') {
                 $dinamicRules = array();
@@ -241,12 +241,12 @@ class ChecklistController extends Controller
             if ($request->has('object_contract')) $this->checklist->object_contract = $request->object_contract;
             if ($request->has('shipping_method')) $this->checklist->shipping_method = $request->shipping_method;
             if ($request->has('obs')) $this->checklist->obs = $request->obs;
-            if ($request->has('accept')) $this->checklist->accept = $request->accept;
-            if ($request->has('signed_by')) $this->checklist->user_id = $request->signed_by;
+            if ($request->has('accepted_by')) $this->checklist->accepted_by = $request->accepted_by;
+            if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
             // validação pendente
-            if (!empty($this->checklist->user_id) && !$this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 4;
-            // finalizado
-            if (!empty($this->checklist->user_id) && $this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 5;
+            // if (!empty($this->checklist->signed_by) && !$this->checklist->accepted_by && $this->checklist->completion == 100) $this->checklist->status_id = 4;
+            // // finalizado
+            // if (!empty($this->checklist->user_id) && $this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 5;
 
             $this->checklist->update();
 
@@ -429,7 +429,7 @@ class ChecklistController extends Controller
                         $checklist->shipping_method = $id_checklist_reference->shipping_method;
                         $checklist->sector_id = $id_checklist_reference->sector_id;
                         $checklist->obs = $id_checklist_reference->obs;
-                        $checklist->accept = $id_checklist_reference->accept;
+                        $checklist->accepted_by = $id_checklist_reference->accepted_by;
                         $checklist->signed_by = $id_checklist_reference->signed_by;
                         $checklist->save();
                         $id_checklist = $checklist->id;
