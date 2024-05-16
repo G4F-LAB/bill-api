@@ -10,7 +10,7 @@ use App\Events\FilesItensSaved;
 
 class FilesItens extends Model
 {
-    // use LogsActivity;
+    use LogsActivity;
     protected $primaryKey = 'id';
     protected $table = 'files_itens';
 
@@ -35,9 +35,12 @@ class FilesItens extends Model
             'file_id',
             'created_at',
             'updated_at',
-            'deleted_at']);
+            'file',
+            'item',
+            'deleted_at'])->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
     }
 
+    
     
 
     public function file()

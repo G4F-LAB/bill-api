@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class File extends Model
 {
     use HasFactory;
-    // use LogsActivity;
+    use LogsActivity;
 
     protected $table = 'files';
     protected $primaryKey = 'id';
@@ -33,8 +33,9 @@ class File extends Model
             'complementary_name',
             'created_at',
             'updated_at',
-            'path'
-        ]);
+            'path',
+            'itens'
+        ])->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
     }
 
     public function getFullPathAttribute()

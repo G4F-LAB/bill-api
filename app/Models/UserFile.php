@@ -3,11 +3,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 class UserFile extends Model
 {
-    // use LogsActivity;
+
     protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;
@@ -20,15 +18,6 @@ class UserFile extends Model
         'file_type',
     ];
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->useLogName('UserFile')->logOnly([
-            'user_id',
-            'filename',
-            'file_path',
-            'file_type',
-        ]);
-    }
 
     // Define relationships
     public function user()

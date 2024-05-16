@@ -12,7 +12,7 @@ class Item extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    // use LogsActivity;
+    use LogsActivity;
 
     protected $connection =  'book';
     protected $table = 'itens';
@@ -23,22 +23,34 @@ class Item extends Model
         'status',
         'file_name_id',
         'checklist_id',
-        'mandatory'
+        'mandatory',
+        'file_competence_id'
     ];
 
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+        ->logOnly([ 
+            'file_type_id',
+            'status',
+            'file_name_id',
+            'checklist_id',
+            'mandatory',
+            'file_competence_id',
+            'checklist',
+            'user_id',
+            'itens',
+            'status',
+            'contract',
+            'file_name',
+            'files',
+            'file_types',
+            'file_competence',
+            'file_itens'
+        ])->useLogName('Item')->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
 
-    // public function getActivitylogOptions(): LogOptions
-    // {
-    //     return LogOptions::defaults()
-    //         ->useLogName('item')
-    //         ->logOnly([
-    //             'file_type_id',
-    //             'status',
-    //             'file_name_id',
-    //             'checklist_id',
-    //             'mandatory'
-    //         ]);
-    // }
+    }
 
     public function rules()
     {
@@ -87,6 +99,11 @@ class Item extends Model
     public function file_name()
     {
         return $this->belongsTo(FileName::class);
+    }
+
+    public function file_itens()
+    {
+        return $this->hasMany(FilesItens::class);
     }
 
     public function file_competence()

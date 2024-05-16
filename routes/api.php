@@ -44,7 +44,7 @@ Route::middleware(['handle.cors'])->post('/login', [AuthController::class, 'logi
 
 //Rotas protegidas pelo middleware sys.auth
 
-Route::middleware(['sec.check', 'sys.auth'])->group(function () {
+Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
 
     $all_permissions = 'check.permission: Admin, Diretoria, Superintendência, Executivo, Gerente, Operação, RH, Financeiro, Processos, TI, Colaborador, Geral';
     //Auth

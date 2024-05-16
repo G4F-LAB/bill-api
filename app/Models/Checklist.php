@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 class Checklist extends Model
 
 {
-    // use LogsActivity;
+    use LogsActivity;
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $appends = ['name'];
@@ -22,6 +22,7 @@ class Checklist extends Model
         'shipping_method',
         'obs',
         'accept',
+        'signed_by',
         'user_id'
     ];
 
@@ -37,18 +38,27 @@ class Checklist extends Model
         ];
     }
 
-
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->useLogName('Checklist')->logOnly([
+        return LogOptions::defaults()
+        ->logOnly([ 
             'contract_uuid',
             'date_checklist',
             'object_contract',
             'shipping_method',
             'obs',
             'accept',
-            'user_id']);
+            'signed_by',
+            'user_id',
+            'itens',
+            'status',
+            'contract',
+        ])->useLogName('checklist')->dontLogIfAttributesChangedOnly(['updated_at'])->logOnlyDirty();
+
     }
+
+
+    // Define rel
 
     public function feedback() {
         return[
