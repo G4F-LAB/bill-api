@@ -70,7 +70,7 @@ class TimelineController extends Controller
     
                 $response[] = [
                     'type' => $log->event,
-                    'name' => $log->log_name,
+                    'name' => $log->log_name ,
                     'causer' =>  $log->causer_id ? $this->fetchRelatedModel($log->causer_id) : null,
                     'causer_type' => $log->causer_type,
                     'created' =>  Carbon::parse($log->created_at)->locale('pt_BR')->isoFormat('LL'),
@@ -102,29 +102,39 @@ class TimelineController extends Controller
     
             $response = Activity::inLog('checklist', 'file_item')
                 ->whereIn('subject_id', $fileItensIds)
+                ->orderByDesc('created_at') 
                 ->get()
                 ->reject(function ($activity) {
                     return empty($activity->properties['attributes']) && empty($activity->properties['old']);
+                })
+                ->map(function ($activity) {
+                    // Get user's name if causer_id is not null
+                    $activity->name = $activity->log_name === 'checklist' ? 'Checklist' : 'Arquivo';
+                    $causer = User::find($activity->causer_id);
+
+                if ($causer) {
+                    $activity->causer = $causer->name;
+                    $activity->causer_position = $causer->position;
+                } else {
+                    $activity->causer = null;
+                    $activity->causer_position = null;
+                }
+                    $activity->created = Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('LL');
+                    $activity->created_time = Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('HH:mm');
+    
+                    // Unset "causer_id"
+                    unset($activity->causer_id);
+    
+                    return $activity;
                 });
     
-            $response = $response->map(function ($activity) {
-                // Get user's name if causer_id is not null
-                $activity->causer = optional(User::find($activity->causer_id))->name;
-                $activity->created =  Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('LL');
-                $activity->created_time =  Carbon::parse($activity->created_at)->locale('pt_BR')->isoFormat('HH:mm');
-        
-                // Unset "causer_id"
-                unset($activity->causer_id);
-        
-                return $activity;
-            });
-        
-            return response()->json($response, 200);
+            return response()->json($response->values(), 200);
         
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
     
 
     
