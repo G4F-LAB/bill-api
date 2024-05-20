@@ -251,6 +251,8 @@ class ChecklistController extends Controller
             $this->checklist->update();
 
             // //Notification
+
+            // \\wsl.localhost\openSUSE-Tumbleweed\home\mninaut\book-api\app\Events\ChecklistEvent.php
             // if ($this->checklist->status_id = 5 && $this->checklist->getChanges()) {
             //     $data_notification->desc_id = 4;
             //     $data_notification->notification_cat_id = 2;

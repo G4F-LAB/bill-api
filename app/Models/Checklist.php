@@ -12,6 +12,14 @@ class Checklist extends Model
 
 {
     use LogsActivity;
+    
+    protected $dispatchesEvents = [
+        //  'saved' => \App\Events\ChecklistEvent::class,
+        // 'updated' => \App\Events\ChecklistEvent::class,
+        // 'deleted' => 'App\Events\FilesItensDeleted',
+    ];
+
+
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $appends = ['name'];

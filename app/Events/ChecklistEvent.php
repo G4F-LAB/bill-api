@@ -2,27 +2,26 @@
 
 namespace App\Events;
 
-use App\Models\FilesItens;
+use App\Models\Checklist;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class FilesItensEvent
+class ChecklistEvent
 {
     use Dispatchable, SerializesModels;
 
-    public $filesItens;
+    public $checklist;
 
-    public function __construct(FilesItens $filesItens)
+    public function __construct(Checklist $checklist)
     {
-        $this->filesItens = $filesItens;
+        $this->checklist = $checklist;
 
-        // Update the related Item's status
-        $item = $this->filesItens->item;
-        $item->status = $item->file_itens->isNotEmpty(); // Set status to true if file_itens is not empty
-        $item->save();
+        // Update the completion and status of the checklist
+        $this->updateChecklist($this->checklist);
 
-        // Update the related Checklist's completion
-        $this->updateChecklist($item->checklist);
+        //notification?
+
+       
     }
 
     protected function updateChecklist($checklist)
