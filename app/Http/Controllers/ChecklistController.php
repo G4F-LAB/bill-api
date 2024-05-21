@@ -8,6 +8,7 @@ use App\Models\FileName;
 use App\Models\Contract;
 use App\Models\Item;
 use Carbon\Carbon;
+use App\Services\ChecklistUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -243,13 +244,10 @@ class ChecklistController extends Controller
             if ($request->has('obs')) $this->checklist->obs = $request->obs;
             if ($request->has('accepted_by')) $this->checklist->accepted_by = $request->accepted_by;
             if ($request->has('signed_by')) $this->checklist->signed_by = $request->signed_by;
-            // validação pendente
-            // if (!empty($this->checklist->signed_by) && !$this->checklist->accepted_by && $this->checklist->completion == 100) $this->checklist->status_id = 4;
-            // // finalizado
-            // if (!empty($this->checklist->user_id) && $this->checklist->accept && $this->checklist->completion == 100) $this->checklist->status_id = 5;
 
             $this->checklist->update();
 
+            new ChecklistUpdateService($this->checklist);
             // //Notification
 
             // \\wsl.localhost\openSUSE-Tumbleweed\home\mninaut\book-api\app\Events\ChecklistEvent.php

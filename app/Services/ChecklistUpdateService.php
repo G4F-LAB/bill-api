@@ -1,15 +1,11 @@
 <?php
 
-namespace App\Events;
+namespace App\Services;
 
 use App\Models\Checklist;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
-class ChecklistUpdateEvent
+class ChecklistUpdateService
 {
-    use Dispatchable, SerializesModels;
-
     public $checklist;
 
     public function __construct(Checklist $checklist)

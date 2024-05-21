@@ -5,7 +5,7 @@ namespace App\Events;
 use App\Models\FilesItens;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Events\ChecklistUpdateEvent;
+use App\Services\ChecklistUpdateService;
 
 class FilesItensEvent
 {
@@ -24,7 +24,7 @@ class FilesItensEvent
 
         // Update the related Checklist's completion
 
-       $checklistUpdateEvent = new ChecklistUpdateEvent($item->checklist);
+       $checklistUpdateEvent = new ChecklistUpdateService($item->checklist);
 
     }
 
