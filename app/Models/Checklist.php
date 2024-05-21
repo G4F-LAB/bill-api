@@ -13,6 +13,7 @@ class Checklist extends Model
 {
     use LogsActivity;
     
+    
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $appends = ['name'];
