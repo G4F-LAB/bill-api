@@ -208,7 +208,7 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
 
     //Automação
     Route::middleware('check.permission: Admin')->post('/automacao', [FileController::class, 'automacao']);
-    Route::middleware('check.permission: Admin,Executivo,Operação,Analista,RH,Financeiro,Geral')->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
+    Route::middleware($all_permissions)->delete('/file/{file_id}/{item_id}', [FileController::class, 'deleteFile']);
 
     //notifications
     Route::middleware('check.permission: Admin')->get('/notifications', [NotificationController::class, 'notifications']);

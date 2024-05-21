@@ -30,6 +30,8 @@ class ChecklistUpdateService
 
         if ($checklist->completion > 0 && $completedItemsCount > 0) {
             $checklist->status_id = 2;
+            $checklist->signed_by = null;
+            $checklist->accepted_by = null;
         }
         
         if (floatval($checklist->completion) >= 100) {
