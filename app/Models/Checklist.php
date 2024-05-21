@@ -13,7 +13,7 @@ class Checklist extends Model
 {
     use LogsActivity;
     
-    
+
     protected $connection =  'book';
     protected $primaryKey = 'id';
     protected $appends = ['name'];
@@ -41,6 +41,7 @@ class Checklist extends Model
         ];
     }
 
+    
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
