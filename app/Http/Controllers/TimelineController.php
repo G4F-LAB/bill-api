@@ -50,8 +50,13 @@ class TimelineController extends Controller
             usort($response, function($a, $b) {
                 return strtotime($b['created_at']) - strtotime($a['created_at']);
             });
+            foreach ($response as &$entry) {
+                if (isset($entry['properties'])) {
+                    $entry['properties'] = $this->translateProperties($entry['properties']);
+                }
+            }
 
-    
+        
             // Return response with merged data
             return response()->json($response, 200);
     
@@ -97,6 +102,11 @@ class TimelineController extends Controller
     
                     // Unset "causer_id"
                     unset($activity->causer_id);
+
+                    if (isset($activity->properties)) {
+                        $activity->properties = $this->translateProperties($activity->properties);
+                    }
+    
     
                     return $activity;
                 });
@@ -109,7 +119,59 @@ class TimelineController extends Controller
     }
     
     
+    private function translateProperties($properties)
+    {
+        $translated = [
+            'attributes' => [],
+            'old' => []
+        ];
 
+        $translations = [
+            'completion' => 'Progresso',
+            'status' => [
+                1 => 'Iniciado',
+                // Add more translations as needed
+            ],
+            // Add other translations as needed
+        ];
+    
+        if (isset($properties['attributes'])) {
+            foreach ($properties['attributes'] as $key => $value) {
+                // Translate key (example: 'completion' to 'Progresso')
+                $translatedKey = $this->translateKey($key);
+                $translated['attributes'][$translatedKey] = $value;
+            }
+        }
+    
+        if (isset($properties['old'])) {
+            foreach ($properties['old'] as $key => $value) {
+                // Translate key (example: 'completion' to 'Progresso')
+                $translatedKey = $this->translateKey($key);
+                $translated['old'][$translatedKey] = $value;
+            }
+        }
+    
+        return $translated;
+    }
+    
+    
+
+private function translateKey($key)
+{
+
+    
+    if (isset($translations[$key])) {
+        // If it's an array, it's a nested translation
+        if (is_array($translations[$key])) {
+            return $translations[$key][$value] ?? $key; // Return translated value or original key
+        } else {
+            return $translations[$key]; // Return translated key
+        }
+    }
+
+    // If no specific translation, return original key
+    return $key;
+}
     
     private function fetchRelatedModel($userDetails)
     {

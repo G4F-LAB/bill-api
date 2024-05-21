@@ -15,8 +15,8 @@ class Checklist extends Model
     
     protected $dispatchesEvents = [
         //  'saved' => \App\Events\ChecklistEvent::class,
-        // 'updated' => \App\Events\ChecklistEvent::class,
-        // 'deleted' => 'App\Events\FilesItensDeleted',
+        // 'updated' => \App\Events\ChecklistUpdateEvent::class,
+        // 'deleted' => 'App\Events\ChecklistUpdateEvent',
     ];
 
 

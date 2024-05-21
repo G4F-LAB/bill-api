@@ -5,6 +5,7 @@ namespace App\Events;
 use App\Models\FilesItens;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use App\Events\ChecklistUpdateEvent;
 
 class FilesItensEvent
 {
@@ -22,29 +23,10 @@ class FilesItensEvent
         $item->save();
 
         // Update the related Checklist's completion
-        $this->updateChecklist($item->checklist);
+
+       $checklistUpdateEvent = new ChecklistUpdateEvent($item->checklist);
+
     }
 
-    protected function updateChecklist($checklist)
-    {
-        $completedItemsCount = $checklist->itens()->where('status', true)->count();
-        $totalItemsCount = $checklist->itens()->count();
-        $checklist->completion = number_format(($totalItemsCount > 0) ? ($completedItemsCount / $totalItemsCount) * 100 : 0, 2);
-
-        $checklist->status_id = 1;
-
-        if ($checklist->completion > 0 && $completedItemsCount > 0) {
-            $checklist->status_id = 2;
-        }
-        
-        if (floatval($checklist->completion) >= 100) {
-            if ($checklist->accepted_by === null) {
-                $checklist->status_id = ($checklist->signed_by === null) ? 3 : 4;
-            } elseif ($checklist->signed_by !== null) {
-                $checklist->status_id = 5;
-            }
-        }
-
-        $checklist->save();
-    }
+ 
 }

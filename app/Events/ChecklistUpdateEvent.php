@@ -6,7 +6,7 @@ use App\Models\Checklist;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ChecklistEvent
+class ChecklistUpdateEvent
 {
     use Dispatchable, SerializesModels;
 
