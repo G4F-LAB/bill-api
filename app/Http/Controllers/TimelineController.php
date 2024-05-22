@@ -41,8 +41,8 @@ class TimelineController extends Controller
                 ->orderByDesc('created_at') 
                 ->get();
     
-                $timelineArray = $timeline->toArray();
-                $checklistsArray = !empty($checklists) ? $checklists[0]->original->toArray() : [];
+            $timelineArray = $timeline->toArray();
+            $checklistsArray = $checklists->isNotEmpty() ? $checklists->map->original->toArray()[0] : [];
 
             $response = array_merge($timelineArray, $checklistsArray);
 
