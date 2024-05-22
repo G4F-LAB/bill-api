@@ -42,7 +42,8 @@ class TimelineController extends Controller
                 ->get();
     
                 $timelineArray = $timeline->toArray();
-                $checklistsArray = !empty($checklists) ? $checklists[0]->original->toArray() : [];
+                $checklistsArray = $checklists->isNotEmpty() ? $checklists->map->original->toArray() : [];
+
 
             $response = array_merge($timelineArray, $checklistsArray);
 
