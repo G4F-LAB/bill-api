@@ -42,7 +42,7 @@ class TimelineController extends Controller
                 ->get();
     
             $timelineArray = $timeline->toArray();
-            $checklistsArray = $checklists->isNotEmpty() ? $checklists->map->original->toArray()[0] : [];
+            $checklistsArray = $checklists->isNotEmpty() ? $checklists->pluck('original')->flatten()->toArray() ?? [] : [];
 
             $response = array_merge($timelineArray, $checklistsArray);
 
