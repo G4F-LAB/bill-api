@@ -11,11 +11,19 @@ class FileNameController extends Controller
 
     public function __construct()
     {
-        // Validate permissions
+        // Verifique se há um usuário autenticado
+        if (auth()->check()) {
+            // Acesse o tipo do usuário autenticado
+            $userType = auth()->user()->type;
 
-        $userType = auth()->user()->type;
-        if (!in_array($userType, $this->allow_types)) {
-            return response()->json(['error' => 'Acesso não permitido.'], 403);
+            // Verifique se o tipo de usuário está entre os tipos permitidos
+            if (!in_array($userType, $this->allow_types)) {
+                // Se o tipo de usuário não estiver entre os permitidos, retorne uma resposta de erro
+                return response()->json(['error' => 'Acesso não permitido.'], 403);
+            }
+        } else {
+            // Se não houver usuário autenticado, retorne uma resposta de erro
+            return response()->json(['error' => 'Usuário não autenticado.'], 401);
         }
     }
 
@@ -23,7 +31,7 @@ class FileNameController extends Controller
     {
         // Retrieve file naming records
         $query = FileName::with(['type', 'task.integration']);
-        
+
         // Apply filter if provided
         if ($request->has('q')) {
             $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($request->q) . '%']);
@@ -49,7 +57,7 @@ class FileNameController extends Controller
 
     public function update(Request $request, $id)
     {
-    
+
         // Find the file naming record by id
         $fileName = FileName::find($id);
 
