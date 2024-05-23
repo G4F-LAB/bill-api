@@ -11,6 +11,10 @@ class ADUser extends User implements JWTSubject
 {
     use HasFactory;
 
+    // protected $casts = [
+    //     'employeeid' => 'array',
+    // ];
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

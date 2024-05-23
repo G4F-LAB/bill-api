@@ -52,6 +52,7 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
     Route::get('/me', [UserController::class, 'me']);
     Route::get('/refresh', [AuthController::class, 'refresh']);
     Route::put('/update_info', [AuthController::class, 'update_info']);
+    Route::put('/ldap', [AuthController::class, 'ldap']);
 
     //Setup
     Route::middleware($all_permissions)->get('/setup/navigation', [SetupController::class, 'navigation']);
@@ -228,7 +229,12 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
 Route::get('/users/birthdays', [UserController::class , 'birthdays']);
 Route::middleware('sys.auth')->get('/teste', [TesteController::class, 'novoteste2']);
 Route::post('/teste', [TesteController::class, 'novoteste']);
-Route::get('/teste2', [TesteController::class, 'novoteste2']);
+Route::get('/updatecontract', [ContractController::class, 'update_alias']);
+
+
+
+
+
 
 Route::get('/documentation', function () {
     return view('documentation');
