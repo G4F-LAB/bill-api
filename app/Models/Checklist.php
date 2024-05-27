@@ -16,7 +16,7 @@ class Checklist extends Model
 
     protected $connection =  'book';
     protected $primaryKey = 'id';
-    protected $appends = ['name'];
+    protected $appends = ['name', 'date_checklist_br'];
     protected $fillable = [
         'contract_uuid',
         'date_checklist',
@@ -80,6 +80,11 @@ class Checklist extends Model
         $monthYear = $date->translatedFormat('F Y');
         return "{$this->id} - {$monthYear}";
     }
+
+      public function getDateChecklistBrAttribute($value)
+      {
+          return Carbon::parse($value)->format('d/m/Y');
+      }
 
     public function contract(){
         return $this->belongsTo(Contract::class, 'contract_uuid', 'id');

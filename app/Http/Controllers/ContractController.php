@@ -53,7 +53,7 @@ class ContractController extends Controller
             $query->where('status', $status);
         }
 
-        $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->get();
+        $contracts = $query->orderByRaw("CASE WHEN status = 'Ativo' THEN 1 ELSE 2 END")->orderBy('name', 'asc')->get();
 
         return response()->json($contracts, 200);
     }
