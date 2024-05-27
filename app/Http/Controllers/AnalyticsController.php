@@ -7,96 +7,43 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Contract;
 use App\Models\Checklist;
-use Illuminate\Support\Facades\DB;
-use App\Models\StatusChecklist;
 use App\Models\OperationContractUser;
 use App\Models\Operation;
 use App\Models\OperationManager;
 use App\Models\ContractUser;
 use App\Models\Collaborator;
 
+
 class AnalyticsController extends Controller
 {
     public function operation_data(Request $request)
     {
         try {
-            // Busca as operações com contratos e checklists ativos
-            $operations = Operation::with(['contracts' => function ($query) {
-                $query->where('status', 'Ativo');
-            }, 'contracts.checklists'])->get();
-
             // Inicializa variáveis para os totais
-            $totalOperations = $operations->count();
-            $totalContracts = 0;
-             $totalChecklistsDone = 0;
-             $totalChecklistsUndone = 0;
-             $totalCollaborators = 0;
+            $totalOperations = Operation::count();
+            $totalContracts = Contract::where('status', 'Ativo')->count();
+            $totalChecklistsDone = Checklist::where('completion', 100)->count();
+            $totalChecklistsUndone = Checklist::where('completion', '!=', 100)->count();
+            $totalCollaborators = User::where('status', 'Ativo')->count();
 
             // Inicializa o status de progresso das checklists
             $checklistsStatusProgress = [
                 ['name' => 'Iniciado', 'total' => 0],
                 ['name' => 'Em progresso', 'total' => 0],
+                ['name' => 'Assinatura pendente', 'total' => 0],
+                ['name' => 'Validação pendente', 'total' => 0],
+                ['name' => 'Finalizado', 'total' => 0]
             ];
 
-            // Monta os dados de retorno para cada operação
-            $operationsData = [];
-            foreach ($operations as $operation) {
-                $operationData = [
-                    'operation_id' => $operation->id,
-                    'operation_name' => $operation->name,
-                    'contracts' => [],
-                    'total_collaborators_operation' => 0,
-                ];
-
-                // Conta os colaboradores ativos da operação
-                $totalCollaboratorsOperation = OperationContractUser::where('operation_id', $operation->id)
-                    ->whereHas('user', function ($query) {
-                        $query->where('status', 'Ativo');
-                    })
-                    ->count();
-                $operationData['total_collaborators_operation'] = $totalCollaboratorsOperation;
-                $totalCollaborators += $totalCollaboratorsOperation;
-
-                // Processa os contratos da operação
-                foreach ($operation->contracts as $contract) {
-                    $contractData = [
-                        'contract_id' => $contract->id,
-                        'contract_name' => $contract->name,
-                        'checklists_done' => 0,
-                        'checklists_undone' => 0,
-                        'total_collaborators_contract' => 0,
-                    ];
-
-                    // Conta os checklists concluídos e em andamento do contrato
-                    $checklistsDoneContract = $contract->checklists()->where('completion', 100)->count();
-                    $checklistsUndoneContract = $contract->checklists()->where('completion', '!=', 100)->count();
-                    $contractData['checklists_done'] = $checklistsDoneContract;
-                    $contractData['checklists_undone'] = $checklistsUndoneContract;
-                    $totalChecklistsDone += $checklistsDoneContract;
-                    $totalChecklistsUndone += $checklistsUndoneContract;
-
-                    // Conta os colaboradores ativos do contrato
-                    $totalCollaboratorsContract = OperationContractUser::where('contract_id', $contract->id)
-                        ->whereHas('user', function ($query) {
-                            $query->where('status', 'Ativo');
-                        })
-                        ->count();
-                    $contractData['total_collaborators_contract'] = $totalCollaboratorsContract;
-
-                    // Atualiza o progresso das checklists
-                    foreach ($contract->checklists as $checklist) {
-                        if ($checklist->completion == 0) {
-                            $checklistsStatusProgress[0]['total']++;
-                        } elseif ($checklist->completion < 100) {
-                            $checklistsStatusProgress[1]['total']++;
-                        }
+            // Atualiza o progresso das checklists
+            foreach (Checklist::all() as $checklist) {
+                $status = $checklist->status->name;
+                foreach ($checklistsStatusProgress as &$statusProgress) {
+                    if ($statusProgress['name'] == $status) {
+                        $statusProgress['total']++;
+                        break;
                     }
-
-                    $operationData['contracts'][] = $contractData;
-                    $totalContracts++;
                 }
-
-                $operationsData[] = $operationData;
             }
 
             // Monta os dados finais de retorno
@@ -107,7 +54,6 @@ class AnalyticsController extends Controller
                 'total_checklists_undone' => $totalChecklistsUndone,
                 'total_collaborators' => $totalCollaborators,
                 'checklists_status_progress' => $checklistsStatusProgress,
-                'operations' => $operationsData,
             ];
 
             return response()->json(['status' => 'ok', 'message' => 'Dados carregados com sucesso', 'data' => $responseData], 200);
@@ -117,149 +63,115 @@ class AnalyticsController extends Controller
     }
 
 
+    public function contracts($id, Request $request) {
+        $data = [];
 
+        // Recupera o parâmetro de consulta 'name' da solicitação
+        $contractName = $request->query('name');
 
+        // Recupera o parâmetro de consulta 'date_checklist' da solicitação (esperado no formato MM-YYYY)
+        $dateChecklist = $request->query('date_checklist');
 
-public function contracts($id) {
-    $data = [];
-
-    // Recupera a operação com os contratos ativos e os últimos checklists
-    $operation = Operation::with([
-            'contracts' => function($query) {
-                $query->where('status','Ativo')->with(['checklists' => function($query) {
-                    $query->orderBy('id','desc')->limit(2);
-                }]);
-            },
-        ])
-        ->where('id', $id)
-        ->first();
-
-    if (!$operation) {
-        return ['error' => 'Operação não encontrada'];
-    }
-
-    $contracts = $operation->contracts;
-
-    if ($contracts->isEmpty()) {
-        return ['error' => 'Nenhum contrato ativo encontrado para esta operação'];
-    }
-
-    // Monta a estrutura de retorno para a operação
-    $data = [
-        'id' => $operation->id,
-        'name' => $operation->name,
-        'manager' => null,
-        'executive' => null,
-        'contracts' => [],
-    ];
-
-    // Recupera os detalhes do gerente associado à operação
-    $manager = OperationManager::with('manager')
-        ->where('operation_id', $operation->id)
-        ->whereNotNull('manager_id')
-        ->first();
-
-    if ($manager) {
-        $data['manager'] = ['id' => $manager->manager->id, 'name' => $manager->manager->name];
-    }
-
-    // Recupera os detalhes do executivo associado à operação
-    $executive = OperationManager::with('executive')
-        ->where('operation_id', $operation->id)
-        ->whereNotNull('executive_id')
-        ->first();
-
-    if ($executive) {
-        $data['executive'] = ['id' => $executive->executive->id, 'name' => $executive->executive->name];
-    }
-
-    // Monta a estrutura de retorno para cada contrato
-    foreach ($contracts as $contract) {
-        $contractData = [
-            'id' => $contract->id,
-            'name' => $contract->name,
-            'checklists' => [],
-        ];
-
-        // Monta a estrutura de retorno para os checklists do contrato
-        foreach ($contract->checklists as $checklist) {
-            $checklistData = [
-                'id' => $checklist->id,
-                'name' => $checklist->name,
-                'status' => $checklist->status, // Suponho que o modelo tenha um atributo "status"
-                // Adicione aqui mais informações que deseja retornar sobre os checklists
-            ];
-
-            // Adicione mais informações sobre os itens e arquivos, se necessário
-
-            $contractData['checklists'][] = $checklistData;
-        }
-
-        $data['contracts'][] = $contractData;
-    }
-
-    return $data;
-}
-
-    public function collaborators($id) {
-        // Recupera os detalhes das operações relacionadas ao contrato
-        $operations = Contract::leftJoin('operation_contract_users', 'operation_contract_users.contract_id', 'contracts.id')
-            ->leftJoin('users', 'users.id', 'operation_contract_users.user_id')
-            ->leftJoin('operations', 'operations.id', 'operation_contract_users.operation_id')
-            ->select('operations.id as id', 'operations.name as name')
-            ->where('contracts.id', $id)
-            // ->where('users.status', 'Ativo')
-            ->groupBy('operations.id') // Agrupar pelos IDs das operações
-            ->get();
-
-        // Verifica se há operações
-        if ($operations->isEmpty()) {
-            return [
-                'error' => 'Contrato não encontrado ou encerrado'
-            ];
-        }
-
-        // Monta a estrutura de retorno para a primeira operação encontrada
-        $firstOperation = $operations->first();
-
-        // Recupera os detalhes do gerente associado à primeira operação encontrada
-        $manager = OperationManager::with('executive')
-            ->where('operation_id', $firstOperation->id)
-            ->whereNotNull('executive_id')
+        // Recupera os detalhes do gerente associado à operação
+        $manager = OperationManager::with('manager')
+            ->where('operation_id', $id)
+            ->whereNotNull('manager_id')
             ->first();
 
-        // Recupera os detalhes do executivo associado à primeira operação encontrada
+        // Recupera os detalhes do executivo associado à operação
         $executive = OperationManager::with('executive')
-            ->where('operation_id', $firstOperation->id)
+            ->where('operation_id', $id)
             ->whereNotNull('executive_id')
             ->first();
 
-        // Monta a estrutura de retorno
-        $collaboratorsData = [
-            'id' => $firstOperation->id,
-            'name' => $firstOperation->name,
-            'manager' => $manager ? ['id' => $manager->executive->id, 'name' => $manager->executive->name] : null,
-            'executive' => $executive ? ['id' => $executive->executive->id, 'name' => $executive->executive->name] : null,
-            'collaborators' => [] // Inicializa a lista de colaboradores
-        ];
+        // Adiciona os detalhes do gerente e do executivo aos dados
+        $operation = Operation::find($id);
+        if (!$operation) {
+            return response()->json(['error' => 'Operação não encontrada'], 404);
+        }
 
-        // Preenche os detalhes dos colaboradores para o contrato
-        $collaborators = User::join('operation_contract_users', 'operation_contract_users.user_id', '=', 'users.id')
-            ->where('operation_contract_users.contract_id', $id)
-            ->where('users.status', 'Ativo')
-            ->select('users.id', 'users.name')
-            ->get();
+        $data['id'] = $operation->id;
+        $data['name'] = $operation->name;
+        $data['manager'] = $manager ? ['id' => $manager->manager->id, 'name' => $manager->manager->name] : null;
+        $data['executive'] = $executive ? ['id' => $executive->executive->id, 'name' => $executive->executive->name] : null;
 
-        $collaboratorsData['collaborators'] = [
-            'count' => $collaborators->count(),
-            'list' => $collaborators->map(function ($collaborator) {
-                return ['id' => $collaborator->id, 'name' => $collaborator->name];
-            })->toArray()
-        ];
+        // Recupera as informações dos contratos associados à operação
+        $contractsQuery = Contract::where('operation_id', $id)
+            ->where('status', 'Ativo');
 
-        // Retorna os dados
-        return $collaboratorsData;
+        // Se 'name' estiver presente, aplica filtro pelo nome do contrato
+        if ($contractName) {
+            $contractsQuery->where('name', 'ILIKE', '%' . $contractName . '%');
+        }
+
+        $contracts = $contractsQuery->get();
+
+        // Verifica se há contratos associados à operação
+        if ($contracts->isEmpty()) {
+            return response()->json(['error' => 'Nenhum contrato ativo encontrado para esta operação'], 404);
+        }
+
+        // Adiciona a soma de contratos ativos associados à operação
+        $data['total_contracts'] = $contracts->count();
+
+        // Adiciona os contratos com seus detalhes
+        $data['contracts'] = $contracts->map(function ($contract) use ($dateChecklist) {
+            $contractData = [
+                'id' => $contract->id,
+                'name' => $contract->name,
+                'checklists' => []
+            ];
+
+            // Filtra os checklists pelo mês e ano fornecidos, se disponível
+            $filteredChecklistsQuery = $contract->checklists();
+            if ($dateChecklist) {
+                $dateParts = explode('-', $dateChecklist);
+                if (count($dateParts) == 2) {
+                    $month = $dateParts[0];
+                    $year = $dateParts[1];
+                    $filteredChecklistsQuery->whereYear('created_at', $year)
+                                            ->whereMonth('created_at', $month);
+                }
+            }
+            $filteredChecklists = $filteredChecklistsQuery->orderBy('id', 'desc')->get();
+
+            // Adiciona os detalhes dos checklists
+            foreach ($filteredChecklists as $checklist) {
+                $checklistData = [
+                    'id' => $checklist->id,
+                    'name' => $checklist->name,
+                    'completion' => $checklist->completion,
+                    'created_at' => $checklist->created_at->toDateString(),
+                    'items' => []
+                ];
+
+                // Adiciona os detalhes dos itens do checklist
+                // foreach ($checklist->items as $item) {
+                //     $itemData = [
+                //         'id' => $item->id,
+                //         'status' => $item->status,
+                //         'files' => $item->files->map(function ($file) {
+                //             return [
+                //                 'id' => $file->id,
+                //                 'name' => $file->name,
+                //                 'url' => $file->url,
+                //             ];
+                    //     }),
+                    // ];
+
+                //     $checklistData['items'][] = $itemData;
+                // }
+
+                $contractData['checklists'][] = $checklistData;
+            }
+
+            return $contractData;
+        });
+
+        return response()->json($data);
     }
+
+
 
 
 

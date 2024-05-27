@@ -125,7 +125,7 @@ Route::middleware(['sec.check', 'sys.auth', 'handle.cors'])->group(function () {
       //Analytics
       Route::prefix('/analytics')->group(function () {
         Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations', [AnalyticsController::class,'operation_data']);
-        // Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations/{id}/contracts', [AnalyticsController::class,'contracts']);
+         //Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations/{id}/contracts', [AnalyticsController::class,'contracts']);
         Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/operations/{id}/', [AnalyticsController::class,'contracts']);
         // Route::middleware('check.permission: Admin,Executivo,Operação,Processos')->get('/contracts/{id}/collaborators', [AnalyticsController::class,'collaborators']);
     });
